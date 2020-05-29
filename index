@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>IG - Project</title>
+  </head>
+  <body>
+    <h1>IG - Project</h1>
+    <h4>Who we are?</h4>
+    <ol>
+      <li>Andrea Napoletani</li>
+      <li>Sergio Picca</li>
+    </ol>
+  </body>
+</html>
