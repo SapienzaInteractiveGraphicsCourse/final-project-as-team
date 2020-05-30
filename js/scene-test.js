@@ -17,7 +17,7 @@ import * as THREE from './three.js-master/build/three.module.js';
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 1000 );
-				camera.position.set(0, 0, 0 );
+				camera.position.set(1000, -100, -3000 );
 
 				scene = new THREE.Scene();
 
@@ -38,6 +38,7 @@ import * as THREE from './three.js-master/build/three.module.js';
 							function ( gltf ) {
 
 								scene.add( gltf.scene );
+								
 
 								gltf.animations; // Array<THREE.AnimationClip>
 								gltf.scene; // THREE.Group
