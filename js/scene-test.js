@@ -17,7 +17,7 @@ import * as THREE from './three.js-master/build/three.module.js';
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 1000 );
-				camera.position.set(  -170, 170, 40 );
+				camera.position.set(0, 0, 0 );
 
 				scene = new THREE.Scene();
 
@@ -83,7 +83,7 @@ import * as THREE from './three.js-master/build/three.module.js';
 				controls.addEventListener( 'change', render ); // use if there is no animation loop
 				controls.minDistance = Math.abs(2);
 				controls.maxDistance = Math.abs(10);
-				controls.target.set( 100, 100, - 100 );
+				controls.target.set( 200, 200, - 800 );
 				controls.update();
 
 				window.addEventListener( 'resize', onWindowResize, false );
