@@ -1,7 +1,6 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
-import './tween/tween.esm.js'
 
 function main() {
   const canvas = document.querySelector('#c');
@@ -19,6 +18,17 @@ function main() {
   controls.update();
 
   let root;
+  let position = { x:0 };
+  var tween = new TWEEN.Tween(position)
+  .to({ x: 30 * Math.PI/180 }, 2000)
+  .start();
+
+  var tweenTwo = new TWEEN.Tween(position).to({ x: -20 * Math.PI/180 }, 2000)
+  .start();
+
+  tween.chain(tweenTwo);
+  tweenTwo.chain(tween);
+
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('black');
 
@@ -95,17 +105,13 @@ function main() {
       root.scale.multiplyScalar(1/100);
       root.castShadow = true;
 
-      var tween = new TWEEN.Tween(root.position)
-      .to({ x: 100, y: 100, z: 100 }, 60000)
-      .start();
 
       // Show the name of the body parts
-      //
       /*
       root.traverse((o) => {
         if(o.name.includes("LeftUpLeg_")){
           console.log(o.name);
-          var tween = new TWEEN.Tween(o.position)
+          var tween = new TWEEN.Tween(position)
           .to({ x: 100, y: 100, z: 100 }, 10000)
           .start();
         }
@@ -152,6 +158,11 @@ function main() {
 
     renderer.render(scene, camera);
     root.rotation.y += 0.005;
+    root.traverse((o) => {
+      if(o.name.includes("LeftUpLeg_")){
+        o.rotation.x=position.x;
+      }
+    });
     TWEEN.update();
     requestAnimationFrame(render);
   }
