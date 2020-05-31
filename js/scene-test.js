@@ -17,6 +17,8 @@ function main() {
   controls.target.set(0, 5, 0);
   controls.update();
 
+  let root;
+
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('black');
 
@@ -87,21 +89,21 @@ function main() {
   {
     const gltfLoader = new GLTFLoader();
     gltfLoader.load('./js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
-      const root = gltf.scene;
+      root = gltf.scene;
+      // Scale 1:100
+      root.scale.multiplyScalar(1/100);
+      root.castShadow = true;
+      root.traverse((o) => {
+        console.log(o);
+      });
       scene.add(root);
 
       // compute the box that contains all the stuff
       // from root and below
-      const bbox = new THREE.Box3().setFromObject(root);
-      let cent = bbox.getCenter(new THREE.Vector3());
-      let size = bbox.getSize(new THREE.Vector3());
-      //Rescale the object to normalized space
-      let maxAxis = Math.max(size.x, size.y, size.z);
-      root.scale.multiplyScalar(1.0 / maxAxis);
-      bbox.setFromObject(root);
-      bbox.getCenter(cent);
-      bbox.getSize(size);
+      const box = new THREE.Box3().setFromObject(root);
 
+      const boxSize = box.getSize(new THREE.Vector3()).length();
+      const boxCenter = box.getCenter(new THREE.Vector3());
 
       // set the camera to frame the box
       frameArea(boxSize, boxSize, boxCenter, camera);
@@ -110,6 +112,7 @@ function main() {
       controls.maxDistance = boxSize * 10;
       controls.target.copy(boxCenter);
       controls.update();
+      render();
     });
   }
 
@@ -132,11 +135,11 @@ function main() {
     }
 
     renderer.render(scene, camera);
-
+    root.rotation.y += 0.005;
     requestAnimationFrame(render);
   }
 
-  requestAnimationFrame(render);
+  //requestAnimationFrame(render);
 }
 
 main();
