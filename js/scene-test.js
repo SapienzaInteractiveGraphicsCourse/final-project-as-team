@@ -1,6 +1,6 @@
-import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r115/build/three.module.js';
-import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r115/examples/jsm/controls/OrbitControls.js';
-import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r115/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from './three.js-master/build/three.module.js';
+import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 
 function main() {
   const canvas = document.querySelector('#c');
