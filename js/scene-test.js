@@ -1,111 +1,136 @@
-import * as THREE from './three.js-master/build/three.module.js';
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r115/build/three.module.js';
+import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r115/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r115/examples/jsm/loaders/GLTFLoader.js';
 
-			import { OrbitControls } from './three.js-master/examples/jsm/controls/OrbitControls.js';
-			import { GLTFLoader } from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
-			import { RGBELoader } from './three.js-master/examples/jsm/loaders/RGBELoader.js';
-			import { RoughnessMipmapper } from './three.js-master/examples/jsm/utils/RoughnessMipmapper.js';
+function main() {
+  const canvas = document.querySelector('#c');
+  const renderer = new THREE.WebGLRenderer({canvas});
 
-			var container, controls;
-			var camera, scene, renderer;
+  const fov = 45;
+  const aspect = 2;  // the canvas default
+  const near = 0.1;
+  const far = 100;
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(0, 10, 20);
 
-			init();
-			render();
+  const controls = new OrbitControls(camera, canvas);
+  controls.target.set(0, 5, 0);
+  controls.update();
 
-			function init() {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('black');
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
+  {
+    const planeSize = 40;
 
-				camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 1000 );
-				camera.position.set(1000, -100, -3000 );
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.magFilter = THREE.NearestFilter;
+    const repeats = planeSize / 2;
+    texture.repeat.set(repeats, repeats);
 
-				scene = new THREE.Scene();
+    const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+    const planeMat = new THREE.MeshPhongMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(planeGeo, planeMat);
+    mesh.rotation.x = Math.PI * -.5;
+    scene.add(mesh);
+  }
 
-				scene.background = new THREE.Color( 0xffffff );
+  {
+    const skyColor = 0xB1E1FF;  // light blue
+    const groundColor = 0xB97A20;  // brownish orange
+    const intensity = 1;
+    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+    scene.add(light);
+  }
 
-						// model
+  {
+    const color = 0xFFFFFF;
+    const intensity = 1;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(5, 10, 2);
+    scene.add(light);
+    scene.add(light.target);
+  }
 
-						// use of RoughnessMipmapper is optional
+  function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
+    const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
+    const halfFovY = THREE.MathUtils.degToRad(camera.fov * .5);
+    const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
+    // compute a unit vector that points in the direction the camera is now
+    // in the xz plane from the center of the box
+    const direction = (new THREE.Vector3())
+        .subVectors(camera.position, boxCenter)
+        .multiply(new THREE.Vector3(1, 0, 1))
+        .normalize();
 
-						var loader = new GLTFLoader();
+    // move the camera to a position distance units way from the center
+    // in whatever direction the camera was from the center already
+    camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
 
+    // pick some near and far values for the frustum that
+    // will contain the box.
+    camera.near = boxSize / 100;
+    camera.far = boxSize * 100;
 
-						// Load a glTF resource
-						loader.load(
-							// resource URL
-							'./js/clone_trooper_phase1_shiny_updated/scene.gltf',
-							// called when the resource is loaded
-							function ( gltf ) {
+    camera.updateProjectionMatrix();
 
-								scene.add( gltf.scene );
-								
+    // point the camera to look at the center of the box
+    camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
+  }
 
-								gltf.animations; // Array<THREE.AnimationClip>
-								gltf.scene; // THREE.Group
-								gltf.scenes; // Array<THREE.Group>
-								gltf.cameras; // Array<THREE.Camera>
-								gltf.asset; // Object
+  {
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load('./js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
+      const root = gltf.scene;
+      scene.add(root);
 
-								render();
+      // compute the box that contains all the stuff
+      // from root and below
+      const box = new THREE.Box3().setFromObject(root);
 
-							},
-							// called while loading is progressing
-							function ( xhr ) {
+      const boxSize = box.getSize(new THREE.Vector3()).length();
+      const boxCenter = box.getCenter(new THREE.Vector3());
 
-								console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+      // set the camera to frame the box
+      frameArea(boxSize, boxSize, boxCenter, camera);
 
-							},
-							// called when loading has errors
-							function ( error ) {
+      // update the Trackball controls to handle the new size
+      controls.maxDistance = boxSize * 10;
+      controls.target.copy(boxCenter);
+      controls.update();
+    });
+  }
 
-								console.log( 'An error happened' );
+  function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
+    return needResize;
+  }
 
-							}
-						);
+  function render() {
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
 
+    renderer.render(scene, camera);
 
-				/*renderer = new THREE.WebGLRenderer( { antialias: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.toneMapping = THREE.ACESFilmicToneMapping;
-				renderer.toneMappingExposure = 0.8;
-				renderer.outputEncoding = THREE.sRGBEncoding;
-				container.appendChild( renderer.domElement );*/
-				//renderer.setClearColorHex( 0x000000, 1);
+    requestAnimationFrame(render);
+  }
 
-				/*var pmremGenerator = new THREE.PMREMGenerator( renderer );
-				pmremGenerator.compileEquirectangularShader();*/
+  requestAnimationFrame(render);
+}
 
-				renderer = new THREE.WebGLRenderer();
-		   	renderer.setSize( window.innerWidth, window.innerHeight );
-		   	document.body.appendChild( renderer.domElement );
-
-				controls = new OrbitControls( camera, renderer.domElement );
-				controls.addEventListener( 'change', render ); // use if there is no animation loop
-				controls.minDistance = Math.abs(2);
-				controls.maxDistance = Math.abs(10);
-				controls.target.set( 200, 200, - 800 );
-				controls.update();
-
-				window.addEventListener( 'resize', onWindowResize, false );
-
-			}
-
-			function onWindowResize() {
-
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize( window.innerWidth, window.innerHeight );
-
-				render();
-
-			}
-
-			//
-
-			function render() {
-
-				renderer.render( scene, camera );
-
-			}
+main();
