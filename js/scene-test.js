@@ -92,10 +92,16 @@ function main() {
 
       // compute the box that contains all the stuff
       // from root and below
-      const box = new THREE.Box3().setFromObject(root);
+      const bbox = new THREE.Box3().setFromObject(root);
+      let cent = bbox.getCenter(new THREE.Vector3());
+      let size = bbox.getSize(new THREE.Vector3());
+      //Rescale the object to normalized space
+      let maxAxis = Math.max(size.x, size.y, size.z);
+      root.scale.multiplyScalar(1.0 / maxAxis);
+      bbox.setFromObject(root);
+      bbox.getCenter(cent);
+      bbox.getSize(size);
 
-      const boxSize = box.getSize(new THREE.Vector3()).length();
-      const boxCenter = box.getCenter(new THREE.Vector3());
 
       // set the camera to frame the box
       frameArea(boxSize, boxSize, boxCenter, camera);

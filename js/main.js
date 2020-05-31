@@ -1,217 +1,147 @@
-import Stats from './three.js-master/examples/jsm/libs/stats.module.js';
+import * as THREE from './three.js-master/build/three.module.js';
+import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
+import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.js';
 
-import { GUI } from './three.js-master/examples/jsm/libs/dat.gui.module.js';
-import { EffectComposer } from './three.js-master/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from './three.js-master/examples/jsm/postprocessing/RenderPass.js';
-import { TexturePass } from './three.js-master/examples/jsm/postprocessing/TexturePass.js';
-import { CubeTexturePass } from './three.js-master/examples/jsm/postprocessing/CubeTexturePass.js';
-import { ShaderPass } from './three.js-master/examples/jsm/postprocessing/ShaderPass.js';
-import { ClearPass } from './three.js-master/examples/jsm/postprocessing/ClearPass.js';
-import { CopyShader } from './three.js-master/examples/jsm/shaders/CopyShader.js';
-import { OrbitControls } from './three.js-master/examples/jsm/controls/OrbitControls.js';
+function main() {
+  const canvas = document.querySelector('#c');
+  const renderer = new THREE.WebGLRenderer({canvas});
 
-var scene, renderer, composer;
-var clearPass, texturePass, renderPass;
-var cameraP, cubeTexturePassP;
-var gui, stats;
+  const fov = 45;
+  const aspect = 2;  // the canvas default
+  const near = 0.1;
+  const far = 100;
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(0, 20, 40);
 
-var params = {
+  const controls = new OrbitControls(camera, canvas);
+  controls.target.set(0, 5, 0);
+  controls.update();
 
-	clearPass: true,
-	clearColor: 'white',
-	clearAlpha: 1.0,
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('white');
 
-	texturePass: true,
-	texturePassOpacity: 1.0,
+  function addLight(...pos) {
+    const color = 0xFFFFFF;
+    const intensity = 1;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(...pos);
+    scene.add(light);
+    scene.add(light.target);
+  }
+  addLight(5, 5, 2);
+  addLight(-5, 5, 5);
 
-	cubeTexturePass: true,
-	cubeTexturePassOpacity: 1.0,
+  const manager = new THREE.LoadingManager();
+  manager.onLoad = init;
 
-	renderPass: true
-};
+  const progressbarElem = document.querySelector('#progressbar');
+  manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
+  };
 
-init();
-animate();
+	// Loading the models
+  const models = {
+    pig:    { url: 'https://threejsfundamentals.org/threejs/resources/models/animals/Pig.gltf' },
+    cow:    { url: 'https://threejsfundamentals.org/threejs/resources/models/animals/Cow.gltf' },
+    llama:  { url: 'https://threejsfundamentals.org/threejs/resources/models/animals/Llama.gltf' },
+    pug:    { url: 'https://threejsfundamentals.org/threejs/resources/models/animals/Pug.gltf' },
+    sheep:  { url: 'https://threejsfundamentals.org/threejs/resources/models/animals/Sheep.gltf' },
+    zebra:  { url: 'https://threejsfundamentals.org/threejs/resources/models/animals/Zebra.gltf' },
+    horse:  { url: 'https://threejsfundamentals.org/threejs/resources/models/animals/Horse.gltf' },
+    knight: { url: 'https://threejsfundamentals.org/threejs/resources/models/knight/KnightCharacter.gltf' },
+		clone:  {url:  "js/clone_trooper_phase1_shiny_updated/scene.gltf"}
+  };
+  {
+    const gltfLoader = new GLTFLoader(manager);
+    for (const model of Object.values(models)) {
+      gltfLoader.load(model.url, (gltf) => {
+        model.gltf = gltf;
+      });
+    }
+  }
 
-clearGui();
+  function prepModelsAndAnimations() {
+    Object.values(models).forEach(model => {
+      const animsByName = {};
+      model.gltf.animations.forEach((clip) => {
+        animsByName[clip.name] = clip;
+      });
+      model.animations = animsByName;
+    });
+  }
 
-function clearGui() {
+  const mixers = [];
 
-	if ( gui ) gui.destroy();
+  function init() {
+    // hide the loading bar
+    const loadingElem = document.querySelector('#loading');
+    loadingElem.style.display = 'none';
 
-	gui = new GUI();
+    prepModelsAndAnimations();
 
-	gui.add( params, "clearPass" );
-	gui.add( params, "clearColor", [ 'black', 'white', 'blue', 'green', 'red' ] );
-	gui.add( params, "clearAlpha", 0, 1 );
+    Object.values(models).forEach((model, ndx) => {
+      const clonedScene = SkeletonUtils.clone(model.gltf.scene);
+      const root = new THREE.Object3D();
+      root.add(clonedScene);
+      scene.add(root);
 
-	gui.add( params, "texturePass" );
-	gui.add( params, "texturePassOpacity", 0, 1 );
+			// In the case of the clone guy we have to rescale
+			// https://stackoverflow.com/questions/52271397/centering-and-resizing-gltf-models-automatically-in-three-js
+			if(model.url.includes("clone_trooper_phase1_shiny_updated")){
+				var bbox = new THREE.Box3().setFromObject(root);
+				var cent = bbox.getCenter(new THREE.Vector3());
+				var size = bbox.getSize(new THREE.Vector3());
+				//Rescale the object to normalized space
+				var maxAxis = Math.max(size.x, size.y, size.z);
+				root.scale.multiplyScalar(10.0 / maxAxis);
+				bbox.setFromObject(root);
+				bbox.getCenter(cent);
+				bbox.getSize(size);
+			}
 
-	gui.add( params, "cubeTexturePass" );
-	gui.add( params, "cubeTexturePassOpacity", 0, 1 );
+			root.position.x = (ndx - 3) * 3;
+      const mixer = new THREE.AnimationMixer(clonedScene);
+      const firstClip = Object.values(model.animations)[0];
+      const action = mixer.clipAction(firstClip);
+      action.play();
+      mixers.push(mixer);
+    });
+  }
 
-	gui.add( params, "renderPass" );
+  function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
+    return needResize;
+  }
 
-	gui.open();
+  let then = 0;
+  function render(now) {
+    now *= 0.001;  // convert to seconds
+    const deltaTime = now - then;
+    then = now;
 
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+
+    for (const mixer of mixers) {
+      mixer.update(deltaTime);
+    }
+
+    renderer.render(scene, camera);
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
 }
 
-function init() {
-
-	var container = document.getElementById( "container" );
-
-	var width = window.innerWidth || 1;
-	var height = window.innerHeight || 1;
-	var aspect = width / height;
-	var devicePixelRatio = window.devicePixelRatio || 1;
-
-	renderer = new THREE.WebGLRenderer();
-	renderer.setPixelRatio( devicePixelRatio );
-	renderer.setSize( width, height );
-	document.body.appendChild( renderer.domElement );
-
-	stats = new Stats();
-	container.appendChild( stats.dom );
-
-	//
-
-	cameraP = new THREE.PerspectiveCamera( 65, aspect, 1, 10 );
-	cameraP.position.z = 7;
-
-	scene = new THREE.Scene();
-
-	var group = new THREE.Group();
-	scene.add( group );
-
-	var light = new THREE.PointLight( 0xddffdd, 1.0 );
-	light.position.z = 70;
-	light.position.y = - 70;
-	light.position.x = - 70;
-	scene.add( light );
-
-	var light2 = new THREE.PointLight( 0xffdddd, 1.0 );
-	light2.position.z = 70;
-	light2.position.x = - 70;
-	light2.position.y = 70;
-	scene.add( light2 );
-
-	var light3 = new THREE.PointLight( 0xddddff, 1.0 );
-	light3.position.z = 70;
-	light3.position.x = 70;
-	light3.position.y = - 70;
-	scene.add( light3 );
-
-	var geometry = new THREE.SphereBufferGeometry( 1, 48, 24 );
-
-	var material = new THREE.MeshStandardMaterial();
-	material.roughness = 0.5 * Math.random() + 0.25;
-	material.metalness = 0;
-	material.color.setHSL( Math.random(), 1.0, 0.3 );
-
-	var mesh = new THREE.Mesh( geometry, material );
-	group.add( mesh );
-
-	// postprocessing
-
-	var genCubeUrls = function ( prefix, postfix ) {
-
-		return [
-			prefix + 'px' + postfix, prefix + 'nx' + postfix,
-			prefix + 'py' + postfix, prefix + 'ny' + postfix,
-			prefix + 'pz' + postfix, prefix + 'nz' + postfix
-		];
-
-	};
-
-	composer = new EffectComposer( renderer );
-
-	clearPass = new ClearPass( params.clearColor, params.clearAlpha );
-	composer.addPass( clearPass );
-
-	texturePass = new TexturePass();
-	composer.addPass( texturePass );
-
-	var textureLoader = new THREE.TextureLoader();
-	textureLoader.load( "/js/three.js-master/examples/textures/hardwood2_diffuse.jpg", function ( map ) {
-
-		texturePass.map = map;
-
-	} );
-
-	cubeTexturePassP = null;
-
-	var ldrUrls = genCubeUrls( "/js/three.js-master/examples/textures/cube/pisa/", ".png" );
-	new THREE.CubeTextureLoader().load( ldrUrls, function ( ldrCubeMap ) {
-
-		cubeTexturePassP = new CubeTexturePass( cameraP, ldrCubeMap );
-		composer.insertPass( cubeTexturePassP, 2 );
-
-	} );
-
-	renderPass = new RenderPass( scene, cameraP );
-	renderPass.clear = false;
-	composer.addPass( renderPass );
-
-	var copyPass = new ShaderPass( CopyShader );
-	composer.addPass( copyPass );
-
-	var controls = new OrbitControls( cameraP, renderer.domElement );
-	controls.enableZoom = false;
-
-	window.addEventListener( 'resize', onWindowResize, false );
-
-}
-
-function onWindowResize() {
-
-	var width = window.innerWidth;
-	var height = window.innerHeight;
-	var aspect = width / height;
-
-	cameraP.aspect = aspect;
-	cameraP.updateProjectionMatrix();
-
-	renderer.setSize( width, height );
-	composer.setSize( width, height );
-
-}
-
-function animate() {
-
-	requestAnimationFrame( animate );
-
-	stats.begin();
-
-	cameraP.updateMatrixWorld( true );
-
-	var newColor = clearPass.clearColor;
-	switch ( params.clearColor ) {
-
-		case 'blue': newColor = 0x0000ff; break;
-		case 'red': newColor = 0xff0000; break;
-		case 'green': newColor = 0x00ff00; break;
-		case 'white': newColor = 0xffffff; break;
-		case 'black': newColor = 0x000000; break;
-
-	}
-
-	clearPass.enabled = params.clearPass;
-	clearPass.clearColor = newColor;
-	clearPass.clearAlpha = params.clearAlpha;
-
-	texturePass.enabled = params.texturePass;
-	texturePass.opacity = params.texturePassOpacity;
-
-	if ( cubeTexturePassP != null ) {
-		cubeTexturePassP.enabled = params.cubeTexturePass;
-		cubeTexturePassP.opacity = params.cubeTexturePassOpacity;
-	}
-
-	renderPass.enabled = params.renderPass;
-
-	composer.render();
-
-	stats.end();
-
-}
+main();
