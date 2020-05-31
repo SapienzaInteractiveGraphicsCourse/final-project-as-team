@@ -1,6 +1,7 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
+import './tween/tween.esm.js'
 
 function main() {
   const canvas = document.querySelector('#c');
@@ -18,7 +19,6 @@ function main() {
   controls.update();
 
   let root;
-
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('black');
 
@@ -90,12 +90,28 @@ function main() {
     const gltfLoader = new GLTFLoader();
     gltfLoader.load('./js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
       root = gltf.scene;
-      // Scale 1:100
+
+      // Scale the clone guy to  1:100
       root.scale.multiplyScalar(1/100);
       root.castShadow = true;
+
+      var tween = new TWEEN.Tween(root.position)
+      .to({ x: 100, y: 100, z: 100 }, 60000)
+      .start();
+
+      // Show the name of the body parts
+      //
+      /*
       root.traverse((o) => {
-        console.log(o);
-      });
+        if(o.name.includes("LeftUpLeg_")){
+          console.log(o.name);
+          var tween = new TWEEN.Tween(o.position)
+          .to({ x: 100, y: 100, z: 100 }, 10000)
+          .start();
+        }
+      });*/
+
+      // Add the storm tropper to the scene
       scene.add(root);
 
       // compute the box that contains all the stuff
@@ -136,6 +152,7 @@ function main() {
 
     renderer.render(scene, camera);
     root.rotation.y += 0.005;
+    TWEEN.update();
     requestAnimationFrame(render);
   }
 

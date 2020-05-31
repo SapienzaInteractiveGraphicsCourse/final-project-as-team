@@ -1,3 +1,5 @@
+var version = '18.5.0';
+
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/tweenjs/tween.js
@@ -1054,8 +1056,6 @@ TWEEN.Interpolation = {
 	}
 
 };
-
-import {version} from '../.temp.version.js';
 TWEEN.version = version;
 
 export default TWEEN;
