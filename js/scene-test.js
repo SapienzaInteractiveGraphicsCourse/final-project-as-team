@@ -10,7 +10,7 @@ function main() {
   const fov = 45;
   const aspect = 2;  // the canvas default
   const near = 0.1;
-  const far = 100;
+  const far = 1000;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(0, 10, 20);
 
@@ -22,7 +22,7 @@ function main() {
   let position = { x:0 };
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('black');
+  scene.background = new THREE.Color('white');
 
   {
     const planeSize = 40;
@@ -90,7 +90,7 @@ function main() {
 
   {
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load('./js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
+    gltfLoader.load('js/vege_tank/scene.gltf', (gltf) => {
       root = gltf.scene;
 
       // Scale the clone guy to  1:100
@@ -100,7 +100,6 @@ function main() {
 
       // Add the storm tropper to the scene
       scene.add(root);
-
       // compute the box that contains all the stuff
       // from root and below
       const box = new THREE.Box3().setFromObject(root);
@@ -138,11 +137,12 @@ function main() {
     }
 
     renderer.render(scene, camera);
-    //root.rotation.y += 0.005;
+    root.rotation.y += 0.005;
     root.traverse((o) => {
-      if(o.name.includes("LeftUpLeg_")){
-        o.rotation.x=position.x;
-      }
+      console.log(o.name);
+      /*if(o.name ="Chenille_"){
+        o.rotation.x = position.x;
+      }*/
     });
 
     TWEEN.update();
