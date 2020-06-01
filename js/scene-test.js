@@ -2,6 +2,7 @@ import * as THREE from './three.js-master/build/three.module.js';
 import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {WalkingAnimation} from './animations.js';
+import {KillingRobot} from './robot.js'
 
 function main() {
   const canvas = document.querySelector('#c');
@@ -42,24 +43,34 @@ function main() {
     });
     const mesh = new THREE.Mesh(planeGeo, planeMat);
     mesh.rotation.x = Math.PI * -.5;
+    mesh.receiveShadow = true;
     scene.add(mesh);
   }
 
   {
-    const skyColor = 0xB1E1FF;  // light blue
-    const groundColor = 0xB97A20;  // brownish orange
-    const intensity = 1;
-    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-    scene.add(light);
-  }
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
-  {
-    const color = 0xFFFFFF;
-    const intensity = 1;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(5, 10, 2);
-    scene.add(light);
-    scene.add(light.target);
+    //Create a DirectionalLight and turn on shadows for the light
+    var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
+    light.position.set(15, 20, 15); 			//default; light shining from top
+    light.castShadow = true;            // default false
+    scene.add( light );
+
+    //Set up shadow properties for the light
+    light.shadow.mapSize.width = 512;  // default
+    light.shadow.mapSize.height = 512; // default
+    light.shadow.camera.near = 0.5;    // default
+    light.shadow.camera.far = 500;     // default
+
+    //Create a helper for the shadow camera (optional)
+    var helper = new THREE.CameraHelper( light.shadow.camera );
+    scene.add( helper );
+
+    let robot = new KillingRobot();
+    robot.castShadow = true;
+    robot.receiveShadow = true;
+    scene.add(robot);
   }
 
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
@@ -90,7 +101,7 @@ function main() {
 
   {
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load('js/vege_tank/scene.gltf', (gltf) => {
+    gltfLoader.load('js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
       root = gltf.scene;
 
       // Scale the clone guy to  1:100
@@ -99,7 +110,7 @@ function main() {
       WalkingAnimation(root, position);
 
       // Add the storm tropper to the scene
-      scene.add(root);
+      //scene.add(root);
       // compute the box that contains all the stuff
       // from root and below
       const box = new THREE.Box3().setFromObject(root);
@@ -114,7 +125,6 @@ function main() {
       controls.maxDistance = boxSize * 10;
       controls.target.copy(boxCenter);
       controls.update();
-      render();
     });
   }
 
@@ -137,17 +147,12 @@ function main() {
     }
 
     renderer.render(scene, camera);
-    root.rotation.y += 0.005;
-    root.traverse((o) => {
-      console.log(o.name);
-      /*if(o.name ="Chenille_"){
-        o.rotation.x = position.x;
-      }*/
-    });
 
     TWEEN.update();
     requestAnimationFrame(render);
   }
+
+  render();
 
   //requestAnimationFrame(render);
 }
