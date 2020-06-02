@@ -533,10 +533,12 @@ function createWheel(robotSizes){
   texture.minFilter = THREE.NearestFilter;
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set( 4, 4 );
 
   const wheelGeo = new THREE.TorusGeometry(radius, tube, radialSeg, tubularSeg);
-  const wheelMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
+  const wheelMat = new THREE.MeshPhongMaterial({
+    color: '#1E1C1A',// pseudo-black
+    map: texture
+  }); 
   const mesh = new THREE.Mesh(wheelGeo, wheelMat);
 
   // Set the shadows and position
