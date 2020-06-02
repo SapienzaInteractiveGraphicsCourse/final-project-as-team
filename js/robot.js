@@ -1,6 +1,7 @@
 
 var KillingRobot = function(){
-  // Sizes of the various robot parts
+  // Sizes of the various robot parts. In this way everytime there is
+  // something to change we just have to modify this object.
   var robotSizes = {
     torso       : {h: 0.8, w: 2.5},
     head        : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
@@ -10,6 +11,9 @@ var KillingRobot = function(){
     eyeBall     : {r: 0.25, h: 32, w: 32},
     ear         : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
     ant         : {h: 1, w: 0.05},
+    shoulder    : {h: 0.2, w: 0.5, d: 3},
+    shouldCyl   : {rTop: 0.2, rBot: 0.4, h: 3, radialSeg: 32},
+    arm         : {h: 0.8, w: 2.5},
     leg         : {distance: 2.5},
     upLeg       : {h: 0.25, w: 0.25},
     midLeg      : {h: 2, w: 0.2},
@@ -32,6 +36,13 @@ var KillingRobot = function(){
   // Create torso. To the torso will be connected the single leg that will be
   // then attacched to the wheel
   const robotTorso = createTorso(robotSizes);
+  // Create the robot shoulder
+  const robotShoulder = createShoulder(robotSizes);
+  // const robotArms = createArms(robotSizes);
+  // const robotCannon = createCannon(robotSizes);
+  // robotArms.add(robotCannon);
+  // robotShoulder.add(robotArms);
+  robotTorso.add(robotShoulder);
 
   // Creating the leg with its various parts, the upper, the middle and the
   // the lower part. Middle and lower part are CHILDREN of the upper one.
@@ -254,6 +265,64 @@ function createNeck(robotSizes){
 }
 
 /**
+ * This function will create an object to attach to the torso, that will be the
+ * shoulder of the robot.
+ * @param  {object} robotSizes The robot sizes.
+ * @return {object}            The shoulder object
+ */
+function createShoulder(robotSizes){
+  const shoulderObj = new THREE.Object3D();
+
+  // The shoulder will be composed of two different pieces
+  const h = robotSizes.shoulder.h;
+  const w = robotSizes.shoulder.w;
+  const d = robotSizes.shoulder.d;
+
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  const cubeGeo = new THREE.BoxGeometry(w, h, d);
+  const cubeMat = new THREE.MeshPhongMaterial({color: '#E23C19'}); // red
+  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth - 0.4, torsoHeight + 2, 0);
+  mesh.name = "robotShoulderFirstPArt";
+  // Add the first part of the shoulder
+  shoulderObj.add(mesh);
+
+  // Cylinder part of the shoulder
+  // The radius will be the same both in the top and in the bottom case
+  const r = robotSizes.shouldCyl.rTop;
+  const height = robotSizes.shouldCyl.h;
+  const radialSeg = robotSizes.shouldCyl.radialSeg;
+
+  const cylGeo = new THREE.CylinderGeometry(r, r, height, radialSeg);
+  const cylMesh = new THREE.Mesh(cylGeo, cubeMat);
+  cylMesh.castShadow = true;
+  cylMesh.receiveShadow = true;
+  cylMesh.position.set(torsoWidth - 0.8, torsoHeight + 2, 0);
+  cylMesh.rotation.x = 90 * Math.PI/180
+  cylMesh.name = "robotShoulderSecondPart";
+  shoulderObj.add(cylMesh);
+
+  return shoulderObj;
+}
+
+/**
+ * [createArm description]
+ * @param  {[type]} robotSizes [description]
+ * @return {[type]}            [description]
+ */
+function createArm(robotSizes){
+  const armsObject = new THREE.Object3D();
+
+}
+
+
+function createCannon(robotSizes){}
+
+/**
  * Function to create the torso of the robot
  * @param  {object} robotSizes Sizes of the robot
  * @return {object}            The torso object
@@ -414,10 +483,5 @@ function createWheel(robotSizes){
 
   return mesh;
 }
-
-function createWaist(robotSizes){
-
-}
-
 
 export {KillingRobot};
