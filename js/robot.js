@@ -6,6 +6,8 @@ var KillingRobot = function(){
     head  : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
     neck  : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
     eye   : {r: 6, s: 1},
+    ear   : {rTop: 0.4, rBot: 0.4, h: 3, radialSeg: 32},
+    ant   : {h: 0.8, w: 2.5},
     leg   : {distance: 2.5},
     upLeg : {h: 0.25, w: 0.25},
     midLeg: {h: 2, w: 0.2},
@@ -16,6 +18,9 @@ var KillingRobot = function(){
   const robot = new THREE.Object3D();
   const robotHead = createHead(robotSizes);
   robotHead.add(createNeck(robotSizes));
+  // Add the details to the head, such as the ear with the antenna
+  robotHead.add(createHeadDetails(robotSizes));
+  
   // Add head
   robot.add(robotHead);
 
@@ -49,7 +54,6 @@ var KillingRobot = function(){
  */
 function createHead(robotSizes) {
   const height = robotSizes.head.h;
-  const width =  robotSizes.head.w;
   const radiusTop = robotSizes.head.rTop;
   const radiusBottom = robotSizes.head.rBot;
   const radialSegments = robotSizes.head.radialSeg;
@@ -73,6 +77,49 @@ function createHead(robotSizes) {
 }
 
 function createHeadDetails(robotSizes){
+  const headDetailsObjs = new THREE.Object3D();
+
+  // Sizes
+  // Ear
+  const height = robotSizes.ear.h;
+  const radiusTop = robotSizes.ear.rTop;
+  const radiusBottom = robotSizes.ear.rBot;
+  const radialSegments = robotSizes.ear.radialSeg;
+
+  // Antenna
+  const antennaHeigh = robotSizes.ant.h;
+  const antennaWidth = robotSizes.ant.w;
+
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  // The ear will be composed by the ear that is a cylinder and one antenna, so
+  // we created an object that will be later inserted in the head details.
+  const earObj = new THREE.Object3D();
+  // Ear
+  const earGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments );
+  const earMat = new THREE.MeshBasicMaterial( {color: '#99A89F'} ); // light grey
+  const ear = new THREE.Mesh(headGeo, headMat);
+  ear.castShadow = true;
+  ear.receiveShadow = true;
+  ear.position.set(torsoWidth + 1, torsoHeight + 3.5, 1);
+  ear.name = "robotEar";
+  ear.rotation.z = 90* Math.PI/180;
+  earObj.add(ear);
+
+  // Antenna
+  const cubeGeo = new THREE.BoxBufferGeometry(antennaWidth, antennaHeigh,antennaWidth);
+  const cubeMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
+  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth + 1, torsoHeight + 2, 0);
+  mesh.name = "robotTorso";
+  earObj.add(mesh);
+
+  headDetailsObjs.add(earObj);
+
+  return headDetailsObjs;
 
 }
 /**
@@ -99,19 +146,25 @@ function createNeck(robotSizes){
   const lowerNeck = new THREE.Mesh(neckGeo, neckMat);
 
   // Set the shadows and position
+  // Upper Neck
   upperNeck.castShadow = true;
   upperNeck.receiveShadow = true;
   upperNeck.position.set(torsoWidth + 1, torsoHeight + 3, 0);
+  upperNeck.name = "robotUpperNeck";
   upperNeck.rotation.x = 90 * Math.PI/180;
 
+  // Middle neck
   middleNeck.castShadow = true;
   middleNeck.receiveShadow = true;
   middleNeck.position.set(torsoWidth + 1, torsoHeight + 2.75, 0);
+  middleNeck.name = "robotMiddleNeck";
   middleNeck.rotation.x = 90 * Math.PI/180;
 
+  // Lower Neck
   lowerNeck.castShadow = true;
   lowerNeck.receiveShadow = true;
   lowerNeck.position.set(torsoWidth + 1, torsoHeight + 2.5, 0);
+  lowerNeck.name = "robotLowerNeck";
   lowerNeck.rotation.x = 90 * Math.PI/180;
 
   // Adding the varius neck parts
