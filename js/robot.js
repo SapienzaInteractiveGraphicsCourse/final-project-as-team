@@ -13,7 +13,7 @@ var KillingRobot = function(){
     ant         : {h: 1, w: 0.05},
     shoulder    : {h: 0.2, w: 0.5, d: 3},
     shouldCyl   : {rTop: 0.2, rBot: 0.4, h: 3, radialSeg: 32},
-    arm         : {h: 0.8, w: 2.5},
+    arm         : {h: 1, w: 0.2},
     leg         : {distance: 2.5},
     upLeg       : {h: 0.25, w: 0.25},
     midLeg      : {h: 2, w: 0.2},
@@ -38,10 +38,12 @@ var KillingRobot = function(){
   const robotTorso = createTorso(robotSizes);
   // Create the robot shoulder
   const robotShoulder = createShoulder(robotSizes);
-  // const robotArms = createArms(robotSizes);
+  const robotArms = createArm(robotSizes);
   // const robotCannon = createCannon(robotSizes);
   // robotArms.add(robotCannon);
-  // robotShoulder.add(robotArms);
+  // Add the arms to the shoulder
+  robotShoulder.add(robotArms);
+  // Add the shoulder to the torso
   robotTorso.add(robotShoulder);
 
   // Creating the leg with its various parts, the upper, the middle and the
@@ -310,13 +312,42 @@ function createShoulder(robotSizes){
 }
 
 /**
- * [createArm description]
- * @param  {[type]} robotSizes [description]
- * @return {[type]}            [description]
+ * This function creates the arm that is made up of two different components
+ * they hold the cannon for shoothing
+ * @param  {object} robotSizes The robot sizes
+ * @return {object}            Return the object containg the two mesh
  */
 function createArm(robotSizes){
   const armsObject = new THREE.Object3D();
+  // The shoulder will be composed of two different pieces
+  const h = robotSizes.arm.h;
+  const w = robotSizes.arm.w;
 
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  const cubeGeo = new THREE.BoxGeometry(w, h, w);
+  const cubeMat = new THREE.MeshPhongMaterial({color: '#E23C19'}); // red
+  // Creating the mesh for the two arms
+  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  const meshBack = new THREE.Mesh(cubeGeo, cubeMat);
+  // First component
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth - 1.3, torsoHeight + 1.55, 1);
+  mesh.rotation.z = -45 * Math.PI /180
+  mesh.name = "robotFrontArm";
+  // Second component
+  meshBack.castShadow = true;
+  meshBack.receiveShadow = true;
+  meshBack.position.set(torsoWidth - 1.3, torsoHeight + 1.55, -1);
+  meshBack.rotation.z = -45 * Math.PI /180
+  meshBack.name = "robotBackArm";
+
+  armsObject.add(mesh);
+  armsObject.add(meshBack);
+
+  return armsObject;
 }
 
 
