@@ -25,6 +25,11 @@ function main() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('white');
 
+  const robot = new KillingRobot();
+  robot.castShadow = true;
+  robot.receiveShadow = true;
+  scene.add(robot);
+
   {
     const planeSize = 40;
 
@@ -66,11 +71,6 @@ function main() {
     //Create a helper for the shadow camera (optional)
     var helper = new THREE.CameraHelper( light.shadow.camera );
     scene.add( helper );
-
-    let robot = new KillingRobot();
-    robot.castShadow = true;
-    robot.receiveShadow = true;
-    scene.add(robot);
   }
 
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
@@ -147,7 +147,12 @@ function main() {
     }
 
     renderer.render(scene, camera);
-
+    robot.traverse(function(child){
+      // console.log(child);
+      if(child.name == "robotWheel"){
+        child.rotation.x += 0.1;
+      }
+    });
     TWEEN.update();
     requestAnimationFrame(render);
   }

@@ -6,8 +6,8 @@ var KillingRobot = function(){
     head  : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
     neck  : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
     eye   : {r: 6, s: 1},
-    ear   : {rTop: 0.4, rBot: 0.4, h: 3, radialSeg: 32},
-    ant   : {h: 0.8, w: 2.5},
+    ear   : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
+    ant   : {h: 1, w: 0.05},
     leg   : {distance: 2.5},
     upLeg : {h: 0.25, w: 0.25},
     midLeg: {h: 2, w: 0.2},
@@ -20,7 +20,7 @@ var KillingRobot = function(){
   robotHead.add(createNeck(robotSizes));
   // Add the details to the head, such as the ear with the antenna
   robotHead.add(createHeadDetails(robotSizes));
-  
+
   // Add head
   robot.add(robotHead);
 
@@ -78,6 +78,10 @@ function createHead(robotSizes) {
 
 function createHeadDetails(robotSizes){
   const headDetailsObjs = new THREE.Object3D();
+  // Spatial coordinates to add in order to set the position
+  const addX = 1.75;
+  const addY = 3.7;
+  const addZ = 0.5;
 
   // Sizes
   // Ear
@@ -99,10 +103,10 @@ function createHeadDetails(robotSizes){
   // Ear
   const earGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments );
   const earMat = new THREE.MeshBasicMaterial( {color: '#99A89F'} ); // light grey
-  const ear = new THREE.Mesh(headGeo, headMat);
+  const ear = new THREE.Mesh(earGeo, earMat);
   ear.castShadow = true;
   ear.receiveShadow = true;
-  ear.position.set(torsoWidth + 1, torsoHeight + 3.5, 1);
+  ear.position.set(torsoWidth + addX, torsoHeight + addY, addZ);
   ear.name = "robotEar";
   ear.rotation.z = 90* Math.PI/180;
   earObj.add(ear);
@@ -113,7 +117,7 @@ function createHeadDetails(robotSizes){
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth + 1, torsoHeight + 2, 0);
+  mesh.position.set(torsoWidth + addX + 0.1, torsoHeight + addY + 0.8, addZ);
   mesh.name = "robotTorso";
   earObj.add(mesh);
 
@@ -301,6 +305,7 @@ function createLowerLeg(robotSizes){
   mesh.receiveShadow = true;
   mesh.position.set(torsoWidth + d - 1.2, torsoHeight + 0.25, 0);
   mesh.rotation.z = 90 * Math.PI/180;
+  mesh.name = "robotLowerLeg";
   // Add to the torso
   lowerLegObj.add(mesh);
 
@@ -331,6 +336,7 @@ function createWheel(robotSizes){
   mesh.receiveShadow = true;
   mesh.position.set(torsoWidth + 1, torsoHeight + 0.25, 0);
   mesh.rotation.y = 90 * Math.PI/180;
+  mesh.name = "robotWheel";
 
   return mesh;
 }
