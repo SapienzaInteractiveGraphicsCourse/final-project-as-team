@@ -2,24 +2,28 @@
 var KillingRobot = function(){
   // Sizes of the various robot parts
   var robotSizes = {
-    torso : {h: 0.8, w: 2.5},
-    head  : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
-    neck  : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
-    eye   : {r: 6, s: 1},
-    ear   : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
-    ant   : {h: 1, w: 0.05},
-    leg   : {distance: 2.5},
-    upLeg : {h: 0.25, w: 0.25},
-    midLeg: {h: 2, w: 0.2},
-    lowLeg: {r: 0.2, radialSeg: 35, h: 2.8},
-    wheel : {r: 0.4, t: 0.8, radialSeg: 14, tubularSeg: 81}
+    torso       : {h: 0.8, w: 2.5},
+    head        : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
+    neck        : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
+    eye         : {rTop: 0.3, rBot: 0.3, h: 0.3, radialSeg: 32},
+    eyeSupport  : {rTop: 0.2, rBot: 0.1, h: 1.5, radialSeg: 32},
+    ear         : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
+    ant         : {h: 1, w: 0.05},
+    leg         : {distance: 2.5},
+    upLeg       : {h: 0.25, w: 0.25},
+    midLeg      : {h: 2, w: 0.2},
+    lowLeg      : {r: 0.2, radialSeg: 35, h: 2.8},
+    wheel       : {r: 0.4, t: 0.8, radialSeg: 14, tubularSeg: 81}
   }
   // Creating the root element of the robot
   const robot = new THREE.Object3D();
   const robotHead = createHead(robotSizes);
+  // Add the neck to the head
   robotHead.add(createNeck(robotSizes));
   // Add the details to the head, such as the ear with the antenna
-  robotHead.add(createHeadDetails(robotSizes));
+  robotHead.add(createEar(robotSizes));
+  // Add the eye
+  robotHead.add(createEye(robotSizes));
 
   // Add head
   robot.add(robotHead);
@@ -76,8 +80,7 @@ function createHead(robotSizes) {
   return headObj;
 }
 
-function createHeadDetails(robotSizes){
-  const headDetailsObjs = new THREE.Object3D();
+function createEar(robotSizes){
   // Spatial coordinates to add in order to set the position
   const addX = 1.75;
   const addY = 3.7;
@@ -101,7 +104,7 @@ function createHeadDetails(robotSizes){
   // we created an object that will be later inserted in the head details.
   const earObj = new THREE.Object3D();
   // Ear
-  const earGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments );
+  const earGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
   const earMat = new THREE.MeshBasicMaterial( {color: '#99A89F'} ); // light grey
   const ear = new THREE.Mesh(earGeo, earMat);
   ear.castShadow = true;
@@ -121,11 +124,53 @@ function createHeadDetails(robotSizes){
   mesh.name = "robotTorso";
   earObj.add(mesh);
 
-  headDetailsObjs.add(earObj);
-
-  return headDetailsObjs;
-
+  return earObj;
 }
+
+function createEye(robotSizes){
+  const eyeObj = new THREE.Object3D();
+  // Creating the eye, that will be composed by three parts
+  // Sizes of the first part
+  const rEyeTop = robotSizes.eye.rTop;
+  const rEyeBot = robotSizes.eye.rBot;
+  const hEye = robotSizes.eye.h;
+  const radSegEye = robotSizes.eye.radialSeg;
+
+  // References
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+  const addX = 0;
+  const addY = 2;
+  const addZ = 0;
+
+  const eyeGeo = new THREE.CylinderGeometry(rEyeTop, rEyeBot, hEye, radSegEye);
+  const eyeMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
+  const eyeMesh = new THREE.Mesh(eyeGeo, eyeMat);
+  eyeMesh.castShadow = true;
+  eyeMesh.receiveShadow = true;
+  eyeMesh.position.set(torsoWidth + 0.4, torsoHeight + 4, 1.8);
+  eyeMesh.rotation.x = 90 * Math.PI/180
+  eyeMesh.name = "robotEye";
+  eyeObj.add(eyeMesh);
+
+  // Sizes of the support of the eye
+  const rEyeSupTop = robotSizes.eyeSupport.rTop;
+  const rEyeSupBot = robotSizes.eyeSupport.rBot;
+  const hEyeSup = robotSizes.eyeSupport.h;
+  const radSegEyeSup = robotSizes.eyeSupport.radialSeg;
+
+  const eyeSuppGeo = new THREE.CylinderGeometry(rEyeSupTop, rEyeSupBot, hEyeSup, radSegEyeSup);
+  const eyeSuppMesh = new THREE.Mesh(eyeSuppGeo, eyeMat);
+  eyeSuppMesh.castShadow = true;
+  eyeSuppMesh.receiveShadow = true;
+  eyeSuppMesh.position.set(torsoWidth + 0.4, torsoHeight + 4, 1);
+  eyeSuppMesh.rotation.x = 90 * Math.PI/180
+  eyeSuppMesh.name = "robotEyeSupport";
+  eyeObj.add(eyeSuppMesh);
+
+  return eyeObj;
+}
+
 /**
  * This function creates the neck of the robot that is made up of three different
  * components, giving an effect of mobility and flexibility.
