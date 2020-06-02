@@ -369,7 +369,10 @@ function createTorso(robotSizes){
   const texture = loader.load('js/m-textures/robotTorso.jpg');
 
   const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.5);
-  const cubeMat = new THREE.MeshPhongMaterial({color: '#E23C19', map: texture});
+  const cubeMat = new THREE.MeshPhongMaterial({
+    color: '#4E4E4E', // dark grey
+    map: texture
+  });
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -411,10 +414,17 @@ function createUpperLeg(robotSizes){
   const torsoWidth = robotSizes.torso.w;
 
   const upperLegObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/row.metal.jpeg');
   // The upper leg part is just a little cube attached to the cylinder inside
   // the torso.
   const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.1);
-  const cubeMat = new THREE.MeshPhongMaterial({color: '#858382'}); // grey
+  const cubeMat = new THREE.MeshPhongMaterial({
+    color: '#858382',
+    map  : texture
+  }); // grey
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -441,10 +451,21 @@ function createMidLeg(robotSizes){
   const torsoWidth = robotSizes.torso.w;
 
   const midLegObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/row.metal.jpeg');
+  texture.minFilter = THREE.NearestFilter;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set( 4, 4 );
 
   // The middle leg part is just a little cube attached to the upper leg
   const cubeGeo = new THREE.BoxGeometry(width, height, width);
-  const cubeMat = new THREE.MeshPhongMaterial({color: '#858382'}); // grey
+  const cubeMat = new THREE.MeshPhongMaterial({
+    color: '#DAD5D5', // very light grey
+    map: texture,
+  }); // grey
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -504,6 +525,15 @@ function createWheel(robotSizes){
 
   const torsoHeight = robotSizes.torso.h;
   const torsoWidth = robotSizes.torso.w;
+
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/wheel-texture.jpg');
+  texture.minFilter = THREE.NearestFilter;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set( 4, 4 );
 
   const wheelGeo = new THREE.TorusGeometry(radius, tube, radialSeg, tubularSeg);
   const wheelMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
