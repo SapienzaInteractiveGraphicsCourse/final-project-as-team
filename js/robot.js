@@ -2,7 +2,7 @@
 var KillingRobot = function(){
   // Sizes of the various robot parts
   var robotSizes = {
-    torso : {h: 3, w: 4.5},
+    torso : {h: 0.5, w: 3.5},
     head  : {h: 1, w: 4},
     eye   : {r: 6, s: 1},
     waist : {rTop: 2.5, rBot: 0.5, h: 2, radialSeg: 32}
@@ -13,8 +13,6 @@ var KillingRobot = function(){
   robot.add(createTorso(robotSizes));
 
   robot.add(createHead(robotSizes));
-
-  robot.add(createWaist(robotSizes));
 
   return robot;
 }
@@ -34,24 +32,21 @@ function createTorso(robotSizes){
   mesh.name = "robotTorso";
   torsoObj.add(mesh);
 
-  const radius = 1.8;
-  const wSeg = 35;
-  const hSeg = 35;
-  const sphereGeo = new THREE.SphereGeometry( radius, wSeg, hSeg);
+  const radius = 0.2;
+  const heightCyl = width;
+  const radialSegments = 35;
+  const cylinderGeo = new THREE.CylinderGeometry(radius, radius, heightCyl, radialSegments );
 
-  const rightShoulderMesh = new THREE.Mesh(sphereGeo, cubeMat);
-  const leftShoulderMesh = new THREE.Mesh(sphereGeo, cubeMat);
+  // This will be used as pivot for the connection to the wheel
+  const torsoAxis = new THREE.Mesh(cylinderGeo, cubeMat);
 
-  rightShoulderMesh.castShadow = true;
-  rightShoulderMesh.receiveShadow = true;
-  rightShoulderMesh.position.set(3.5, height + 2, 0);
-
-  leftShoulderMesh.castShadow = true;
-  leftShoulderMesh.receiveShadow = true;
-  leftShoulderMesh.position.set(3 + width, height + 2, 0);
-
-  torsoObj.add(rightShoulderMesh);
-  torsoObj.add(leftShoulderMesh);
+  // Set the shadows and position
+  torsoAxis.castShadow = true;
+  torsoAxis.receiveShadow = true;
+  torsoAxis.position.set(width + 1.5, height + 2, 0);
+  torsoAxis.rotation.z = 90 * Math.PI/180;
+  // Add to the torso
+  torsoObj.add(torsoAxis);
 
   //torsoObj.position.set(width + 1, height + 2, 0);
 
