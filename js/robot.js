@@ -4,6 +4,7 @@ var KillingRobot = function(){
   var robotSizes = {
     torso : {h: 0.8, w: 2.5},
     head  : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
+    neck  : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
     eye   : {r: 6, s: 1},
     leg   : {distance: 2.5},
     upLeg : {h: 0.25, w: 0.25},
@@ -13,9 +14,10 @@ var KillingRobot = function(){
   }
   // Creating the root element of the robot
   const robot = new THREE.Object3D();
-
+  const robotHead = createHead(robotSizes);
+  robotHead.add(createNeck(robotSizes));
   // Add head
-  robot.add(createHead(robotSizes));
+  robot.add(robotHead);
 
   // Create torso. To the torso will be connected the single leg that will be
   // then attacched to the wheel
@@ -39,7 +41,12 @@ var KillingRobot = function(){
 
   return robot;
 }
-
+/**
+ * This is the function to create the head of the robot, that
+ * is just a cone.
+ * @param  {object} robotSizes The robot sizes
+ * @return {object}            The robot head
+ */
 function createHead(robotSizes) {
   const height = robotSizes.head.h;
   const width =  robotSizes.head.w;
@@ -63,6 +70,56 @@ function createHead(robotSizes) {
   headObj.add(head);
 
   return headObj;
+}
+
+function createHeadDetails(robotSizes){
+
+}
+/**
+ * This function creates the neck of the robot that is made up of three different
+ * components, giving an effect of mobility and flexibility.
+ * @param  {object} robotSizes The robot sizes
+ * @return {object}            Return the neck of the robot
+ */
+function createNeck(robotSizes){
+  const radius = robotSizes.neck.r;
+  const tube = robotSizes.neck.t;
+  const radialSeg = robotSizes.neck.radialSeg;
+  const tubularSeg = robotSizes.neck.tubularSeg;
+
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  const neckObj = new THREE.Object3D();
+  const neckGeo = new THREE.TorusGeometry(radius, tube, radialSeg, tubularSeg);
+  const neckMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
+
+  const upperNeck = new THREE.Mesh(neckGeo, neckMat);
+  const middleNeck = new THREE.Mesh(neckGeo, neckMat);
+  const lowerNeck = new THREE.Mesh(neckGeo, neckMat);
+
+  // Set the shadows and position
+  upperNeck.castShadow = true;
+  upperNeck.receiveShadow = true;
+  upperNeck.position.set(torsoWidth + 1, torsoHeight + 3, 0);
+  upperNeck.rotation.x = 90 * Math.PI/180;
+
+  middleNeck.castShadow = true;
+  middleNeck.receiveShadow = true;
+  middleNeck.position.set(torsoWidth + 1, torsoHeight + 2.75, 0);
+  middleNeck.rotation.x = 90 * Math.PI/180;
+
+  lowerNeck.castShadow = true;
+  lowerNeck.receiveShadow = true;
+  lowerNeck.position.set(torsoWidth + 1, torsoHeight + 2.5, 0);
+  lowerNeck.rotation.x = 90 * Math.PI/180;
+
+  // Adding the varius neck parts
+  neckObj.add(upperNeck);
+  neckObj.add(middleNeck);
+  neckObj.add(lowerNeck);
+
+  return neckObj;
 }
 
 /**
