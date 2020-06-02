@@ -363,9 +363,13 @@ function createTorso(robotSizes){
   const width =  robotSizes.torso.w;
 
   const torsoObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/robotTorso.jpg');
 
   const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.5);
-  const cubeMat = new THREE.MeshPhongMaterial({color: '#E23C19'});
+  const cubeMat = new THREE.MeshPhongMaterial({color: '#E23C19', map: texture});
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
