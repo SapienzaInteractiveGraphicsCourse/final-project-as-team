@@ -2,21 +2,77 @@
 var KillingRobot = function(){
   // Sizes of the various robot parts
   var robotSizes = {
-    torso : {h: 0.5, w: 3.5},
+    torso : {h: 0.5, w: 2.5},
     head  : {h: 1, w: 4},
     eye   : {r: 6, s: 1},
-    waist : {rTop: 2.5, rBot: 0.5, h: 2, radialSeg: 32}
+    waist : {rTop: 2.5, rBot: 0.5, h: 2, radialSeg: 32},
+    leg   : {distance: 2.5},
+    upLeg : {h: 0.25, w: 0.25},
+    midLeg: {h: 1.5, w: 0.2},
+    lowLeg: {h: 1.5, w: 1.5},
+    wheel : {}
   }
   // Creating the root element of the robot
   const robot = new THREE.Object3D();
 
-  robot.add(createTorso(robotSizes));
-
+  // Add head
   robot.add(createHead(robotSizes));
+
+  // Create torso. To the torso will be connected the single leg that will be
+  // then attacched to the wheel
+  const robotTorso = createTorso(robotSizes);
+
+  // Creating the leg with its various parts, the upper, the middle and the
+  // the lower part. Middle and lower part are CHILDREN of the upper one.
+  const robotUpperLeg = createUpperLeg(robotSizes);
+  const robotMiddleLeg = createMidLeg(robotSizes);
+
+  robotUpperLeg.add(robotMiddleLeg);
+
+  // All the leg is children of the torso, so we just add the upper leg.
+  robotTorso.add(robotUpperLeg);
+  // Finally we add torso
+  robot.add(robotTorso);
+
 
   return robot;
 }
 
+function createHead(robotSizes) {
+  const height = robotSizes.head.h;
+  const width =  robotSizes.head.w;
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  const headObj = new THREE.Object3D();
+
+  const cubeGeo = new THREE.BoxBufferGeometry(width, height, width);
+  const cubeMat = new THREE.MeshPhongMaterial({color: '#8AC'});
+  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth + 1, torsoHeight + 5, 0);
+  mesh.name = "robotHead";
+  headObj.add(mesh);
+
+  /*
+  const radius = robotSizes.eye.r;
+  const segments = robotSizes.eye.s;
+  const triangleGeo = new THREE.CircleBufferGeometry(radius, segments);
+  const triangleMat = new THREE.MeshBasicMaterial({color: ' 0xff0000 '});
+  const triangle = new THREE.Mesh(triangleGeo, triangleMat);
+  triangle.position.set(torsoWidth + 1, torsoHeight + 5, 1);
+  mesh.name = "eye";
+  headObj.add(triangle);*/
+
+  return headObj;
+}
+
+/**
+ * Function to create the torso of the robot
+ * @param  {object} robotSizes Sizes of the robot
+ * @return {object}            The torso object
+ */
 function createTorso(robotSizes){
   const height = robotSizes.torso.h;
   const width =  robotSizes.torso.w;
@@ -48,39 +104,66 @@ function createTorso(robotSizes){
   // Add to the torso
   torsoObj.add(torsoAxis);
 
-  //torsoObj.position.set(width + 1, height + 2, 0);
-
   return torsoObj;
 }
 
-function createHead(robotSizes) {
-  const height = robotSizes.head.h;
-  const width =  robotSizes.head.w;
+/**
+ * Function to create the leg of the robot, that will be composed of various
+ * parts. This function will create the upper leg part.
+ * @param  {object} robotSizes Sizes of the robot
+ * @return {object}            Upper leg object
+ */
+function createUpperLeg(robotSizes){
+  const height = robotSizes.upLeg.h;
+  const width =  robotSizes.upLeg.w;
+  const d = robotSizes.leg.distance;
+
   const torsoHeight = robotSizes.torso.h;
   const torsoWidth = robotSizes.torso.w;
 
-  const headObj = new THREE.Object3D();
-
-  const cubeGeo = new THREE.BoxBufferGeometry(width, height, width);
-  const cubeMat = new THREE.MeshPhongMaterial({color: '#8AC'});
+  const upperLegObj = new THREE.Object3D();
+  // The upper leg part is just a little cube attached to the cylinder inside
+  // the torso.
+  const cubeGeo = new THREE.BoxBufferGeometry(width, height, width +0.1);
+  const cubeMat = new THREE.MeshPhongMaterial({color: '#858382'}); // grey
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth + 1, torsoHeight + 5, 0);
-  mesh.name = "robotHead";
-  headObj.add(mesh);
+  mesh.position.set(torsoWidth + d, torsoHeight + 1.8, 0);
+  mesh.name = "robotUpperLeg";
+  upperLegObj.add(mesh);
 
-  /*
-  const radius = robotSizes.eye.r;
-  const segments = robotSizes.eye.s;
-  const triangleGeo = new THREE.CircleBufferGeometry(radius, segments);
-  const triangleMat = new THREE.MeshBasicMaterial({color: ' 0xff0000 '});
-  const triangle = new THREE.Mesh(triangleGeo, triangleMat);
-  triangle.position.set(torsoWidth + 1, torsoHeight + 5, 1);
-  mesh.name = "eye";
-  headObj.add(triangle);*/
+  return upperLegObj;
+}
 
-  return headObj;
+/**
+ * This function creates the middle leg part of the leg, is very similar
+ * to the previous function, the one used to create the upper part, what
+ * changes are just the sizes.
+ * @param  {object} robotSizes Sizes of the robot
+ * @return {object}            Middle leg object
+ */
+function createMidLeg(robotSizes){
+  const height = robotSizes.midLeg.h;
+  const width =  robotSizes.midLeg.w;
+  const d = robotSizes.leg.distance;
+
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  const midLegObj = new THREE.Object3D();
+
+  // The middle leg part is just a little cube attached to the upper leg
+  const cubeGeo = new THREE.BoxBufferGeometry(width, height, width);
+  const cubeMat = new THREE.MeshPhongMaterial({color: '#858382'}); // grey
+  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth + d, torsoHeight + 1, 0);
+  mesh.name = "robotMiddleLeg";
+  midLegObj.add(mesh);
+
+  return midLegObj;
 }
 
 function createWaist(robotSizes){
