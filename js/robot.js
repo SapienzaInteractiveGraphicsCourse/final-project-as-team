@@ -2,15 +2,14 @@
 var KillingRobot = function(){
   // Sizes of the various robot parts
   var robotSizes = {
-    torso : {h: 0.5, w: 2.5},
-    head  : {h: 1, w: 4},
+    torso : {h: 0.8, w: 2.5},
+    head  : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
     eye   : {r: 6, s: 1},
-    waist : {rTop: 2.5, rBot: 0.5, h: 2, radialSeg: 32},
     leg   : {distance: 2.5},
     upLeg : {h: 0.25, w: 0.25},
-    midLeg: {h: 1.5, w: 0.2},
-    lowLeg: {r: 0.2, radialSeg: 35, h: 3},
-    wheel : {r: 10, t: 10, radialSeg: 17, tubularSeg: 81}
+    midLeg: {h: 2, w: 0.2},
+    lowLeg: {r: 0.2, radialSeg: 35, h: 2.8},
+    wheel : {r: 0.4, t: 0.8, radialSeg: 14, tubularSeg: 81}
   }
   // Creating the root element of the robot
   const robot = new THREE.Object3D();
@@ -44,29 +43,24 @@ var KillingRobot = function(){
 function createHead(robotSizes) {
   const height = robotSizes.head.h;
   const width =  robotSizes.head.w;
+  const radiusTop = robotSizes.head.rTop;
+  const radiusBottom = robotSizes.head.rBot;
+  const radialSegments = robotSizes.head.radialSeg;
+
   const torsoHeight = robotSizes.torso.h;
   const torsoWidth = robotSizes.torso.w;
 
   const headObj = new THREE.Object3D();
 
-  const cubeGeo = new THREE.BoxBufferGeometry(width, height, width);
-  const cubeMat = new THREE.MeshPhongMaterial({color: '#8AC'});
-  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth + 1, torsoHeight + 5, 0);
-  mesh.name = "robotHead";
-  headObj.add(mesh);
-
-  /*
-  const radius = robotSizes.eye.r;
-  const segments = robotSizes.eye.s;
-  const triangleGeo = new THREE.CircleBufferGeometry(radius, segments);
-  const triangleMat = new THREE.MeshBasicMaterial({color: ' 0xff0000 '});
-  const triangle = new THREE.Mesh(triangleGeo, triangleMat);
-  triangle.position.set(torsoWidth + 1, torsoHeight + 5, 1);
-  mesh.name = "eye";
-  headObj.add(triangle);*/
+  const headGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments );
+  const headMat = new THREE.MeshBasicMaterial( {color: '#139E4D'} ); // green
+  const head = new THREE.Mesh(headGeo, headMat);
+  head.castShadow = true;
+  head.receiveShadow = true;
+  head.position.set(torsoWidth + 1, torsoHeight + 3.5, 1);
+  head.name = "robotHead";
+  head.rotation.x = 110* Math.PI/180;
+  headObj.add(head);
 
   return headObj;
 }
@@ -195,7 +189,7 @@ function createLowerLeg(robotSizes){
   // Set the shadows and position
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth + d - 1.2, torsoHeight + 0.5, 0);
+  mesh.position.set(torsoWidth + d - 1.2, torsoHeight + 0.25, 0);
   mesh.rotation.z = 90 * Math.PI/180;
   // Add to the torso
   lowerLegObj.add(mesh);
@@ -225,33 +219,14 @@ function createWheel(robotSizes){
   // Set the shadows and position
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth, torsoHeight + 0.5, 0);
+  mesh.position.set(torsoWidth + 1, torsoHeight + 0.25, 0);
+  mesh.rotation.y = 90 * Math.PI/180;
 
   return mesh;
 }
 
 function createWaist(robotSizes){
-  const height = robotSizes.waist.h;
-  const width =  robotSizes.waist.w;
-  const radiusTop = robotSizes.waist.rTop;
-  const radiusBottom = robotSizes.waist.rBot;
-  const radialSegments = robotSizes.waist.radialSeg;
 
-  const torsoHeight = robotSizes.torso.h;
-  const torsoWidth = robotSizes.torso.w;
-
-  const waistObj = new THREE.Object3D();
-
-  const waistGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments );
-  const waistMat = new THREE.MeshBasicMaterial( {color: '#000000'} );
-  const waist = new THREE.Mesh(waistGeo, waistMat);
-  waist.castShadow = true;
-  waist.receiveShadow = true;
-  waist.position.set(torsoWidth + 1, torsoHeight - 0.5, 0);
-  waist.name = "robotWaist";
-  waistObj.add(waist);
-
-  return waistObj;
 }
 
 
