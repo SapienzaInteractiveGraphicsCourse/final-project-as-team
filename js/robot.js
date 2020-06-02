@@ -28,6 +28,8 @@ var KillingRobot = function(){
   const robotMiddleLeg = createMidLeg(robotSizes);
   const robotLowerLeg = createLowerLeg(robotSizes);
 
+  // Add the wheel
+  robotLowerLeg.add(createWheel(robotSizes));
   robotMiddleLeg.add(robotLowerLeg);
   robotUpperLeg.add(robotMiddleLeg);
   // All the leg is children of the torso, so we just add the upper leg.
@@ -201,7 +203,32 @@ function createLowerLeg(robotSizes){
   return lowerLegObj;
 }
 
+/**
+ * This is the function to create the wheel of the robot. Since we have no
+ * more child to add, the wheel will be just a mesh.
+ * @param  {object} robotSizes Sizes of the robot
+ * @return {object}            The wheel that allows the robot to move
+ */
+function createWheel(robotSizes){
+  const radius = robotSizes.wheel.r;
+  const tube = robotSizes.wheel.t;
+  const radialSeg = robotSizes.wheel.radialSeg;
+  const tubularSeg = robotSizes.wheel.tubularSeg;
 
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  const wheelGeo = new THREE.TorusGeometry(radius, tube, radialSeg, tubularSeg);
+  const wheelMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
+  const mesh = new THREE.Mesh(wheelGeo, wheelMat);
+
+  // Set the shadows and position
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth, torsoHeight + 0.5, 0);
+
+  return mesh;
+}
 
 function createWaist(robotSizes){
   const height = robotSizes.waist.h;
