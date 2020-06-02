@@ -9,8 +9,8 @@ var KillingRobot = function(){
     leg   : {distance: 2.5},
     upLeg : {h: 0.25, w: 0.25},
     midLeg: {h: 1.5, w: 0.2},
-    lowLeg: {h: 1.5, w: 1.5},
-    wheel : {}
+    lowLeg: {r: 0.2, radialSeg: 35, h: 3},
+    wheel : {r: 10, t: 10, radialSeg: 17, tubularSeg: 81}
   }
   // Creating the root element of the robot
   const robot = new THREE.Object3D();
@@ -26,9 +26,10 @@ var KillingRobot = function(){
   // the lower part. Middle and lower part are CHILDREN of the upper one.
   const robotUpperLeg = createUpperLeg(robotSizes);
   const robotMiddleLeg = createMidLeg(robotSizes);
+  const robotLowerLeg = createLowerLeg(robotSizes);
 
+  robotMiddleLeg.add(robotLowerLeg);
   robotUpperLeg.add(robotMiddleLeg);
-
   // All the leg is children of the torso, so we just add the upper leg.
   robotTorso.add(robotUpperLeg);
   // Finally we add torso
@@ -124,7 +125,7 @@ function createUpperLeg(robotSizes){
   const upperLegObj = new THREE.Object3D();
   // The upper leg part is just a little cube attached to the cylinder inside
   // the torso.
-  const cubeGeo = new THREE.BoxBufferGeometry(width, height, width +0.1);
+  const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.1);
   const cubeMat = new THREE.MeshPhongMaterial({color: '#858382'}); // grey
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
@@ -154,7 +155,7 @@ function createMidLeg(robotSizes){
   const midLegObj = new THREE.Object3D();
 
   // The middle leg part is just a little cube attached to the upper leg
-  const cubeGeo = new THREE.BoxBufferGeometry(width, height, width);
+  const cubeGeo = new THREE.BoxGeometry(width, height, width);
   const cubeMat = new THREE.MeshPhongMaterial({color: '#858382'}); // grey
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
@@ -165,6 +166,42 @@ function createMidLeg(robotSizes){
 
   return midLegObj;
 }
+
+/**
+ * This function creates the lower leg part of the leg, here we simply create
+ * a cylinder that will be the main support for the wheel
+ * @param  {object} robotSizes Sizes of the robot
+ * @return {object}            Lower leg, support for the wheel
+ */
+function createLowerLeg(robotSizes){
+  // Getting the measures, this time will have different measures
+  // since we have a cylinder.
+  const radius = robotSizes.lowLeg.r;
+  const heightCyl = robotSizes.lowLeg.h;
+  const radialSegments = robotSizes.lowLeg.radialSeg;
+  const d = robotSizes.leg.distance;
+
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  const lowerLegObj = new THREE.Object3D();
+  const cylinderGeo = new THREE.CylinderGeometry(radius, radius, heightCyl, radialSegments);
+  const cylinderMat = new THREE.MeshPhongMaterial({color: '#858382'}); // grey
+  // This will be used as support for the connection to the wheel
+  const mesh = new THREE.Mesh(cylinderGeo, cylinderMat);
+
+  // Set the shadows and position
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth + d - 1.2, torsoHeight + 0.5, 0);
+  mesh.rotation.z = 90 * Math.PI/180;
+  // Add to the torso
+  lowerLegObj.add(mesh);
+
+  return lowerLegObj;
+}
+
+
 
 function createWaist(robotSizes){
   const height = robotSizes.waist.h;
