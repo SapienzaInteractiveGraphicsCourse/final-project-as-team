@@ -30,6 +30,13 @@ function main() {
   robot.receiveShadow = true;
   scene.add(robot);
 
+  var tween = new TWEEN.Tween(position)
+  .to({ x: 10 * Math.PI/180 }, 2000)
+  .start();
+
+  var tweenTwo = new TWEEN.Tween(position).to({ x: -20 * Math.PI/180 }, 2000)
+  .start();
+
   {
     const planeSize = 40;
 
@@ -56,13 +63,13 @@ function main() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
-    //Create a DirectionalLight and turn on shadows for the light
+    // Create a DirectionalLight and turn on shadows for the light
     var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
     light.position.set(10, 10, 10); 			//default; light shining from top
     light.castShadow = true;            // default false
     scene.add( light );
 
-    //Set up shadow properties for the light
+    // Set up shadow properties for the light
     light.shadow.mapSize.width = 512;  // default
     light.shadow.mapSize.height = 512; // default
     light.shadow.camera.near = 0.5;    // default
@@ -100,6 +107,8 @@ function main() {
   }
 
   {
+    tween.chain(tweenTwo);
+    tweenTwo.chain(tween);
     const gltfLoader = new GLTFLoader();
     gltfLoader.load('js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
       root = gltf.scene;
@@ -107,10 +116,10 @@ function main() {
       // Scale the clone guy to  1:100
       root.scale.multiplyScalar(1/100);
       root.castShadow = true;
-      WalkingAnimation(root, position);
+      // WalkingAnimation(root, position);
 
       // Add the storm tropper to the scene
-      //scene.add(root);
+      // scene.add(root);
       // compute the box that contains all the stuff
       // from root and below
       const box = new THREE.Box3().setFromObject(root);
@@ -147,12 +156,25 @@ function main() {
     }
 
     renderer.render(scene, camera);
+    /*
     robot.traverse(function(child){
       // console.log(child);
       if(child.name == "robotWheel"){
-        //child.rotation.x += 0.1;
+        child.rotation.x += 0.05;
+      }
+    });*/
+    robot.traverse(function(child){
+      if(child.name == "robotHead"){
+        child.rotation.z = position.x;
+      }
+      if(child.name == "robotEyeSupport"){
+        child.rotation.y = 1.5-position.x;
+      }
+      if(child.name == "robotEyeBar"){
+        child.rotation.y = 1.5-position.x;
       }
     });
+
     TWEEN.update();
     requestAnimationFrame(render);
   }

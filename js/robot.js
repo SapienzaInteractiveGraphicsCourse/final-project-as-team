@@ -32,7 +32,7 @@ var KillingRobot = function(){
   robotHead.add(createEar(robotSizes));
   // Add the eye
   robotHead.add(createEye(robotSizes));
-
+  robotHead.name = "head";
   // Add head
   robot.add(robotHead);
 
@@ -226,7 +226,7 @@ function createEye(robotSizes){
   eyeBarMesh.receiveShadow = true;
   eyeBarMesh.position.set(torsoWidth + 1.174, torsoHeight + 3.8, 1.875);
   eyeBarMesh.rotation.y = 90 * Math.PI/180
-  eyeBarMesh.name = "roboteyeBar";
+  eyeBarMesh.name = "robotEyeBar";
   eyeObj.add(eyeBarMesh);
 
   return eyeObj;
