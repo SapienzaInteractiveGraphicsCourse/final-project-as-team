@@ -160,7 +160,7 @@ function createEar(robotSizes){
 
   // Antenna
   const cubeGeo = new THREE.BoxBufferGeometry(antennaWidth, antennaHeigh,antennaWidth);
-  const cubeMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
+  const cubeMat = new THREE.MeshToonMaterial({color: '#1E1C1A'}); // pseudo-black
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -215,7 +215,7 @@ function createEye(robotSizes){
   const dEyeBar = robotSizes.eyeBar.d;
 
   const barGeo = new THREE.BoxGeometry(wEyeBar, hEyeBar, dEyeBar);
-  const barMaterial = new THREE.MeshPhongMaterial({
+  const barMaterial = new THREE.MeshToonMaterial({
           color: "#FD0000", // red
           shininess: 200.0,
           specular: 0xf25656,
@@ -255,7 +255,7 @@ function createNeck(robotSizes){
 
   const neckObj = new THREE.Object3D();
   const neckGeo = new THREE.TorusGeometry(radius, tube, radialSeg, tubularSeg);
-  const neckMat = new THREE.MeshPhongMaterial({
+  const neckMat = new THREE.MeshToonMaterial({
     color: '#534D4D',  // grey/black
     map: texture,
     bumpMap: texture
@@ -373,7 +373,7 @@ function createArm(robotSizes){
   texture.minFilter = THREE.NearestFilter;
 
   const cubeGeo = new THREE.BoxGeometry(w, h, w);
-  const cubeMat = new THREE.MeshPhongMaterial({
+  const cubeMat = new THREE.MeshToonMaterial({
     color: '#DAD5D5', // very light grey
     map: texture
   });
@@ -427,7 +427,7 @@ function createCannon(robotSizes){
 
   // Build the geometry
   const cylGeo = new THREE.CylinderGeometry(rTop, rBot, h, radialSeg);
-  const cylMat = new THREE.MeshPhongMaterial({
+  const cylMat = new THREE.MeshToonMaterial({
     color: '#FFFFFF', // white
     map: texture,
     shininess: 100.0
@@ -462,7 +462,7 @@ function createCannon(robotSizes){
 
   // Build the view finder of the cannon
   const fGeo = new THREE.BoxGeometry(fW, fH, fD);
-  const blackMaterial = new THREE.MeshPhongMaterial({
+  const blackMaterial = new THREE.MeshToonMaterial({
       color: '#000000', // black
       shininess: 100.0
     });
@@ -573,8 +573,8 @@ function createUpperLeg(robotSizes){
   // The upper leg part is just a little cube attached to the cylinder inside
   // the torso.
   const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.1);
-  const cubeMat = new THREE.MeshPhongMaterial({
-    color: '#DCD1D1', // Close to white
+  const cubeMat = new THREE.MeshToonMaterial({
+    color: '#858382', // grey
     map  : texture
   });
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
@@ -611,7 +611,7 @@ function createMidLeg(robotSizes){
 
   // The middle leg part is just a little cube attached to the upper leg
   const cubeGeo = new THREE.BoxGeometry(width, height, width);
-  const cubeMat = new THREE.MeshPhongMaterial({
+  const cubeMat = new THREE.MeshToonMaterial({
     color: '#DAD5D5', // very light grey
     map: texture,
   });
@@ -650,7 +650,7 @@ function createLowerLeg(robotSizes){
 
   const lowerLegObj = new THREE.Object3D();
   const cylinderGeo = new THREE.CylinderGeometry(radius, radius, heightCyl, radialSegments);
-  const cylinderMat = new THREE.MeshPhongMaterial({
+  const cylinderMat = new THREE.MeshToonMaterial({
     color: '#858382', // grey
     map: texture
 });
@@ -687,15 +687,13 @@ function createWheel(robotSizes){
   // Texture loader
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
-  const texture = loader.load('js/m-textures/wheel-texture.jpg');
+  const texture = loader.load('js/m-textures/wheel.jpeg');
   texture.minFilter = THREE.NearestFilter;
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
 
   const wheelGeo = new THREE.TorusGeometry(radius, tube, radialSeg, tubularSeg);
-  const wheelMat = new THREE.MeshPhongMaterial({
-    color: '#1E1C1A',// pseudo-black
-    map: texture
+  const wheelMat = new THREE.MeshToonMaterial({
+    map: texture,
+    bumpMap: texture
   });
   const mesh = new THREE.Mesh(wheelGeo, wheelMat);
 

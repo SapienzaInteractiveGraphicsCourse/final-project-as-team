@@ -150,7 +150,7 @@ function main() {
     robot.traverse(function(child){
       // console.log(child);
       if(child.name == "robotWheel"){
-        child.rotation.x += 0.1;
+        //child.rotation.x += 0.1;
       }
     });
     TWEEN.update();
