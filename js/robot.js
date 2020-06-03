@@ -2,7 +2,7 @@
 var KillingRobot = function(){
   // Sizes of the various robot parts. In this way everytime there is
   // something to change we just have to modify this object.
-  var robotSizes = {
+  let robotSizes = {
     torso       : {h: 0.8, w: 2.5},
     head        : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
     neck        : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
@@ -23,6 +23,7 @@ var KillingRobot = function(){
     lowLeg      : {r: 0.2, radialSeg: 35, h: 2.8},
     wheel       : {r: 0.4, t: 0.8, radialSeg: 14, tubularSeg: 81}
   }
+
   // Creating the root element of the robot
   const robot = new THREE.Object3D();
   const robotHead = createHead(robotSizes);
@@ -85,8 +86,14 @@ function createHead(robotSizes) {
 
   const headObj = new THREE.Object3D();
 
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/robotTorso.jpg');
+  texture.minFilter = THREE.LinearFilter;
+
   const headGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments );
-  const headMat = new THREE.MeshBasicMaterial( {color: '#139E4D'} ); // green
+  const headMat = new THREE.MeshToonMaterial( {color: '#FFFFFF', shininess: 0, map:texture,  bumpMap: texture} ); // green
   const head = new THREE.Mesh(headGeo, headMat);
   head.castShadow = true;
   head.receiveShadow = true;
@@ -158,6 +165,10 @@ function createEar(robotSizes){
  */
 function createEye(robotSizes){
   const eyeObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+
   // Creating the eye, that will be composed by three parts
   // Sizes of the first part
   const rEyeTop = robotSizes.eye.rTop;
@@ -201,16 +212,23 @@ function createEye(robotSizes){
   const eyeBallAspect = robotSizes.eyeBall.h;
 
   const sphereGeo = new THREE.SphereGeometry(rEyeBall, eyeBallAspect, eyeBallAspect);
+  // Eye ball texture
+  const eyeBallTexture = loader.load('js/m-textures/hal.jpg');
+  eyeBallTexture.minFilter = THREE.NearestFilter;
+  eyeBallTexture.rotation = THREE.MathUtils.degToRad(0);
+
   // The eye ball will be similar to glass
   const glassMaterial = new THREE.MeshPhongMaterial({
-          color: "#A0E7E8", // light blue
-          refractionRatio: 0.8
+          color: "#00000", // light blue
+          refractionRatio: 0.8,
+          map: eyeBallTexture,
+          shininess: 50.0
         });
   const eyeBallMesh = new THREE.Mesh(sphereGeo, glassMaterial);
   eyeBallMesh.castShadow = true;
   eyeBallMesh.receiveShadow = true;
   eyeBallMesh.position.set(torsoWidth + 0.4, torsoHeight + 4, 1.9);
-  eyeBallMesh.rotation.x = 90 * Math.PI/180
+  eyeBallMesh.rotation.y = -90 * Math.PI/180
   eyeBallMesh.name = "robotEyeBall";
   eyeObj.add(eyeBallMesh);
 
@@ -360,7 +378,7 @@ function createArm(robotSizes){
  * the shooter part that has a finder, the shooter and the final
  * shooter piece.
  * @param  {object} robotSizes The robot sizes.
- * @return {object}            The cannon 
+ * @return {object}            The cannon
  */
 function createCannon(robotSizes){
   const cannonObj = new THREE.Object3D();
@@ -455,12 +473,15 @@ function createTorso(robotSizes){
   // Texture loader
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
-  const texture = loader.load('js/m-textures/robotTorso.jpg');
+  const texture = loader.load('js/m-textures/test-materia.jpg');
+  texture.minFilter = THREE.LinearFilter;
 
   const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.5);
-  const cubeMat = new THREE.MeshPhongMaterial({
-    color: '#4E4E4E', // dark grey
-    map: texture
+  const cubeMat = new THREE.MeshToonMaterial({
+    color: '#FFFFFF', // white
+    map: texture,
+    bumpMap: texture,
+    shininess: 200.0
   });
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
@@ -507,6 +528,8 @@ function createUpperLeg(robotSizes){
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
   const texture = loader.load('js/m-textures/row.metal.jpeg');
+  texture.minFilter = THREE.LinearFilter;
+
   // The upper leg part is just a little cube attached to the cylinder inside
   // the torso.
   const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.1);
@@ -544,10 +567,9 @@ function createMidLeg(robotSizes){
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
   const texture = loader.load('js/m-textures/row.metal.jpeg');
-  texture.minFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.LinearFilter;
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set( 4, 4 );
 
   // The middle leg part is just a little cube attached to the upper leg
   const cubeGeo = new THREE.BoxGeometry(width, height, width);
