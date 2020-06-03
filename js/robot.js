@@ -6,9 +6,8 @@ var KillingRobot = function(){
     torso       : {h: 0.8, w: 2.5},
     head        : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
     neck        : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
-    eye         : {rTop: 0.3, rBot: 0.3, h: 0.3, radialSeg: 32},
-    eyeSupport  : {rTop: 0.2, rBot: 0.1, h: 1.5, radialSeg: 32},
-    eyeBall     : {r: 0.25, h: 32, w: 32},
+    eyeSupport  : {w: 1.1, h: 0.3, d: 1.65},
+    eyeBar      : {w: 0.2, h: 0.1, d: 1.5},
     ear         : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
     ant         : {h: 1, w: 0.05},
     shoulder    : {h: 0.2, w: 0.5, d: 3},
@@ -32,7 +31,7 @@ var KillingRobot = function(){
   // Add the details to the head, such as the ear with the antenna
   robotHead.add(createEar(robotSizes));
   // Add the eye
-  //robotHead.add(createEye(robotSizes));
+  robotHead.add(createEye(robotSizes));
 
   // Add head
   robot.add(robotHead);
@@ -172,79 +171,63 @@ function createEar(robotSizes){
   return earObj;
 }
 /**
- * This function creates the eye of the robot, it has three main parts that
- * are the eye support, the eye block and the eye ball.
+ * This function creates the eye of the robot, it has two main parts that
+ * are the eye support and a red line bar.
  * @param  {object} robotSizes The robot sizes.
  * @return {object}            The eye object.
  */
 function createEye(robotSizes){
   const eyeObj = new THREE.Object3D();
-  // Texture loader
-  const loadManager = new THREE.LoadingManager();
-  const loader = new THREE.TextureLoader(loadManager);
-
-  // Creating the eye, that will be composed by three parts
-  // Sizes of the first part
-  const rEyeTop = robotSizes.eye.rTop;
-  const rEyeBot = robotSizes.eye.rBot;
-  const hEye = robotSizes.eye.h;
-  const radSegEye = robotSizes.eye.radialSeg;
 
   // References
   const torsoHeight = robotSizes.torso.h;
   const torsoWidth = robotSizes.torso.w;
 
-  const eyeGeo = new THREE.CylinderGeometry(rEyeTop, rEyeBot, hEye, radSegEye);
-  const eyeMat = new THREE.MeshPhongMaterial({color: '#1E1C1A'}); // pseudo-black
-  const eyeMesh = new THREE.Mesh(eyeGeo, eyeMat);
-  eyeMesh.castShadow = true;
-  eyeMesh.receiveShadow = true;
-  eyeMesh.position.set(torsoWidth + 0.4, torsoHeight + 4, 1.8);
-  eyeMesh.rotation.x = 90 * Math.PI/180
-  eyeMesh.name = "robotEye";
-  eyeObj.add(eyeMesh);
-
   // Sizes of the support of the eye
-  const rEyeSupTop = robotSizes.eyeSupport.rTop;
-  const rEyeSupBot = robotSizes.eyeSupport.rBot;
+  const wEyeSup = robotSizes.eyeSupport.w;
   const hEyeSup = robotSizes.eyeSupport.h;
-  const radSegEyeSup = robotSizes.eyeSupport.radialSeg;
+  const dEyeSup = robotSizes.eyeSupport.d;
 
-  const eyeSuppGeo = new THREE.CylinderGeometry(rEyeSupTop, rEyeSupBot, hEyeSup, radSegEyeSup);
-  const eyeSuppMesh = new THREE.Mesh(eyeSuppGeo, eyeMat);
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/scratched-metal.png');
+  texture.minFilter = THREE.NearestFilter;
+
+  // The eye support will have the same texture of the ear, so they
+  // will seem connected
+  const eyeSuppGeo = new THREE.BoxGeometry(wEyeSup, hEyeSup, dEyeSup);
+  const eyeSuppMat = new THREE.MeshToonMaterial({
+          color: '#99A89F', // black
+          map: texture
+        });
+  const eyeSuppMesh = new THREE.Mesh(eyeSuppGeo, eyeSuppMat);
   eyeSuppMesh.castShadow = true;
   eyeSuppMesh.receiveShadow = true;
-  eyeSuppMesh.position.set(torsoWidth + 0.4, torsoHeight + 4, 1);
-  eyeSuppMesh.rotation.x = 90 * Math.PI/180
+  eyeSuppMesh.position.set(torsoWidth + 1.174, torsoHeight + 3.8, 1.375);
+  eyeSuppMesh.rotation.y = 90 * Math.PI/180
   eyeSuppMesh.name = "robotEyeSupport";
   eyeObj.add(eyeSuppMesh);
 
-  // Sizes of the eye ball
-  const rEyeBall = robotSizes.eyeBall.r;
-  // In this case no matter for the width of the segements or their
-  // heights, indeed we want a smooth sphere
-  const eyeBallAspect = robotSizes.eyeBall.h;
+  // Sizes of the eye bar
+  const wEyeBar = robotSizes.eyeBar.w;
+  const hEyeBar = robotSizes.eyeBar.h;
+  const dEyeBar = robotSizes.eyeBar.d;
 
-  const sphereGeo = new THREE.SphereGeometry(rEyeBall, eyeBallAspect, eyeBallAspect);
-  // Eye ball texture
-  const eyeBallTexture = loader.load('js/m-textures/hal.jpg');
-  eyeBallTexture.minFilter = THREE.NearestFilter;
-  eyeBallTexture.rotation = THREE.MathUtils.degToRad(0);
-
-  // The eye ball will be similar to glass
-  const glassMaterial = new THREE.MeshPhongMaterial({
-          color: "#00000", // light blue
-          refractionRatio: 0.8,
-          map: eyeBallTexture,
-          shininess: 50.0
+  const barGeo = new THREE.BoxGeometry(wEyeBar, hEyeBar, dEyeBar);
+  const barMaterial = new THREE.MeshPhongMaterial({
+          color: "#FD0000", // red
+          shininess: 200.0,
+          specular: 0xf25656,
+          emissive: 0xf25656
         });
-  const eyeBallMesh = new THREE.Mesh(sphereGeo, glassMaterial);
-  eyeBallMesh.castShadow = true;
-  eyeBallMesh.receiveShadow = true;
-  eyeBallMesh.position.set(torsoWidth + 0.4, torsoHeight + 4, 1.9);
-  eyeBallMesh.rotation.y = -90 * Math.PI/180
-  eyeBallMesh.name = "robotEyeBall";
-  eyeObj.add(eyeBallMesh);
+  const eyeBarMesh = new THREE.Mesh(barGeo, barMaterial);
+  eyeBarMesh.castShadow = true;
+  eyeBarMesh.receiveShadow = true;
+  eyeBarMesh.position.set(torsoWidth + 1.174, torsoHeight + 3.8, 1.875);
+  eyeBarMesh.rotation.y = 90 * Math.PI/180
+  eyeBarMesh.name = "roboteyeBar";
+  eyeObj.add(eyeBarMesh);
 
   return eyeObj;
 }
@@ -390,11 +373,9 @@ function createArm(robotSizes){
   texture.minFilter = THREE.NearestFilter;
 
   const cubeGeo = new THREE.BoxGeometry(w, h, w);
-  const cubeMat = new THREE.MeshToonMaterial({
-    color: '#000000', // white
-    //map: texture,
-    //bumpMap: texture,
-    shininess: 100.0
+  const cubeMat = new THREE.MeshPhongMaterial({
+    color: '#DAD5D5', // very light grey
+    map: texture
   });
   // Creating the mesh for the two arms
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
@@ -633,7 +614,7 @@ function createMidLeg(robotSizes){
   const cubeMat = new THREE.MeshPhongMaterial({
     color: '#DAD5D5', // very light grey
     map: texture,
-  }); // grey
+  });
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
