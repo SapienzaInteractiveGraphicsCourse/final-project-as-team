@@ -12,8 +12,11 @@ var KillingRobot = function(){
     ear         : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
     ant         : {h: 1, w: 0.05},
     shoulder    : {h: 0.2, w: 0.5, d: 3},
-    shouldCyl   : {rTop: 0.2, rBot: 0.4, h: 3, radialSeg: 32},
+    shouldCyl   : {rTop: 0.2, rBot: 0.2, h: 3, radialSeg: 32},
     arm         : {h: 1, w: 0.2},
+    cannon      : {rTop: 0.5, rBot: 0.4, h: 2.25, radialSeg: 32},
+    shooter     : {radius: 0.3, h: 2, radialSeg: 32},
+    finder      : {h: 0.8, w: 0.2, d: 1.75},
     leg         : {distance: 2.5},
     upLeg       : {h: 0.25, w: 0.25},
     midLeg      : {h: 2, w: 0.2},
@@ -39,8 +42,9 @@ var KillingRobot = function(){
   // Create the robot shoulder
   const robotShoulder = createShoulder(robotSizes);
   const robotArms = createArm(robotSizes);
-  // const robotCannon = createCannon(robotSizes);
-  // robotArms.add(robotCannon);
+  const robotCannon = createCannon(robotSizes);
+  // Add the cannon to the arm
+  robotArms.add(robotCannon);
   // Add the arms to the shoulder
   robotShoulder.add(robotArms);
   // Add the shoulder to the torso
@@ -288,7 +292,7 @@ function createShoulder(robotSizes){
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth - 0.4, torsoHeight + 2, 0);
+  mesh.position.set(torsoWidth - 0.5, torsoHeight + 2, 0);
   mesh.name = "robotShoulderFirstPArt";
   // Add the first part of the shoulder
   shoulderObj.add(mesh);
@@ -303,7 +307,7 @@ function createShoulder(robotSizes){
   const cylMesh = new THREE.Mesh(cylGeo, cubeMat);
   cylMesh.castShadow = true;
   cylMesh.receiveShadow = true;
-  cylMesh.position.set(torsoWidth - 0.8, torsoHeight + 2, 0);
+  cylMesh.position.set(torsoWidth - 0.875, torsoHeight + 2, 0);
   cylMesh.rotation.x = 90 * Math.PI/180
   cylMesh.name = "robotShoulderSecondPart";
   shoulderObj.add(cylMesh);
@@ -350,8 +354,93 @@ function createArm(robotSizes){
   return armsObject;
 }
 
+/**
+ * This function is used to create the cannon of the robot. The cannon
+ * is composed by one big part that is attached to the robot arm and
+ * the shooter part that has a finder, the shooter and the final
+ * shooter piece.
+ * @param  {object} robotSizes The robot sizes.
+ * @return {object}            The cannon 
+ */
+function createCannon(robotSizes){
+  const cannonObj = new THREE.Object3D();
 
-function createCannon(robotSizes){}
+  // The cannon is composed by one main cylinder
+  const h = robotSizes.cannon.h;
+  const rBot = robotSizes.cannon.rBot;
+  const rTop = robotSizes.cannon.rTop;
+  const radialSeg = robotSizes.cannon.radialSeg
+
+  const torsoHeight = robotSizes.torso.h;
+  const torsoWidth = robotSizes.torso.w;
+
+  // Build the geometry
+  const cylGeo = new THREE.CylinderGeometry(rTop, rBot, h, radialSeg);
+  const cylMat = new THREE.MeshPhongMaterial({color: '#E23C19'}); // red
+  const cylMesh = new THREE.Mesh(cylGeo, cylMat);
+  cylMesh.castShadow = true;
+  cylMesh.receiveShadow = true;
+  cylMesh.position.set(torsoWidth - 1.85, torsoHeight + 1, 0);
+  cylMesh.rotation.x = 90 * Math.PI/180
+  cylMesh.name = "robotCannon";
+  cannonObj.add(cylMesh);
+
+  // Get the shooter sizes
+  const r = robotSizes.shooter.radius;
+  const shotH = robotSizes.shooter.h;
+  const shotRadSeg = robotSizes.shooter.radialSeg;
+
+  // The shooter part of the cannon
+  const shootGeo = new THREE.CylinderGeometry(r, r, shotH, shotRadSeg);
+  const shootMat = new THREE.MeshPhongMaterial({color: '#E23C19'}); // red
+  const shootMesh = new THREE.Mesh(shootGeo, shootMat);
+  shootMesh.castShadow = true;
+  shootMesh.receiveShadow = true;
+  shootMesh.position.set(torsoWidth - 1.85, torsoHeight + 1, 1);
+  shootMesh.rotation.x = 90 * Math.PI/180
+  shootMesh.name = "robotShooter";
+  cannonObj.add(shootMesh);
+
+  // Get the viewfinder measures
+  const fH = robotSizes.finder.h;
+  const fW = robotSizes.finder.w;
+  const fD = robotSizes.finder.d;
+
+  // Build the view finder of the cannon
+  const fGeo = new THREE.BoxGeometry(fW, fH, fD);
+  const fMesh = new THREE.Mesh(fGeo, shootMat);
+  fMesh.castShadow = true;
+  fMesh.receiveShadow = true;
+  fMesh.position.set(torsoWidth - 1.85, torsoHeight + 0.95, 1);
+  fMesh.name = "robotShooterViewFinder";
+  cannonObj.add(fMesh);
+
+  // Code taken from the official documentation of three.js
+  // https://threejs.org/docs/#api/en/geometries/LatheGeometry
+  // This geomtry will be used for the outer part of the cannon
+  const points = [];
+  for (let i = 0; i < 10; i ++) {
+	   points.push( new THREE.Vector2( Math.sin( i * 0.2 ) * 10 + 5, ( i - 5 ) * 2 ) );
+  }
+  // Parameters for the geometry
+  const segments = 30;
+  const phiStart = 0;
+  const phiLenght = 6.3;
+
+  const geometry = new THREE.LatheGeometry(points, segments, phiStart, phiLenght);
+  const lathe = new THREE.Mesh(geometry, cylMat);
+
+  lathe.castShadow = true;
+  lathe.receiveShadow = true;
+  lathe.position.set(torsoWidth - 1.85, torsoHeight + 1, 2);
+  // Make the mesh smaller
+  lathe.scale.multiplyScalar(0.0175);
+  lathe.rotation.x = -90 * Math.PI / 180;
+  lathe.name = "robotShooterOuterPart";
+  cannonObj.add(lathe);
+
+  return cannonObj;
+}
 
 /**
  * Function to create the torso of the robot
@@ -538,7 +627,7 @@ function createWheel(robotSizes){
   const wheelMat = new THREE.MeshPhongMaterial({
     color: '#1E1C1A',// pseudo-black
     map: texture
-  }); 
+  });
   const mesh = new THREE.Mesh(wheelGeo, wheelMat);
 
   // Set the shadows and position
