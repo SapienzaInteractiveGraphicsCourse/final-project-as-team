@@ -1,4 +1,11 @@
-
+/**
+ * This is the class for instantiate the killing robot model, here we have
+ * the various parts of the robot that are created by using the functions
+ * defined below. We can find also the measures of every robot's part, this
+ * object is passed as input parameter to all the function.
+ * 
+ * @return {object} Killing robot object
+ */
 var KillingRobot = function(){
   // Sizes of the various robot parts. In this way everytime there is
   // something to change we just have to modify this object.
