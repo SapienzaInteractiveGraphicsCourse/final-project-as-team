@@ -1,7 +1,7 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
-import {WalkingAnimation} from './animations.js';
+import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js'
 
 function main() {
@@ -29,13 +29,6 @@ function main() {
   robot.castShadow = true;
   robot.receiveShadow = true;
   scene.add(robot);
-
-  var tween = new TWEEN.Tween(position)
-  .to({ x: 10 * Math.PI/180 }, 2000)
-  .start();
-
-  var tweenTwo = new TWEEN.Tween(position).to({ x: -20 * Math.PI/180 }, 2000)
-  .start();
 
   {
     const planeSize = 40;
@@ -163,6 +156,7 @@ function main() {
         child.rotation.x += 0.05;
       }
     });*/
+    /*
     robot.traverse(function(child){
       if(child.name == "robotHead"){
         child.rotation.z = position.x;
@@ -173,7 +167,8 @@ function main() {
       if(child.name == "robotEyeBar"){
         child.rotation.y = 1.5-position.x;
       }
-    });
+    });*/
+    AnimateRobot(robot);
 
     TWEEN.update();
     requestAnimationFrame(render);
