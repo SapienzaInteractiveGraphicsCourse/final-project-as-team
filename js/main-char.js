@@ -18,11 +18,12 @@ var Hero = function(){
     midFinger   : {w: 0.2, h: 0.1, d: 1.5},
     upperFinger : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
     gun         : {h: 0.8, w: 0.5, d: 5},
+    gunHandle   : {h: 1.2, w: 0.4, d: 0.7}
   }
 
   // Creating the root element of the robot
   const hero = new THREE.Object3D();
-  hero.position.set(10,0,0);
+  hero.position.set(6, 0, -3);
 
   const heroTorso = createTorso(heroSizes);
   hero.add(heroTorso);
@@ -180,6 +181,10 @@ function createGun(sizes){
   const torsoHeight = sizes.torso.h;
   const torsoWidth = sizes.torso.w;
 
+  const gunPosX = torsoWidth - 10;
+  const gunPosY = torsoHeight + 3;
+  const gunPosZ = 7;
+
   const gunObj = new THREE.Object3D();
   // Texture loader
   const loadManager = new THREE.LoadingManager();
@@ -191,12 +196,30 @@ function createGun(sizes){
   const cubeMat = new THREE.MeshToonMaterial({
     color: '#000000',
   });
+
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth - 10, torsoHeight + 3, 7);
-  mesh.name = "heroTorso";
+  mesh.position.set(gunPosX, gunPosY, gunPosZ);
+  mesh.name = "gunBody";
   gunObj.add(mesh);
+
+  // Gun handle
+  // Sizes
+  const handleWidth = sizes.gunHandle.w;
+  const handleHeight = sizes.gunHandle.h;
+  const handleDepth = sizes.gunHandle.d;
+
+  const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth);
+  const handleMat = new THREE.MeshToonMaterial({
+    color: '#DFF900',
+  });
+  const handleMesh = new THREE.Mesh(handleGeo, handleMat);
+  handleMesh.castShadow = true;
+  handleMesh.receiveShadow = true;
+  handleMesh.position.set(gunPosX, gunPosY - 1, gunPosZ - 1);
+  handleMesh.name = "gunHandle";
+  gunObj.add(handleMesh);
 
   return gunObj;
 }
