@@ -100,8 +100,6 @@ function main() {
   }
 
   {
-    tween.chain(tweenTwo);
-    tweenTwo.chain(tween);
     const gltfLoader = new GLTFLoader();
     gltfLoader.load('js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
       root = gltf.scene;

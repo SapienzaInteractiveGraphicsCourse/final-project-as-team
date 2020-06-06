@@ -1,4 +1,4 @@
-import './tween/tween.esm.js'
+
 let position = {
   cannonRot : 0
 }
