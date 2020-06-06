@@ -1,8 +1,8 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
-import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {AnimateRobot} from './robot-animations.js';
-import {KillingRobot} from './robot.js'
+import {KillingRobot} from './robot.js';
+import {Hero} from './main-char.js';
 
 function main() {
   const canvas = document.querySelector('#c');
@@ -25,10 +25,15 @@ function main() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('white');
 
+  // Init the robot and then add it to the scene
   const robot = new KillingRobot();
   robot.castShadow = true;
   robot.receiveShadow = true;
   scene.add(robot);
+
+  // Init the main character
+  const mainChar = new Hero();
+  scene.add(mainChar);
 
   {
     const planeSize = 40;
@@ -99,34 +104,6 @@ function main() {
     camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
   }
 
-  {
-    const gltfLoader = new GLTFLoader();
-    gltfLoader.load('js/clone_trooper_phase1_shiny_updated/scene.gltf', (gltf) => {
-      root = gltf.scene;
-
-      // Scale the clone guy to  1:100
-      root.scale.multiplyScalar(1/100);
-      root.castShadow = true;
-      // WalkingAnimation(root, position);
-
-      // Add the storm tropper to the scene
-      // scene.add(root);
-      // compute the box that contains all the stuff
-      // from root and below
-      const box = new THREE.Box3().setFromObject(root);
-
-      const boxSize = box.getSize(new THREE.Vector3()).length();
-      const boxCenter = box.getCenter(new THREE.Vector3());
-
-      // set the camera to frame the box
-      frameArea(boxSize, boxSize, boxCenter, camera);
-
-      // update the Trackball controls to handle the new size
-      controls.maxDistance = boxSize * 10;
-      controls.target.copy(boxCenter);
-      controls.update();
-    });
-  }
 
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
@@ -147,25 +124,8 @@ function main() {
     }
 
     renderer.render(scene, camera);
-    /*
-    robot.traverse(function(child){
-      // console.log(child);
-      if(child.name == "robotWheel"){
-        child.rotation.x += 0.05;
-      }
-    });*/
-    /*
-    robot.traverse(function(child){
-      if(child.name == "robotHead"){
-        child.rotation.z = position.x;
-      }
-      if(child.name == "robotEyeSupport"){
-        child.rotation.y = 1.5-position.x;
-      }
-      if(child.name == "robotEyeBar"){
-        child.rotation.y = 1.5-position.x;
-      }
-    });*/
+
+    // Calling the function to animate the robot
     AnimateRobot(robot);
 
     TWEEN.update();
@@ -174,7 +134,6 @@ function main() {
 
   render();
 
-  //requestAnimationFrame(render);
 }
 
 main();
