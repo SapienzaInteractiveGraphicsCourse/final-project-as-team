@@ -31,7 +31,6 @@ function main() {
   scene.add(robot);
 
 
-
   {
     const planeSize = 4000;
 
