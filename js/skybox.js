@@ -33,7 +33,7 @@ function main() {
 
 
   {
-    const planeSize = 40;
+    const planeSize = 4000;
 
     const loader = new THREE.TextureLoader();
     const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
@@ -76,16 +76,16 @@ function main() {
   }
 
   let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/nx.png');
-  let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/ny.png');
-  let texture_up = new THREE.TextureLoader().load( 'js/bg_images/nz.png');
-  let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/px.png');
-  let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/py.png');
-  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/pz.png');
+  let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/arid2_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/arid2_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load( 'js/bg_images/arid2_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/arid2_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/arid2_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/arid2_lf.jpg');
 
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft, bumpMap: texture_ft }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk, bumpMap: texture_bk }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up, bumpMap:  texture_up}));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up, bumpMap: texture_up }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn, bumpMap: texture_dn }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt, bumpMap: texture_rt }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf, bumpMap: texture_ft }));
@@ -93,7 +93,7 @@ function main() {
   for (let i = 0; i < 6; i++){
     materialArray[i].side = THREE.BackSide;
   }
-  let skyboxGeo = new THREE.BoxGeometry( 10000, 10000, 10000);
+  let skyboxGeo = new THREE.BoxGeometry( 4000, 4000, 4000);
   let skybox = new THREE.Mesh( skyboxGeo, materialArray );
   scene.add( skybox );
 
