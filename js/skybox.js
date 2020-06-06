@@ -32,7 +32,7 @@ function main() {
 
 
   {
-    const planeSize = 4000;
+    const planeSize = 400;
 
     const loader = new THREE.TextureLoader();
     const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
@@ -75,12 +75,12 @@ function main() {
   }
 
   let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/arid2_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/arid2_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load( 'js/bg_images/arid2_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/arid2_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/arid2_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/arid2_lf.jpg');
+  let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_lf.jpg');
 
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft, bumpMap: texture_ft }));
   materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk, bumpMap: texture_bk }));
