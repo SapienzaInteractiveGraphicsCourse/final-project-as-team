@@ -10,17 +10,44 @@ var Hero = function(){
   // Sizes of the various robot parts. In this way everytime there is
   // something to change we just have to modify this object.
   let heroSizes = {
-    torso       : {h: 0.8, w: 2.5},
-    arms        : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
+    torso       : {h: 1.8, w: 4.5, d: 2},
+    upperArms   : {rTop: 0.8, rBot: 0.6, h: 2.5, radialSeg: 8},
+    lowerArms   : {rTop: 0.5, rBot: 0.4, h: 2.5, radialSeg: 15},
     hand        : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
     lowFinger   : {w: 1.1, h: 0.3, d: 1.65},
     midFinger   : {w: 0.2, h: 0.1, d: 1.5},
     upperFinger : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
+    gun         : {h: 0.8, w: 0.5, d: 5},
   }
 
   // Creating the root element of the robot
   const hero = new THREE.Object3D();
+  hero.position.set(10,0,0);
+
   const heroTorso = createTorso(heroSizes);
+  hero.add(heroTorso);
+
+  const leftArm = createArm(heroSizes, "left");
+  const leftLowerArm = createLowerArm(heroSizes, "left");
+  leftArm.add(leftLowerArm);
+  leftArm.name = "heroLeftArm";
+  leftArm.rotation.x = -60 * Math.PI/180;
+  leftArm.rotation.y = -60 * Math.PI/180;
+  leftArm.position.set(1,3.5,7);
+
+  const rightArm = createArm(heroSizes, "right");
+  const rightLowerArm = createLowerArm(heroSizes, "right");
+  rightArm.add(rightLowerArm);
+  rightArm.name = "heroRightArm";
+  rightArm.rotation.x = -120 * Math.PI/180;
+  rightArm.rotation.z = 45 * Math.PI/180;
+  rightArm.rotation.y = 70 * Math.PI/180;
+  rightArm.position.set(-7.2, -4.4, 6);
+
+  // Adding the arms to the torso
+  heroTorso.add(rightArm);
+  heroTorso.add(leftArm);
+  hero.add(createGun(heroSizes));
 
   return hero;
 }
@@ -30,9 +57,10 @@ var Hero = function(){
  * @param  {object} heroSizes Sizes of the character
  * @return {object}           The torso object
  */
-function createTorso(hero){
-  const height = hero.torso.h;
-  const width =  hero.torso.w;
+function createTorso(sizes){
+  const height = sizes.torso.h;
+  const width =  sizes.torso.w;
+  const dept = sizes.torso.d;
 
   const torsoObj = new THREE.Object3D();
   // Texture loader
@@ -41,37 +69,136 @@ function createTorso(hero){
   const texture = loader.load('js/m-textures/scratched-metal.png');
   texture.minFilter = THREE.NearestFilter;
 
-  const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.5);
+  const cubeGeo = new THREE.BoxGeometry(width, height, dept);
   const cubeMat = new THREE.MeshToonMaterial({
-    color: '#FF00FF', // white
-    // map: texture,
-    // bumpMap: texture,
-    shininess: 0.0
+    color: '#0000FF',
   });
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(width + 5, height + 2, 2);
-  mesh.name = "robotTorso";
+  mesh.position.set(width - 10, height + 3, 2);
+  mesh.name = "heroTorso";
   torsoObj.add(mesh);
 
-  const radius = 0.2;
-  const heightCyl = width;
-  const radialSegments = 35;
-  const cylinderGeo = new THREE.CylinderGeometry(radius, radius, heightCyl, radialSegments );
-
-  // This will be used as pivot for the connection to the wheel
-  const torsoAxis = new THREE.Mesh(cylinderGeo, cubeMat);
-
-  // Set the shadows and position
-  torsoAxis.castShadow = true;
-  torsoAxis.receiveShadow = true;
-  torsoAxis.position.set(width + 1.5, height + 2, 0);
-  torsoAxis.rotation.z = 90 * Math.PI/180;
-  // Add to the torso
-  torsoObj.add(torsoAxis);
-
   return torsoObj;
+}
+
+function createArm(sizes, position){
+  // Sizes
+  const height = sizes.upperArms.h;
+  const radiusTop = sizes.upperArms.rTop;
+  const radiusBottom = sizes.upperArms.rBot;
+  const radialSegments = sizes.upperArms.radialSeg;
+
+  const torsoHeight = sizes.torso.h;
+  const torsoWidth = sizes.torso.w;
+
+  const armObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/scratched-metal.png');
+  texture.minFilter = THREE.NearestFilter;
+
+  const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
+  const cylMat = new THREE.MeshToonMaterial( {
+    color: '#00009F',
+    flatShading: true,
+    // map: texture
+  } );
+  const cyl = new THREE.Mesh(cylGeo, cylMat);
+  cyl.castShadow = true;
+  cyl.receiveShadow = true;
+
+  // Depending on the value of the position, meaning if we want to build the
+  // right arm or the lower one we change the position of the geometry
+  if (position == "left") {
+    cyl.position.set(torsoWidth - 7.5, torsoHeight + 2, 2.4);
+    cyl.name = "heroLeftUpperArm";
+  }
+  else{
+    cyl.position.set(torsoWidth - 12.5, torsoHeight + 2, 2.4);
+    cyl.name = "heroRightUpperArm";
+  }
+  armObj.add(cyl);
+
+  return armObj;
+}
+
+function createLowerArm(sizes, position){
+  // Sizes
+  const height = sizes.lowerArms.h;
+  const radiusTop = sizes.lowerArms.rTop;
+  const radiusBottom = sizes.lowerArms.rBot;
+  const radialSegments = sizes.lowerArms.radialSeg;
+
+  const torsoHeight = sizes.torso.h;
+  const torsoWidth = sizes.torso.w;
+
+  const lowerArmObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/scratched-metal.png');
+  texture.minFilter = THREE.NearestFilter;
+
+  const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
+  const cylMat = new THREE.MeshToonMaterial( {
+    color: '#00009F',
+    flatShading: true,
+    // map: texture
+  } );
+  const cyl = new THREE.Mesh(cylGeo, cylMat);
+  cyl.castShadow = true;
+  cyl.receiveShadow = true;
+
+  // Depending on the value of the position, meaning if we want to build the
+  // right arm or the lower one we change the position of the geometry
+  if (position == "left") {
+    cyl.position.set(torsoWidth - 7.5, torsoHeight, 3.5);
+    cyl.name = "heroLowerLeftArm";
+    cyl.rotation.x = -70 * Math.PI/180;
+  }
+  else{
+    cyl.position.set(torsoWidth - 12.5, torsoHeight, 2.8);
+    cyl.name = "heroLowerRightArm";
+    cyl.rotation.x = -20 * Math.PI/180;
+  }
+
+  lowerArmObj.add(cyl);
+
+  return lowerArmObj;
+}
+
+function createLeftHand(){}
+
+function createGun(sizes){
+  const height = sizes.gun.h;
+  const width =  sizes.gun.w;
+  const dept = sizes.gun.d;
+
+  const torsoHeight = sizes.torso.h;
+  const torsoWidth = sizes.torso.w;
+
+  const gunObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/scratched-metal.png');
+  texture.minFilter = THREE.NearestFilter;
+
+  const cubeGeo = new THREE.BoxGeometry(width, height, dept);
+  const cubeMat = new THREE.MeshToonMaterial({
+    color: '#000000',
+  });
+  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(torsoWidth - 10, torsoHeight + 3, 7);
+  mesh.name = "heroTorso";
+  gunObj.add(mesh);
+
+  return gunObj;
 }
 
 export {Hero}

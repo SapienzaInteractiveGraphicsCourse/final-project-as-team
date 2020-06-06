@@ -29,10 +29,12 @@ function main() {
   const robot = new KillingRobot();
   robot.castShadow = true;
   robot.receiveShadow = true;
-  scene.add(robot);
+  // scene.add(robot);
 
   // Init the main character
   const mainChar = new Hero();
+  mainChar.castShadow = true;
+  mainChar.receiveShadow = true;
   scene.add(mainChar);
 
   {
@@ -122,6 +124,12 @@ function main() {
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
+
+    mainChar.traverse(function(child){
+      if(child.name =="heroRightArm"){
+        // child.rotation.y +=0.003;
+      }
+    })
 
     renderer.render(scene, camera);
 
