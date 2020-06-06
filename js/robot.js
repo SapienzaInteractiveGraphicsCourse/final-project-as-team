@@ -3,7 +3,7 @@
  * the various parts of the robot that are created by using the functions
  * defined below. We can find also the measures of every robot's part, this
  * object is passed as input parameter to all the function.
- * 
+ *
  * @return {object} Killing robot object
  */
 var KillingRobot = function(){
@@ -108,7 +108,7 @@ function createHead(robotSizes) {
   const head = new THREE.Mesh(headGeo, headMat);
   head.castShadow = true;
   head.receiveShadow = true;
-  head.position.set(torsoWidth + 1, torsoHeight + 3.5, 1);
+  head.position.set(torsoWidth + 1, torsoHeight + 3.3, 1);
   head.name = "robotHead";
   head.rotation.x = 110* Math.PI/180;
   headObj.add(head);
