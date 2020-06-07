@@ -1,5 +1,6 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
@@ -19,9 +20,6 @@ function main() {
   controls.target.set(0, 5, 0);
   controls.update();
 
-  let root;
-  let position = { x:0 };
-
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('white');
 
@@ -29,10 +27,12 @@ function main() {
   const robot = new KillingRobot();
   robot.castShadow = true;
   robot.receiveShadow = true;
-  scene.add(robot);
+  // scene.add(robot);
 
   // Init the main character
   const mainChar = new Hero();
+  mainChar.castShadow = true;
+  mainChar.receiveShadow = true;
   scene.add(mainChar);
 
   {
@@ -77,6 +77,22 @@ function main() {
     var helper = new THREE.CameraHelper( light.shadow.camera );
     scene.add( helper );
   }
+
+  /*
+  No need to load an external model for the moment
+
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.load('js/m4a1_reload_animation/scene.gltf', (gltf) => {
+    const root = gltf.scene;
+    scene.add(root);
+    root.scale.multiplyScalar(0.1);
+    root.traverse(function(child){
+      console.log(child.name);
+    })
+    // compute the box that contains all the stuff
+    // from root and below
+  });*/
+
 
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
     const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
