@@ -8,6 +8,8 @@ function main() {
   const canvas = document.querySelector('#c');
   const renderer = new THREE.WebGLRenderer({canvas});
 
+  renderer.setPixelRatio(window.devicePixelRatio);
+
   const fov = 45;
   const aspect = 2;  // the canvas default
   const near = 1;
@@ -32,10 +34,10 @@ function main() {
 
 
   {
-    const planeSize = 400;
+    const planeSize = 4000;
 
     const loader = new THREE.TextureLoader();
-    const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
+    const texture = loader.load('js/bg_images/DarkredBlack.jpg');
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.magFilter = THREE.NearestFilter;
@@ -46,12 +48,15 @@ function main() {
     const planeMat = new THREE.MeshPhongMaterial({
       map: texture,
       side: THREE.DoubleSide,
+      shininess: 0,
     });
     const mesh = new THREE.Mesh(planeGeo, planeMat);
     mesh.rotation.x = Math.PI * -.5;
     mesh.receiveShadow = true;
     scene.add(mesh);
   }
+
+
 
   {
     renderer.shadowMap.enabled = true;
@@ -75,25 +80,48 @@ function main() {
   }
 
   let materialArray = [];
-  let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_ft.jpg');
+  /*let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_ft.jpg');
   let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_bk.jpg');
   let texture_up = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_up.jpg');
   let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_dn.jpg');
   let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_lf.jpg');
+  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_lf.jpg');*/
+  let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/arid2_ft.jpg');
+  let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/arid2_bk.jpg');
+  let texture_up = new THREE.TextureLoader().load( 'js/bg_images/arid2_up.jpg');
+  let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/arid2_dn.jpg');
+  let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/arid2_rt.jpg');
+  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/arid2_lf.jpg');
 
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft, bumpMap: texture_ft }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk, bumpMap: texture_bk }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up, bumpMap: texture_up }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn, bumpMap: texture_dn }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt, bumpMap: texture_rt }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf, bumpMap: texture_ft }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+  
+  texture_ft.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  texture_bk.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  texture_up.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  texture_dn.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  texture_rt.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  texture_lf.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+  materialArray.map.magFilter = THREE.LinearMipMapLinearFilter;
+  /*materialArray[0].map.magFilter = THREE.LinearMipMapLinearFilter;
+  materialArray[1].map.magFilter = THREE.LinearMipMapLinearFilter;
+  materialArray[2].map.magFilter = THREE.LinearMipMapLinearFilter;
+  materialArray[3].map.magFilter = THREE.LinearMipMapLinearFilter;
+  materialArray[4].map.magFilter = THREE.LinearMipMapLinearFilter;
+  materialArray[5].map.magFilter = THREE.LinearMipMapLinearFilter;*/
+
 
   for (let i = 0; i < 6; i++){
-    materialArray[i].side = THREE.BackSide;
+    materialArray[i].side = THREE.BackSide;;
   }
   let skyboxGeo = new THREE.BoxGeometry( 4000, 4000, 4000);
   let skybox = new THREE.Mesh( skyboxGeo, materialArray );
+
   scene.add( skybox );
 
   function resizeRendererToDisplaySize(renderer) {
