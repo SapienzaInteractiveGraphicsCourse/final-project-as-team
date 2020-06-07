@@ -330,10 +330,11 @@ function createFinger(sizes, type, position){
       fingerLower.rotation.x = 55 * Math.PI/180;
       fingerObj.add(fingerLower);
 
-      fingerUpper.position.set(torsoWidth - 7.8, torsoHeight - 1.483, 5.565);
+      fingerUpper.position.set(torsoWidth - 7.655, torsoHeight - 1.453, 5.5);
       fingerUpper.name = "heroUpperLeftOther";
-      fingerUpper.rotation.z = 110 * Math.PI/180;
-      fingerUpper.rotation.y = -40 * Math.PI/180;
+      fingerUpper.rotation.z = 100 * Math.PI/180;
+      fingerUpper.rotation.y = -35 * Math.PI/180;
+      fingerUpper.rotation.x = -20 * Math.PI/180;
 
       fingerObj.add(fingerUpper);
     }
@@ -374,6 +375,37 @@ function createGun(sizes){
   mesh.name = "gunBody";
   gunObj.add(mesh);
 
+  // Add details to the gun
+  let detailGeo, detailMat, detailMesh;
+  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept + 0.2);
+  detailMat = new THREE.MeshToonMaterial({
+    color: "#FD0000", // red
+    shininess: 200.0,
+    specular: 0xf25656,
+    emissive: 0xf25656
+  });
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(gunPosX, gunPosY, gunPosZ);
+  detailMesh.name = "shiningDetailGun";
+  gunObj.add(detailMesh);
+
+  // Another shining detail
+  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept + 0.2);
+  detailMat = new THREE.MeshToonMaterial({
+    color: "#FD0000", // red
+    shininess: 200.0,
+    specular: 0xf25656,
+    emissive: 0xf25656
+  });
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ);
+  detailMesh.name = "shiningDetailGun";
+  gunObj.add(detailMesh);
+
   // Gun handle
   // Sizes
   const handleWidth = sizes.gunHandle.w;
@@ -387,7 +419,7 @@ function createGun(sizes){
   const handleMesh = new THREE.Mesh(handleGeo, handleMat);
   handleMesh.castShadow = true;
   handleMesh.receiveShadow = true;
-  handleMesh.position.set(gunPosX, gunPosY - 1, gunPosZ - 1);
+  handleMesh.position.set(gunPosX, gunPosY - 1, gunPosZ - 0.775);
   handleMesh.name = "gunHandle";
   gunObj.add(handleMesh);
 
