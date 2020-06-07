@@ -92,7 +92,10 @@ function main() {
     // compute the box that contains all the stuff
     // from root and below
   });*/
+  var worldAxis = new THREE.AxesHelper(20);
+  scene.add(worldAxis);
 
+  mainChar.getObjectByName("heroUpperLeftOther").add(worldAxis);
 
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
     const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
@@ -138,9 +141,7 @@ function main() {
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
-
     renderer.render(scene, camera);
-
     // Calling the function to animate the robot
     AnimateRobot(robot);
 

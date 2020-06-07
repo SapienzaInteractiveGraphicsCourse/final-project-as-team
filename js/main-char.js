@@ -13,9 +13,22 @@ var Hero = function(){
     torso       : {h: 1.8, w: 4.5, d: 2},
     upperArms   : {rTop: 0.8, rBot: 0.6, h: 2.5, radialSeg: 5},
     lowerArms   : {rTop: 0.5, rBot: 0.4, h: 2.5, radialSeg: 5},
-    hand        : {rTop: 0.25, rBot: 0.35, h: 0.8, radialSeg: 4},
-    lowFinger   : {w: 1.1, h: 0.3, d: 1.65},
-    midFinger   : {w: 0.2, h: 0.1, d: 1.5},
+    hand        : {h: 0.8, w: 0.3, d: 0.8},
+    // Each finger is composed by two parts. The hand has a more simple
+    // geometry since we have just three fingers: the thumb, the index
+    // and the others are included in one single geometry.
+    thumb       : {
+                    lower: {rTop: 0.2, rBot: 0.1, h: 0.4, radialSeg: 4},
+                    upper: {rTop: 0.08, rBot: 0.1, h: 0.25, radialSeg: 4}
+                  },
+    index       : {
+                    lower: {rTop: 0.175, rBot: 0.1, h: 0.4, radialSeg: 4},
+                    upper: {rTop: 0.08, rBot: 0.1, h: 0.3, radialSeg: 4}
+                  },
+    fingers     : {
+                    lower: {h: 0.4, w: 0.1, d: 0.4},
+                    upper: {h: 0.35, w: 0.1, d: 0.3}
+                  },
     upperFinger : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
     gun         : {h: 0.8, w: 0.5, d: 5},
     gunHandle   : {h: 1.2, w: 0.4, d: 0.7}
@@ -36,7 +49,15 @@ var Hero = function(){
   leftArm.rotation.y = -60 * Math.PI/180;
   leftArm.position.set(1,3.5,7);
   // Adding the left hand to the left arm
-  leftArm.add(createLeftHand(heroSizes));
+  const leftHand = createLeftHand(heroSizes);
+  const thumbFinger = createFinger(heroSizes, "thumb", "left");
+  const indexFinger = createFinger(heroSizes, "index", "left");
+  const otherFinger = createFinger(heroSizes, "other", "left");
+
+  leftHand.add(thumbFinger);
+  leftHand.add(indexFinger);
+  leftHand.add(otherFinger);
+  leftArm.add(leftHand);
 
   const rightArm = createArm(heroSizes, "right");
   const rightLowerArm = createLowerArm(heroSizes, "right");
@@ -176,9 +197,8 @@ function createLowerArm(sizes, position){
 function createLeftHand(sizes){
   // Sizes
   const height = sizes.hand.h;
-  const radiusTop = sizes.hand.rTop;
-  const radiusBottom = sizes.hand.rBot;
-  const radialSegments = sizes.hand.radialSeg;
+  const width = sizes.hand.w;
+  const depth = sizes.hand.d;
 
   const torsoHeight = sizes.torso.h;
   const torsoWidth = sizes.torso.w;
@@ -190,21 +210,137 @@ function createLeftHand(sizes){
   const texture = loader.load('js/m-textures/scratched-metal.png');
   texture.minFilter = THREE.NearestFilter;
 
-  const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
-  const cylMat = new THREE.MeshToonMaterial( {
+  const cubeGeo = new THREE.BoxGeometry(width, height, depth);
+  const cubeMat = new THREE.MeshToonMaterial( {
     color: '#BFB7B7',
     flatShading: true,
     // map: texture
   } );
-  const cyl = new THREE.Mesh(cylGeo, cylMat);
-  cyl.castShadow = true;
-  cyl.receiveShadow = true;
-  cyl.position.set(torsoWidth - 7.5, torsoHeight - 0.5, 5.0);
-  cyl.name = "heroLeftHandArm";
-  cyl.rotation.x = -50 * Math.PI/180;
-  handObj.add(cyl);
+  const cube = new THREE.Mesh(cubeGeo, cubeMat);
+  cube.castShadow = true;
+  cube.receiveShadow = true;
+  cube.position.set(torsoWidth - 7.5, torsoHeight - 0.7, 5.0);
+  cube.name = "heroLeftHand";
+  cube.rotation.z = 130 * Math.PI/180;
+  cube.rotation.x = 55 * Math.PI/180;
+  handObj.add(cube);
 
   return handObj;
+}
+
+/**
+ * This function is used to create the fingers of the hero. Instead of doing
+ * one function for each part of the finger, since each king of finger is
+ * made up of two parts (and this for every hand!), we built a simple function
+ * that depending on the input parameters allow to build one particular finger
+ * on a specific hand.
+ * @param  {object} sizes    The sizes of the hero.
+ * @param  {string} type     This is the type of the finger that we want to built
+ * @param  {string} position This is the hand on which the finger is
+ * @return {object}          The function returns the finger object
+ */
+function createFinger(sizes, type, position){
+  const fingerObj = new THREE.Object3D();
+  let fingerLowerGeo, fingerUpperGeo;
+
+  // Same material of the hand
+  const cubeMat = new THREE.MeshToonMaterial( {
+    color: '#BFB7B7',
+    flatShading: true,
+    // map: texture
+  });
+
+  // The torso is  always the reference
+  const torsoHeight = sizes.torso.h;
+  const torsoWidth = sizes.torso.w;
+
+  // Depending on the type of the fingers we have a different geometry
+  if(type == "thumb" || type == "index"){
+    // Each type of finger has an upper part and a lower part
+    let lowerFingerHeight = sizes[type].lower.h;
+    let lowerFingerRtop = sizes[type].lower.rTop;
+    let lowerFingerRbot = sizes[type].lower.rBot;
+    let lowerFingerRadSeg = sizes[type].lower.radialSeg;
+
+    let upperFingerHeight = sizes[type].upper.h;
+    let upperFingerRtop = sizes[type].upper.rTop;
+    let upperFingerRbot = sizes[type].upper.rBot;
+    let upperFingerRadSeg = sizes[type].upper.radialSeg;
+
+    fingerLowerGeo = new THREE.CylinderGeometry(lowerFingerRtop, lowerFingerRbot, lowerFingerHeight, lowerFingerRadSeg);
+    fingerUpperGeo = new THREE.CylinderGeometry(upperFingerRtop, upperFingerRbot, upperFingerHeight, upperFingerRadSeg);
+  }
+  else{
+    // Each type of finger has an upper part and a lower part
+    let lowerHeight = sizes.fingers.lower.h;
+    let lowerWidth = sizes.fingers.lower.w;
+    let lowerDepth = sizes.fingers.lower.d;
+
+    let upperHeight = sizes.fingers.upper.h;
+    let upperWidth = sizes.fingers.upper.w;
+    let upperDepth = sizes.fingers.upper.d;
+
+    fingerLowerGeo = new THREE.BoxGeometry(lowerWidth, lowerHeight, lowerDepth);
+    fingerUpperGeo = new THREE.BoxGeometry(upperWidth, upperHeight, upperDepth);
+  }
+
+  let fingerLower = new THREE.Mesh(fingerLowerGeo, cubeMat);
+  let fingerUpper = new THREE.Mesh(fingerUpperGeo, cubeMat);
+
+  // Set shadows
+  fingerLower.castShadow = true;
+  fingerLower.receiveShadow = true;
+  fingerUpper.castShadow = true;
+  fingerUpper.receiveShadow = true;
+
+  // If we have to add the finger to the left hand
+  if (position == "left") {
+    if(type == "thumb"){
+      fingerLower.position.set(torsoWidth - 7.7, torsoHeight - 0.2, 5.0);
+      fingerLower.name = "heroLowerLeftThumb";
+      fingerLower.rotation.x = -120 * Math.PI/180;
+      fingerObj.add(fingerLower);
+
+      fingerUpper.position.set(torsoWidth - 7.7, torsoHeight - 0.2, 5.275);
+      fingerUpper.name = "heroUpperLeftThumb";
+      fingerUpper.rotation.x = 100 * Math.PI/180;
+      fingerObj.add(fingerUpper);
+    }
+
+    else if (type == "index") {
+
+      fingerLower.position.set(torsoWidth - 7.3, torsoHeight - 1.125, 5.475);
+      fingerLower.name = "heroLowerLeftIndex";
+      fingerLower.rotation.x = -30 * Math.PI/180;
+      fingerLower.rotation.y = 5 * Math.PI/180;
+      fingerObj.add(fingerLower);
+
+      fingerUpper.position.set(torsoWidth - 7.35, torsoHeight - 1.275, 5.645);
+      fingerUpper.name = "heroUpperLeftIndex";
+      fingerUpper.rotation.x = 110 * Math.PI/180;
+      fingerUpper.rotation.y = -50 * Math.PI/180;
+      fingerUpper.rotation.z = 60 * Math.PI/180;
+      fingerObj.add(fingerUpper);
+    }
+
+    else{
+      fingerLower.position.set(torsoWidth - 7.6, torsoHeight - 1.275, 5.275);
+      fingerLower.name = "heroLowerLeftOther";
+      fingerLower.rotation.z = 130 * Math.PI/180;
+      fingerLower.rotation.x = 55 * Math.PI/180;
+      fingerObj.add(fingerLower);
+
+      fingerUpper.position.set(torsoWidth - 7.8, torsoHeight - 1.483, 5.565);
+      fingerUpper.name = "heroUpperLeftOther";
+      fingerUpper.rotation.z = 110 * Math.PI/180;
+      fingerUpper.rotation.y = -40 * Math.PI/180;
+
+      fingerObj.add(fingerUpper);
+    }
+  }
+
+  return fingerObj;
+
 }
 
 function createGun(sizes){
