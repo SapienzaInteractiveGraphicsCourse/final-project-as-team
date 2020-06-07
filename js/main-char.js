@@ -11,9 +11,9 @@ var Hero = function(){
   // something to change we just have to modify this object.
   let heroSizes = {
     torso       : {h: 1.8, w: 4.5, d: 2},
-    upperArms   : {rTop: 0.8, rBot: 0.6, h: 2.5, radialSeg: 8},
-    lowerArms   : {rTop: 0.5, rBot: 0.4, h: 2.5, radialSeg: 15},
-    hand        : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
+    upperArms   : {rTop: 0.8, rBot: 0.6, h: 2.5, radialSeg: 5},
+    lowerArms   : {rTop: 0.5, rBot: 0.4, h: 2.5, radialSeg: 5},
+    hand        : {rTop: 0.25, rBot: 0.35, h: 0.8, radialSeg: 4},
     lowFinger   : {w: 1.1, h: 0.3, d: 1.65},
     midFinger   : {w: 0.2, h: 0.1, d: 1.5},
     upperFinger : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
@@ -35,6 +35,8 @@ var Hero = function(){
   leftArm.rotation.x = -60 * Math.PI/180;
   leftArm.rotation.y = -60 * Math.PI/180;
   leftArm.position.set(1,3.5,7);
+  // Adding the left hand to the left arm
+  leftArm.add(createLeftHand(heroSizes));
 
   const rightArm = createArm(heroSizes, "right");
   const rightLowerArm = createLowerArm(heroSizes, "right");
@@ -54,7 +56,7 @@ var Hero = function(){
 }
 
 /**
- * Function to create the torso of the robot
+ * Function to create the torso of the hero
  * @param  {object} heroSizes Sizes of the character
  * @return {object}           The torso object
  */
@@ -171,7 +173,39 @@ function createLowerArm(sizes, position){
   return lowerArmObj;
 }
 
-function createLeftHand(){}
+function createLeftHand(sizes){
+  // Sizes
+  const height = sizes.hand.h;
+  const radiusTop = sizes.hand.rTop;
+  const radiusBottom = sizes.hand.rBot;
+  const radialSegments = sizes.hand.radialSeg;
+
+  const torsoHeight = sizes.torso.h;
+  const torsoWidth = sizes.torso.w;
+
+  const handObj = new THREE.Object3D();
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load('js/m-textures/scratched-metal.png');
+  texture.minFilter = THREE.NearestFilter;
+
+  const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
+  const cylMat = new THREE.MeshToonMaterial( {
+    color: '#BFB7B7',
+    flatShading: true,
+    // map: texture
+  } );
+  const cyl = new THREE.Mesh(cylGeo, cylMat);
+  cyl.castShadow = true;
+  cyl.receiveShadow = true;
+  cyl.position.set(torsoWidth - 7.5, torsoHeight - 0.5, 5.0);
+  cyl.name = "heroLeftHandArm";
+  cyl.rotation.x = -50 * Math.PI/180;
+  handObj.add(cyl);
+
+  return handObj;
+}
 
 function createGun(sizes){
   const height = sizes.gun.h;
