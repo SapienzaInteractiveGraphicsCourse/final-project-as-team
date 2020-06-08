@@ -254,7 +254,13 @@ function createLowerArm(sizes, position){
 
   return lowerArmObj;
 }
-
+/**
+ * This function creates the hand of the hero that are just box
+ * geometries where later the fingers will be attached.
+ * @param  {object} heroSizes Sizes of the character
+ * @param  {string} position  This value is either left or right
+ * @return {object}           The hand object.
+ */
 function createHand(sizes, position){
   // Sizes
   const height = sizes.hand.h;
