@@ -4,6 +4,7 @@ import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
+import {AnimateHero} from './main-char-animations.js';
 
 function main() {
   const canvas = document.querySelector('#c');
@@ -92,10 +93,6 @@ function main() {
     // compute the box that contains all the stuff
     // from root and below
   });*/
-  var worldAxis = new THREE.AxesHelper(20);
-  scene.add(worldAxis);
-
-  mainChar.getObjectByName("heroUpperRightThumb").add(worldAxis);
 
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
     const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
@@ -123,7 +120,6 @@ function main() {
     camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
   }
 
-
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -135,6 +131,7 @@ function main() {
     return needResize;
   }
 
+  let heroAnimation = new AnimateHero(mainChar);
   function render() {
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
@@ -142,9 +139,10 @@ function main() {
       camera.updateProjectionMatrix();
     }
     renderer.render(scene, camera);
+    heroAnimation.reload();
+
     // Calling the function to animate the robot
     AnimateRobot(robot);
-
     TWEEN.update();
     requestAnimationFrame(render);
   }

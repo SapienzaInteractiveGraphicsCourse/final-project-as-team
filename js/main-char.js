@@ -65,7 +65,6 @@ var Hero = function(){
   leftLowerArm.add(leftHand);
   leftArm.add(leftLowerArm);
   // Rotate the arm
-
   leftArm.name = "heroLeftArm";
   leftArm.rotation.x = -60 * Math.PI/180;
   leftArm.rotation.y = -60 * Math.PI/180;
@@ -88,7 +87,6 @@ var Hero = function(){
   rightLowerArm.add(rightHand);
   rightArm.add(rightLowerArm);
   // Rotate the arm
-
   rightArm.name = "heroRightArm";
   rightArm.rotation.x = -135 * Math.PI/180;
   rightArm.rotation.z = 45 * Math.PI/180;
@@ -636,7 +634,7 @@ function createGun(sizes){
 
   // This is another detail and is in the lower part of gun's body
   detailGeo = new THREE.BoxGeometry(width + 0.1, 0.4, dept - 2.7);
-  detailTexture = loader.load("js/m-textures/gun-handle.jpeg");
+  detailTexture = loader.load(heroTextures.gunHandle);
   detailMat = new THREE.MeshToonMaterial({
     color: heroColors.brown, // red
     shininess: 0.0,
