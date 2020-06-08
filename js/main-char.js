@@ -34,6 +34,12 @@ var Hero = function(){
     gunHandle   : {h: 1.2, w: 0.4, d: 0.7},
     gunCharge   : {h: 0.25, w: 3, d: 0.8},
     gunShooter  : {h: 0.6, w: 0.3, d: 2.5},
+    gunUpShoot  : {rTop: 0.35, rBot: 0.35, h: 2.5, radialSeg: 3},
+    gunFire     : {rTop: 0.28, rBot: 0.28, h: 0.2, radialSeg: 3},
+    gunTarget   : {
+                    support: {h: 1.2, w: 0.5, d: 5},
+                    window : {h: 1.2, w: 0.5, d: 5}
+                  }
   }
 
   // Creating the root element of the robot
@@ -106,13 +112,18 @@ const heroColors = {
   darkGrey: "#4F4C4C",
   brown: "#AE4C4C",
   red: "#FD0000",
-  shinyRed: 0xffffff//0xf25656,
+  pseudoWhite: "#E3DFDA",
+  shinyRed: 0xf25656,
 }
 
+// These are the textures paths that will be loaded by the loaders
+// for each component of the hero
 const heroTextures = {
   gunBody: "js/m-textures/gun-body.jpg",
   gunHandle: "js/m-textures/gun-handle.jpeg",
-  gunMagazine: "js/m-textures/gun-magazine.jpg"
+  gunMagazine: "js/m-textures/gun-magazine.jpg",
+  leather: "js/m-textures/leather.jpg",
+  metal: "js/m-textures/starwars.jpg"
 }
 
 /**
@@ -145,7 +156,12 @@ function createTorso(sizes){
 
   return torsoObj;
 }
-
+/**
+ * This function creates the upper arm of the hero
+ * @param  {object} heroSizes Sizes of the character
+ * @param  {string} position  Left or right depending on which arm we are creating
+ * @return {object}           The function returns the arm.
+ */
 function createArm(sizes, position){
   // Sizes
   const height = sizes.upperArms.h;
@@ -160,14 +176,14 @@ function createArm(sizes, position){
   // Texture loader
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
-  const texture = loader.load('js/m-textures/scratched-metal.png');
+  const texture = loader.load(heroTextures.metal);
   texture.minFilter = THREE.NearestFilter;
 
   const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
   const cylMat = new THREE.MeshToonMaterial( {
     color: heroColors.blue,
     flatShading: true,
-    // map: texture
+    map: texture
   } );
   const cyl = new THREE.Mesh(cylGeo, cylMat);
   cyl.castShadow = true;
@@ -188,6 +204,12 @@ function createArm(sizes, position){
   return armObj;
 }
 
+/**
+ * This function creates the lower arm of the hero
+ * @param  {object} heroSizes Sizes of the character
+ * @param  {string} position  As in the case of the upper arm, its value is either left or right.
+ * @return {object}           Lower arm object.
+ */
 function createLowerArm(sizes, position){
   // Sizes
   const height = sizes.lowerArms.h;
@@ -202,14 +224,14 @@ function createLowerArm(sizes, position){
   // Texture loader
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
-  const texture = loader.load('js/m-textures/scratched-metal.png');
+  const texture = loader.load(heroTextures.metal);
   texture.minFilter = THREE.NearestFilter;
 
   const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
   const cylMat = new THREE.MeshToonMaterial( {
     color: heroColors.blue,
     flatShading: true,
-    // map: texture
+    map: texture
   } );
   const cyl = new THREE.Mesh(cylGeo, cylMat);
   cyl.castShadow = true;
@@ -246,14 +268,14 @@ function createHand(sizes, position){
   // Texture loader
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
-  const texture = loader.load('js/m-textures/scratched-metal.png');
+  const texture = loader.load(heroTextures.metal);
   texture.minFilter = THREE.NearestFilter;
 
   const cubeGeo = new THREE.BoxGeometry(width, height, depth);
   const cubeMat = new THREE.MeshToonMaterial( {
-    color: heroColors.grey,
+    color: "#FFFFFF",
     flatShading: true,
-    // map: texture
+    map: texture,
   } );
   const cube = new THREE.Mesh(cubeGeo, cubeMat);
   cube.castShadow = true;
@@ -292,11 +314,16 @@ function createFinger(sizes, type, position){
   const fingerObj = new THREE.Object3D();
   let fingerLowerGeo, fingerUpperGeo;
 
+  // Texture loader
+  const loadManager = new THREE.LoadingManager();
+  const loader = new THREE.TextureLoader(loadManager);
+  const texture = loader.load(heroTextures.leather);
+
   // Same material of the hand
   const cubeMat = new THREE.MeshToonMaterial( {
     color: heroColors.grey,
     flatShading: true,
-    // map: texture
+    map: texture
   });
 
   // The torso is  always the reference
@@ -470,7 +497,6 @@ function createGun(sizes){
 
   const cubeGeo = new THREE.BoxGeometry(width, height, dept);
   const cubeMat = new THREE.MeshToonMaterial({
-    color: heroColors.brownGrey,
     map: bodyTexture,
     shininess: 0.0,
   });
@@ -537,6 +563,41 @@ function createGun(sizes){
   shooterMesh.name = "gunShooter";
   gunObj.add(shooterMesh);
 
+  // The shooting element of the gun
+  // No shadows for these two parts of the gun
+  const rT = sizes.gunUpShoot.rTop;
+  const rB = sizes.gunUpShoot.rBot;
+  const radS = sizes.gunUpShoot.radialSeg;
+  const h = sizes.gunUpShoot.h;
+  const shootLastGeo = new THREE.CylinderGeometry(rT, rB, h, radS);
+  const shootLastMat = new THREE.MeshToonMaterial({
+    color: heroColors.brownGrey,
+    map: bodyTexture,
+  });
+  const shootMesh = new THREE.Mesh(shootLastGeo, shootLastMat);
+  shootMesh.position.set(gunPosX, gunPosY - 0.155, gunPosZ + 4);
+  shootMesh.rotation.x = 90 * Math.PI/180;
+  shootMesh.name = "gunShooterLast";
+  gunObj.add(shootMesh);
+
+  // This last part of the gun should give the idea of laser beam
+  const rTf = sizes.gunFire.rTop;
+  const rBf = sizes.gunFire.rBot;
+  const radSf = sizes.gunFire.radialSeg;
+  const hF = sizes.gunFire.h;
+  const fireLastGeo = new THREE.CylinderGeometry(rTf, rBf, hF, radSf);
+  const fireLastMat = new THREE.MeshToonMaterial({
+    color: heroColors.red, // red
+    shininess: 200.0,
+    emissive: heroColors.shinyRed,
+    specular: heroColors.shinyRed
+  });
+  const fireMesh = new THREE.Mesh(fireLastGeo, fireLastMat);
+  fireMesh.position.set(gunPosX, gunPosY - 0.155, gunPosZ + 5.2);
+  fireMesh.rotation.x = 90 * Math.PI/180;
+  fireMesh.name = "gunFireLast";
+  gunObj.add(fireMesh);
+
 
   // In this part we add some custom details to the gun, some shiny red
   // part, that make everything more scifi and some elements that characterize
@@ -548,6 +609,8 @@ function createGun(sizes){
   detailMat = new THREE.MeshToonMaterial({
     color: heroColors.red, // red
     shininess: 200.0,
+    emissive: heroColors.shinyRed,
+    specular: heroColors.shinyRed
   });
   detailMesh = new THREE.Mesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
@@ -565,12 +628,13 @@ function createGun(sizes){
   detailMesh.name = "shiningLowerDetailGun";
   gunObj.add(detailMesh);
 
+  // This is another detail and is in the lower part of gun's body
   detailGeo = new THREE.BoxGeometry(width + 0.1, 0.4, dept - 2.7);
   detailTexture = loader.load("js/m-textures/gun-handle.jpeg");
   detailMat = new THREE.MeshToonMaterial({
-    color: heroColors.shinyRed, // red
+    color: heroColors.brown, // red
     shininess: 0.0,
-    map: detailTexture
+    map: detailTexture,
   });
   detailMesh = new THREE.Mesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
@@ -581,6 +645,12 @@ function createGun(sizes){
 
   // Other shining details to add to the shooter part of the gun
   detailGeo = new THREE.BoxGeometry(width - 0.1, 0.1, dept + 0.2);
+  detailMat = new THREE.MeshToonMaterial({
+    color: heroColors.red, // red
+    shininess: 200.0,
+    emissive: heroColors.shinyRed,
+    specular: heroColors.shinyRed
+  });
   detailMesh = new THREE.Mesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
