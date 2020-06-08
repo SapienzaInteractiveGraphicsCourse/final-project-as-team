@@ -7,7 +7,7 @@ import {KillingRobot} from './robot.js'
 var scene, camera, robot;
 
 var keyboard = {};
-var player = { height:1.8, speed:0.2, turnSpeed:Math.PI*0.02 };
+var player = { height:5, speed:0.3, turnSpeed:Math.PI*0.01 };
 var USE_WIREFRAME = false;
 
 
@@ -65,7 +65,28 @@ function init(){
 	scene.add( light );
 	
 	camera.position.set(0, player.height, -5);
-	camera.lookAt(new THREE.Vector3(0,player.height,0));
+	camera.lookAt(new THREE.Vector3(0,player.height, 0));
+
+	{
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+	
+		// Create a DirectionalLight and turn on shadows for the light
+		var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
+		light.position.set(10, 10, 10); 			//default; light shining from top
+		light.castShadow = true;            // default false
+		scene.add( light );
+	
+		// Set up shadow properties for the light
+		light.shadow.mapSize.width = 512;  // default
+		light.shadow.mapSize.height = 512; // default
+		light.shadow.camera.near = 0.5;    // default
+		light.shadow.camera.far = 500;     // default
+	
+		//Create a helper for the shadow camera (optional)
+		var helper = new THREE.CameraHelper( light.shadow.camera );
+		scene.add( helper );
+	}
 
 	let materialArray = [];
 
