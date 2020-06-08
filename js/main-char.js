@@ -32,7 +32,8 @@ var Hero = function(){
     upperFinger : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
     gun         : {h: 1.2, w: 0.5, d: 5},
     gunHandle   : {h: 1.2, w: 0.4, d: 0.7},
-    gunCharge   : {h: 0.25, w: 3, d: 0.8}
+    gunCharge   : {h: 0.25, w: 3, d: 0.8},
+    gunShooter  : {h: 0.6, w: 0.3, d: 2.5},
   }
 
   // Creating the root element of the robot
@@ -96,15 +97,22 @@ var Hero = function(){
   return hero;
 }
 
+// Variables for the materials of the hero character
 // Colors of the various hero's parts.
 const heroColors = {
-  black: "#000000",
+  brownGrey: "#5E4E4E",
   blue: "#00009F",
   grey: "#BFB7B7",
   darkGrey: "#4F4C4C",
   brown: "#AE4C4C",
   red: "#FD0000",
-  shinyRed: 0xf25656,
+  shinyRed: 0xffffff//0xf25656,
+}
+
+const heroTextures = {
+  gunBody: "js/m-textures/gun-body.jpg",
+  gunHandle: "js/m-textures/gun-handle.jpeg",
+  gunMagazine: "js/m-textures/gun-magazine.jpg"
 }
 
 /**
@@ -434,6 +442,13 @@ function createFinger(sizes, type, position){
 
 }
 
+/**
+ * This is the function that will create the gun used by the hero to
+ * destroy killing robots. This gun is made up of many different pieces
+ * all of them are created in this function
+ * @param  {object} sizes The sizes of the hero
+ * @return {object}       The function returns the gun
+ */
 function createGun(sizes){
   const height = sizes.gun.h;
   const width =  sizes.gun.w;
@@ -450,12 +465,14 @@ function createGun(sizes){
   // Texture loader
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
-  const texture = loader.load('js/m-textures/scratched-metal.png');
-  texture.minFilter = THREE.NearestFilter;
+  const bodyTexture = loader.load(heroTextures.gunBody);
+  bodyTexture.minFilter = THREE.NearestFilter;
 
   const cubeGeo = new THREE.BoxGeometry(width, height, dept);
   const cubeMat = new THREE.MeshToonMaterial({
-    color: heroColors.black,
+    color: heroColors.brownGrey,
+    map: bodyTexture,
+    shininess: 0.0,
   });
 
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
@@ -465,38 +482,15 @@ function createGun(sizes){
   mesh.name = "gunBody";
   gunObj.add(mesh);
 
-  // Add details to the gun
-  let detailGeo, detailMat, detailMesh;
-  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept + 0.2);
-  detailMat = new THREE.MeshToonMaterial({
-    color: heroColors.red, // red
-    shininess: 200.0,
-    specular: heroColors.shinyRed,
-    emissive: heroColors.shinyRed
-  });
-  detailMesh = new THREE.Mesh(detailGeo, detailMat);
-  detailMesh.castShadow = true;
-  detailMesh.receiveShadow = true;
-  detailMesh.position.set(gunPosX, gunPosY + 0.4, gunPosZ);
-  detailMesh.name = "shiningDetailGun";
-  gunObj.add(detailMesh);
-
-  // Another shining detail
-  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept + 0.2);
-  detailMesh = new THREE.Mesh(detailGeo, detailMat);
-  detailMesh.castShadow = true;
-  detailMesh.receiveShadow = true;
-  detailMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ);
-  detailMesh.name = "shiningDetailGun";
-  gunObj.add(detailMesh);
-
   // Charger of the gun
   const wChar = sizes.gunCharge.w;
   const hChar = sizes.gunCharge.h;
   const dChar = sizes.gunCharge.d;
   const chargerGeo = new THREE.BoxGeometry(wChar, hChar, dChar);
+  const chargerText = loader.load(heroTextures.gunMagazine);
   const chargerMat = new THREE.MeshToonMaterial({
     color: heroColors.darkGrey,
+    map: chargerText,
   });
   const charger = new THREE.Mesh(chargerGeo, chargerMat);
   charger.castShadow = true;
@@ -510,10 +504,14 @@ function createGun(sizes){
   const handleWidth = sizes.gunHandle.w;
   const handleHeight = sizes.gunHandle.h;
   const handleDepth = sizes.gunHandle.d;
+  // Wood texture for the handle of the gun
+  const handleTexture = loader.load(heroTextures.gunHandle);
+  handleTexture.minFilter = THREE.NearestFilter;
 
   const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth);
   const handleMat = new THREE.MeshToonMaterial({
     color: heroColors.brown,
+    map: handleTexture,
   });
   const handleMesh = new THREE.Mesh(handleGeo, handleMat);
   handleMesh.castShadow = true;
@@ -521,6 +519,74 @@ function createGun(sizes){
   handleMesh.position.set(gunPosX, gunPosY - 1, gunPosZ - 0.775);
   handleMesh.name = "gunHandle";
   gunObj.add(handleMesh);
+
+  // Gun shooter part
+  const shooterWidth = sizes.gunShooter.w;
+  const shooterHeight = sizes.gunShooter.h;
+  const shooterDepth = sizes.gunShooter.d;
+  // Wood texture for the shooter of the gun
+  const shooterTexture = loader.load(heroTextures.gunBody);
+  shooterTexture.minFilter = THREE.NearestFilter;
+
+  // We use the same material of the gun body
+  const shooterGeo = new THREE.BoxGeometry(shooterWidth, shooterHeight, shooterDepth);
+  const shooterMesh = new THREE.Mesh(shooterGeo, cubeMat);
+  shooterMesh.castShadow = true;
+  shooterMesh.receiveShadow = true;
+  shooterMesh.position.set(gunPosX, gunPosY - 0.2, gunPosZ + 3.7);
+  shooterMesh.name = "gunShooter";
+  gunObj.add(shooterMesh);
+
+
+  // In this part we add some custom details to the gun, some shiny red
+  // part, that make everything more scifi and some elements that characterize
+  // a gun.
+  //
+  // Add details to the gun
+  let detailGeo, detailMat, detailMesh, detailTexture;
+  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept - 0.1);
+  detailMat = new THREE.MeshToonMaterial({
+    color: heroColors.red, // red
+    shininess: 200.0,
+  });
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(gunPosX, gunPosY + 0.4, gunPosZ);
+  detailMesh.name = "shiningUpperDetailGun";
+  gunObj.add(detailMesh);
+
+  // Another shining detail
+  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept - 1.5);
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ - 0.7);
+  detailMesh.name = "shiningLowerDetailGun";
+  gunObj.add(detailMesh);
+
+  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.4, dept - 2.7);
+  detailTexture = loader.load("js/m-textures/gun-handle.jpeg");
+  detailMat = new THREE.MeshToonMaterial({
+    color: heroColors.shinyRed, // red
+    shininess: 0.0,
+    map: detailTexture
+  });
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(gunPosX, gunPosY - 0.6, gunPosZ + 1.25);
+  detailMesh.name = "brownDetailGun";
+  gunObj.add(detailMesh);
+
+  // Other shining details to add to the shooter part of the gun
+  detailGeo = new THREE.BoxGeometry(width - 0.1, 0.1, dept + 0.2);
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(gunPosX, gunPosY - 0.2, gunPosZ + 1.7);
+  detailMesh.name = "shiningShooterDetailGun";
+  gunObj.add(detailMesh);
 
   return gunObj;
 }

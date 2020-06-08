@@ -63,7 +63,7 @@ function main() {
 
     // Create a DirectionalLight and turn on shadows for the light
     var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-    light.position.set(10, 10, 10); 			//default; light shining from top
+    light.position.set(2, 10, 20); 			//default; light shining from top
     light.castShadow = true;            // default false
     scene.add( light );
 
