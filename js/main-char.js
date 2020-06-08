@@ -22,7 +22,7 @@ var Hero = function(){
                     upper: {rTop: 0.08, rBot: 0.1, h: 0.25, radialSeg: 4}
                   },
     index       : {
-                    lower: {rTop: 0.175, rBot: 0.1, h: 0.4, radialSeg: 4},
+                    lower: {rTop: 0.125, rBot: 0.1, h: 0.4, radialSeg: 4},
                     upper: {rTop: 0.08, rBot: 0.1, h: 0.3, radialSeg: 4}
                   },
     fingers     : {
@@ -30,43 +30,63 @@ var Hero = function(){
                     upper: {h: 0.35, w: 0.1, d: 0.3}
                   },
     upperFinger : {rTop: 0.4, rBot: 0.4, h: 0.5, radialSeg: 32},
-    gun         : {h: 0.8, w: 0.5, d: 5},
-    gunHandle   : {h: 1.2, w: 0.4, d: 0.7}
+    gun         : {h: 1.2, w: 0.5, d: 5},
+    gunHandle   : {h: 1.2, w: 0.4, d: 0.7},
+    gunCharge   : {h: 0.25, w: 3, d: 0.8}
   }
 
   // Creating the root element of the robot
   const hero = new THREE.Object3D();
-  hero.position.set(6, 0, -3);
+  hero.position.set(6, 1, -3);
 
   const heroTorso = createTorso(heroSizes);
   hero.add(heroTorso);
 
   const leftArm = createArm(heroSizes, "left");
   const leftLowerArm = createLowerArm(heroSizes, "left");
+
+  const leftHand = createHand(heroSizes, "left");
+  // Creating the fingers for the left hand
+  const thumbFingerLx = createFinger(heroSizes, "thumb", "left");
+  const indexFingerLx = createFinger(heroSizes, "index", "left");
+  const otherFingerLx = createFinger(heroSizes, "other", "left");
+  // Adding the fingers to the left hand
+  leftHand.add(thumbFingerLx);
+  leftHand.add(indexFingerLx);
+  leftHand.add(otherFingerLx);
+  // Adding the left hand to the left arm
+  leftLowerArm.add(leftHand);
   leftArm.add(leftLowerArm);
+  // Rotate the arm
+
   leftArm.name = "heroLeftArm";
   leftArm.rotation.x = -60 * Math.PI/180;
   leftArm.rotation.y = -60 * Math.PI/180;
   leftArm.position.set(1,3.5,7);
-  // Adding the left hand to the left arm
-  const leftHand = createLeftHand(heroSizes);
-  const thumbFinger = createFinger(heroSizes, "thumb", "left");
-  const indexFinger = createFinger(heroSizes, "index", "left");
-  const otherFinger = createFinger(heroSizes, "other", "left");
-
-  leftHand.add(thumbFinger);
-  leftHand.add(indexFinger);
-  leftHand.add(otherFinger);
-  leftArm.add(leftHand);
 
   const rightArm = createArm(heroSizes, "right");
   const rightLowerArm = createLowerArm(heroSizes, "right");
+
+  const rightHand = createHand(heroSizes, "right");
+  // Creating the fingers for the right hand
+  const thumbFingerRx = createFinger(heroSizes, "thumb", "right");
+  const indexFingerRx = createFinger(heroSizes, "index", "right");
+  const otherFingerRx = createFinger(heroSizes, "other", "right");
+  // Adding the fingers to the right hand
+  rightHand.add(thumbFingerRx);
+  rightHand.add(indexFingerRx);
+  rightHand.add(otherFingerRx);
+
+  // Adding the right hand to the right arm
+  rightLowerArm.add(rightHand);
   rightArm.add(rightLowerArm);
+  // Rotate the arm
+
   rightArm.name = "heroRightArm";
-  rightArm.rotation.x = -120 * Math.PI/180;
+  rightArm.rotation.x = -135 * Math.PI/180;
   rightArm.rotation.z = 45 * Math.PI/180;
   rightArm.rotation.y = 70 * Math.PI/180;
-  rightArm.position.set(-7.2, -4.4, 6);
+  rightArm.position.set(-7.4, -4, 8.5);
 
   // Adding the arms to the torso
   heroTorso.add(rightArm);
@@ -74,6 +94,17 @@ var Hero = function(){
   hero.add(createGun(heroSizes));
 
   return hero;
+}
+
+// Colors of the various hero's parts.
+const heroColors = {
+  black: "#000000",
+  blue: "#00009F",
+  grey: "#BFB7B7",
+  darkGrey: "#4F4C4C",
+  brown: "#AE4C4C",
+  red: "#FD0000",
+  shinyRed: 0xf25656,
 }
 
 /**
@@ -95,7 +126,7 @@ function createTorso(sizes){
 
   const cubeGeo = new THREE.BoxGeometry(width, height, dept);
   const cubeMat = new THREE.MeshToonMaterial({
-    color: '#0000FF',
+    color: heroColors.blue,
   });
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
@@ -126,7 +157,7 @@ function createArm(sizes, position){
 
   const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
   const cylMat = new THREE.MeshToonMaterial( {
-    color: '#00009F',
+    color: heroColors.blue,
     flatShading: true,
     // map: texture
   } );
@@ -168,7 +199,7 @@ function createLowerArm(sizes, position){
 
   const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
   const cylMat = new THREE.MeshToonMaterial( {
-    color: '#00009F',
+    color: heroColors.blue,
     flatShading: true,
     // map: texture
   } );
@@ -194,7 +225,7 @@ function createLowerArm(sizes, position){
   return lowerArmObj;
 }
 
-function createLeftHand(sizes){
+function createHand(sizes, position){
   // Sizes
   const height = sizes.hand.h;
   const width = sizes.hand.w;
@@ -212,18 +243,28 @@ function createLeftHand(sizes){
 
   const cubeGeo = new THREE.BoxGeometry(width, height, depth);
   const cubeMat = new THREE.MeshToonMaterial( {
-    color: '#BFB7B7',
+    color: heroColors.grey,
     flatShading: true,
     // map: texture
   } );
   const cube = new THREE.Mesh(cubeGeo, cubeMat);
   cube.castShadow = true;
   cube.receiveShadow = true;
-  cube.position.set(torsoWidth - 7.5, torsoHeight - 0.7, 5.0);
-  cube.name = "heroLeftHand";
-  cube.rotation.z = 130 * Math.PI/180;
-  cube.rotation.x = 55 * Math.PI/180;
-  handObj.add(cube);
+
+  if(position == "left"){
+    cube.position.set(torsoWidth - 7.5, torsoHeight - 0.7, 5.0);
+    cube.name = "heroLeftHand";
+    cube.rotation.z = 130 * Math.PI/180;
+    cube.rotation.x = 55 * Math.PI/180;
+    handObj.add(cube);
+  }
+  else{
+    cube.position.set(torsoWidth - 12.5, torsoHeight - 1.6, 3.3);
+    cube.name = "heroRightHand";
+    cube.rotation.y = 10 * Math.PI/180;
+    cube.rotation.x = 20 * Math.PI/180;
+    handObj.add(cube);
+  }
 
   return handObj;
 }
@@ -245,7 +286,7 @@ function createFinger(sizes, type, position){
 
   // Same material of the hand
   const cubeMat = new THREE.MeshToonMaterial( {
-    color: '#BFB7B7',
+    color: heroColors.grey,
     flatShading: true,
     // map: texture
   });
@@ -340,6 +381,55 @@ function createFinger(sizes, type, position){
     }
   }
 
+  // In the right case
+  else{
+    if(type == "thumb"){
+      fingerLower.position.set(torsoWidth - 12.5, torsoHeight - 1.7, 2.675);
+      fingerLower.name = "heroLowerRightThumb";
+      // fingerLower.rotation.y = 120 * Math.PI/180;
+      fingerLower.rotation.x = 90 * Math.PI/180;
+      fingerObj.add(fingerLower);
+
+      fingerUpper.position.set(torsoWidth - 12.5, torsoHeight - 1.7, 2.375);
+      fingerUpper.name = "heroUpperRightThumb";
+      //fingerUpper.rotation.x = 100 * Math.PI/180;
+      fingerUpper.rotation.x = 90 * Math.PI/180;
+      fingerObj.add(fingerUpper);
+    }
+
+    else if (type == "index") {
+
+      fingerLower.position.set(torsoWidth - 12.5, torsoHeight - 2.1, 2.985);
+      fingerLower.name = "heroLowerRightIndex";
+      fingerLower.rotation.x = 20 * Math.PI/180;
+      //fingerLower.rotation.y = 5 * Math.PI/180;
+      fingerObj.add(fingerLower);
+
+      fingerUpper.position.set(torsoWidth - 12.7, torsoHeight - 2.225, 2.95);
+      fingerUpper.name = "heroUpperRightIndex";
+      fingerUpper.rotation.x = 20 * Math.PI/180;
+      //fingerUpper.rotation.y = -50 * Math.PI/180;
+      fingerUpper.rotation.z = 90 * Math.PI/180;
+      fingerObj.add(fingerUpper);
+    }
+
+    else{
+      fingerLower.position.set(torsoWidth - 12.5, torsoHeight - 2.1, 3.3);
+      fingerLower.name = "heroLowerRightOther";
+      //fingerLower.rotation.z = 130 * Math.PI/180;
+      fingerLower.rotation.x = 20 * Math.PI/180;
+      fingerObj.add(fingerLower);
+
+      fingerUpper.position.set(torsoWidth - 12.7, torsoHeight - 2.275, 3.255);
+      fingerUpper.name = "heroUpperRightOther";
+      fingerUpper.rotation.z = 90 * Math.PI/180;
+      //fingerUpper.rotation.y = -35 * Math.PI/180;
+      fingerUpper.rotation.x = 20 * Math.PI/180;
+
+      fingerObj.add(fingerUpper);
+    }
+  }
+
   return fingerObj;
 
 }
@@ -365,7 +455,7 @@ function createGun(sizes){
 
   const cubeGeo = new THREE.BoxGeometry(width, height, dept);
   const cubeMat = new THREE.MeshToonMaterial({
-    color: '#000000',
+    color: heroColors.black,
   });
 
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
@@ -379,32 +469,41 @@ function createGun(sizes){
   let detailGeo, detailMat, detailMesh;
   detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept + 0.2);
   detailMat = new THREE.MeshToonMaterial({
-    color: "#FD0000", // red
+    color: heroColors.red, // red
     shininess: 200.0,
-    specular: 0xf25656,
-    emissive: 0xf25656
+    specular: heroColors.shinyRed,
+    emissive: heroColors.shinyRed
   });
   detailMesh = new THREE.Mesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
-  detailMesh.position.set(gunPosX, gunPosY, gunPosZ);
+  detailMesh.position.set(gunPosX, gunPosY + 0.4, gunPosZ);
   detailMesh.name = "shiningDetailGun";
   gunObj.add(detailMesh);
 
   // Another shining detail
   detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept + 0.2);
-  detailMat = new THREE.MeshToonMaterial({
-    color: "#FD0000", // red
-    shininess: 200.0,
-    specular: 0xf25656,
-    emissive: 0xf25656
-  });
   detailMesh = new THREE.Mesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
   detailMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ);
   detailMesh.name = "shiningDetailGun";
   gunObj.add(detailMesh);
+
+  // Charger of the gun
+  const wChar = sizes.gunCharge.w;
+  const hChar = sizes.gunCharge.h;
+  const dChar = sizes.gunCharge.d;
+  const chargerGeo = new THREE.BoxGeometry(wChar, hChar, dChar);
+  const chargerMat = new THREE.MeshToonMaterial({
+    color: heroColors.darkGrey,
+  });
+  const charger = new THREE.Mesh(chargerGeo, chargerMat);
+  charger.castShadow = true;
+  charger.receiveShadow = true;
+  charger.position.set(gunPosX - 1.4, gunPosY - 0.1, gunPosZ + 1);
+  charger.name = "gunCharger";
+  gunObj.add(charger);
 
   // Gun handle
   // Sizes
@@ -414,7 +513,7 @@ function createGun(sizes){
 
   const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth);
   const handleMat = new THREE.MeshToonMaterial({
-    color: '#DFF900',
+    color: heroColors.brown,
   });
   const handleMesh = new THREE.Mesh(handleGeo, handleMat);
   handleMesh.castShadow = true;
