@@ -205,7 +205,6 @@ function animate(){
 	if(keyboard[87]){ // W key
 		camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
 		camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
-		mainChar.position.z += 1;
 	}
 	if(keyboard[83]){ // S key
 		camera.position.x += Math.sin(camera.rotation.y) * player.speed;
