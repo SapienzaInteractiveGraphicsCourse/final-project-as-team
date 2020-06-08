@@ -29,7 +29,7 @@ function init(){
 	const near = 1;
 	const far = 10000;
 	camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-	camera.position.set(5, 8, 0);
+	camera.position.set(0.5, 8, -3);
 
 	/*camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 500 );
     camera.position.z = 50;*/
@@ -73,7 +73,7 @@ function init(){
 	scene.add( light );
 	
 	//camera.position.set(0, player.height, -5);
-	camera.lookAt(new THREE.Vector3(0,-20, 50));
+	camera.lookAt(new THREE.Vector3(0,0, 50));
 
 	{
 		renderer.shadowMap.enabled = true;
@@ -205,6 +205,7 @@ function animate(){
 	if(keyboard[87]){ // W key
 		camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
 		camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+		mainChar.position.z += 1;
 	}
 	if(keyboard[83]){ // S key
 		camera.position.x += Math.sin(camera.rotation.y) * player.speed;
@@ -228,9 +229,9 @@ function animate(){
 	
 	//camera.rotation.x += 0.05 * ( target.x - camera.rotation.x );
 	
-	camera.rotation.x += ( target.y*2 - camera.rotation.x );
-	camera.rotation.y += ( target.x*2 - camera.rotation.y );
-	console.log("---------- " + camera.rotation.x);
+	//camera.rotation.x += ( target.y*2 - camera.rotation.x );
+	//camera.rotation.y += ( target.x*2 - camera.rotation.y );
+	//console.log("---------- " + camera.rotation.x);
 	
 
 	//AnimateRobot(robot);
