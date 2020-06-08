@@ -95,7 +95,7 @@ function main() {
   var worldAxis = new THREE.AxesHelper(20);
   scene.add(worldAxis);
 
-  mainChar.getObjectByName("heroUpperLeftOther").add(worldAxis);
+  mainChar.getObjectByName("heroUpperRightThumb").add(worldAxis);
 
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
     const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
