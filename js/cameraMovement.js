@@ -2,13 +2,18 @@ import * as THREE from './three.js-master/build/three.module.js';
 import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {AnimateRobot} from './robot-animations.js';
-import {KillingRobot} from './robot.js'
+import {KillingRobot} from './robot.js';
+import {Hero} from './main-char.js';
 
 var scene, camera, robot;
 
 var keyboard = {};
 var player = { height:5, speed:0.3, turnSpeed:Math.PI*0.01 };
 var USE_WIREFRAME = false;
+
+const mouse = new THREE.Vector2();
+const target = new THREE.Vector2();
+const windowHalf = new THREE.Vector2( window.innerWidth / 2, window.innerHeight / 2 );
 
 
 const canvas = document.querySelector('#c');
@@ -24,7 +29,10 @@ function init(){
 	const near = 1;
 	const far = 10000;
 	camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-	camera.position.set(0, 10, 20);
+	camera.position.set(5, 8, 0);
+
+	/*camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 500 );
+    camera.position.z = 50;*/
 	
 	/*mesh = new THREE.Mesh(
 		new THREE.BoxGeometry(1,1,1),
@@ -54,18 +62,18 @@ function init(){
 	mesh.receiveShadow = true;
 	scene.add(mesh);
     
-    robot = new KillingRobot();
-    robot.castShadow = true;
-    robot.receiveShadow = true;
-    scene.add(robot);
+    const mainChar = new Hero();
+	mainChar.castShadow = true;
+	mainChar.receiveShadow = true;
+	scene.add(mainChar);
 	
 	var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
     light.position.set(10, 10, 10); 			//default; light shining from top
     light.castShadow = true;            // default false
 	scene.add( light );
 	
-	camera.position.set(0, player.height, -5);
-	camera.lookAt(new THREE.Vector3(0,player.height, 0));
+	//camera.position.set(0, player.height, -5);
+	camera.lookAt(new THREE.Vector3(0,-20, 50));
 
 	{
 		renderer.shadowMap.enabled = true;
@@ -127,16 +135,49 @@ function init(){
 	let skybox = new THREE.Mesh( skyboxGeo, materialArray );
 
 	scene.add( skybox );
+
+	var worldAxis = new THREE.AxesHelper(20);
+  	scene.add(worldAxis);
 	
 	if (resizeRendererToDisplaySize(renderer)) {
 		const canvas = renderer.domElement;
 		camera.aspect = canvas.clientWidth / canvas.clientHeight;
 		camera.updateProjectionMatrix();
 	}
-
+	
+	document.addEventListener( 'mousemove', onMouseMove, false );
+    document.addEventListener( 'wheel', onMouseWheel, false );
+	window.addEventListener( 'resize', onResize, false );
 
 	animate();
 }
+
+function onMouseMove( event ) {
+
+	mouse.x = ( event.clientX - windowHalf.x );
+	mouse.y = ( event.clientY - windowHalf.x );
+
+}
+
+function onMouseWheel( event ) {
+
+  camera.position.z += event.deltaY * 0.1; // move camera along z-axis
+
+}
+
+function onResize( event ) {
+
+	const width = window.innerWidth;
+	const height = window.innerHeight;
+  
+	windowHalf.set( width / 2, height / 2 );
+		
+	camera.aspect = width / height;
+	camera.updateProjectionMatrix();
+	renderer.setSize( width, height );
+				
+}
+
 
 function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
@@ -147,6 +188,10 @@ function resizeRendererToDisplaySize(renderer) {
       renderer.setSize(width, height, false);
     }
     return needResize;
+}
+
+function inRange(x, min, max) {
+    return ((x-min)*(x-max) <= 0);
 }
 
 function animate(){
@@ -175,15 +220,20 @@ function animate(){
 		camera.position.z += -Math.cos(camera.rotation.y - Math.PI/2) * player.speed;
 	}
 	
-	// Keyboard turn inputs
-	if(keyboard[37]){ // left arrow key
-		camera.rotation.y -= player.turnSpeed;
-	}
-	if(keyboard[39]){ // right arrow key
-		camera.rotation.y += player.turnSpeed;
-	}
 
-	AnimateRobot(robot);
+
+	target.x = ( mouse.x ) * 0.002;
+	target.y = ( mouse.y ) * 0.002;
+	
+	
+	//camera.rotation.x += 0.05 * ( target.x - camera.rotation.x );
+	
+	camera.rotation.x += ( target.y*2 - camera.rotation.x );
+	camera.rotation.y += ( target.x*2 - camera.rotation.y );
+	console.log("---------- " + camera.rotation.x);
+	
+
+	//AnimateRobot(robot);
 
 	TWEEN.update();
 	
