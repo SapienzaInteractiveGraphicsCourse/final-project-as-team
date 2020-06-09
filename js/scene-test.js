@@ -6,6 +6,9 @@ import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 
+// Add event listener for pressing the keys on the keyboard
+let keyboard = {};
+
 function main() {
   const canvas = document.querySelector('#c');
   const renderer = new THREE.WebGLRenderer({canvas});
@@ -94,7 +97,6 @@ function main() {
     // compute the box that contains all the stuff
     // from root and below
   });*/
-
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
     const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
     const halfFovY = THREE.MathUtils.degToRad(camera.fov * .5);
@@ -132,7 +134,9 @@ function main() {
     return needResize;
   }
 
-  //let heroAnimation = new AnimateHero(mainChar);
+  // instantiate the class for animations
+  let heroAnimation = new AnimateHero(mainChar);
+
   function render() {
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
@@ -141,7 +145,14 @@ function main() {
     }
     renderer.render(scene, mainCharCamera);
     //renderer.render(scene, camera);
-    //heroAnimation.reload();
+    heroAnimation.reload();
+
+    if(keyboard[82]){ // R - for reload
+      // If the reload flag is false
+      if(!heroAnimation.reloadFlag){
+        heroAnimation.reloadFlag = true;
+      }
+    }
 
     // Calling the function to animate the robot
     AnimateRobot(robot);
@@ -152,5 +163,17 @@ function main() {
   render();
 
 }
+
+// Thanks to https://www.youtube.com/watch?v=UUilwGxIj_Q
+function keyDown(event){
+  keyboard[event.keyCode] = true;
+}
+
+function keyUp(event){
+  keyboard[event.keyCode] = false;
+}
+window.addEventListener('keydown', keyDown);
+window.addEventListener('keyup', keyUp);
+
 
 main();

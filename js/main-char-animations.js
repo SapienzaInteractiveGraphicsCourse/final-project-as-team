@@ -15,6 +15,11 @@ class AnimateHero {
     this.startingGunMagazinePos = root.getObjectByName("gunCharger").position.z;
   }
 
+  /**
+   * This is the function for getting the animation of the reload action once
+   * munitions are over.
+   * @return {void} The function does not return anithing.
+   */
   reload(){
     if(this.reloadFlag){
       if(this.root.getObjectByName("heroRightArm").position.z.toPrecision(2) != this.startingArmPos - 1){
