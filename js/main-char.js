@@ -689,6 +689,25 @@ function createGun(sizes){
   detailMesh.name = "shiningShooterDetailGun";
   gunObj.add(detailMesh);
 
+  // Create the target of the gun, that is made up of two parts
+  const targetSupW = sizes.gunTarget.support.w;
+  const targetSupH = sizes.gunTarget.support.h;
+  const targetSupD = sizes.gunTarget.support.d;
+
+  const targetGeoSupport = new THREE.BoxGeometry(targetSupW, targetSupH, targetSupH);
+  const targetSupMap = new THREE.MeshToonMaterial({
+    color: heroColors.darkGrey,
+    map: bodyTexture,
+    shininess: 0.0,
+  });
+
+  const target = new THREE.Mesh(targetGeoSupport, targetSupMap);
+  target.castShadow = true;
+  target.receiveShadow = true;
+  target.position.set(gunPosX, gunPosY, gunPosZ);
+  target.name = "gun";
+  gunObj.add(mesh);
+
   return gunObj;
 }
 
