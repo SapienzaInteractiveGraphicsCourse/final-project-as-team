@@ -34,6 +34,7 @@ function main() {
   const mainChar = new Hero();
   mainChar.castShadow = true;
   mainChar.receiveShadow = true;
+  const mainCharCamera = mainChar.getObjectByName("heroCamera");
   scene.add(mainChar);
 
   {
@@ -131,15 +132,16 @@ function main() {
     return needResize;
   }
 
-  let heroAnimation = new AnimateHero(mainChar);
+  //let heroAnimation = new AnimateHero(mainChar);
   function render() {
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
-    renderer.render(scene, camera);
-    heroAnimation.reload();
+    renderer.render(scene, mainCharCamera);
+    //renderer.render(scene, camera);
+    //heroAnimation.reload();
 
     // Calling the function to animate the robot
     AnimateRobot(robot);

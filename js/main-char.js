@@ -10,8 +10,8 @@ var Hero = function(){
   // Sizes of the various robot parts. In this way everytime there is
   // something to change we just have to modify this object.
   let heroSizes = {
-    torso       : {h: 1.8, w: 4.5, d: 2},
-    upperArms   : {rTop: 0.8, rBot: 0.6, h: 2.5, radialSeg: 5},
+    torso       : {h: 1.8, w: 4.5, d: 1},
+    upperArms   : {rTop: 0.8, rBot: 0.6, h: 3, radialSeg: 5},
     lowerArms   : {rTop: 0.5, rBot: 0.4, h: 2.5, radialSeg: 5},
     hand        : {h: 0.8, w: 0.3, d: 0.8},
     // Each finger is composed by two parts. The hand has a more simple
@@ -98,6 +98,9 @@ var Hero = function(){
   heroTorso.add(leftArm);
   hero.add(createGun(heroSizes));
 
+  // Attach the camera to the torso
+  heroTorso.add(createCamera(heroSizes));
+
   return hero;
 }
 
@@ -123,6 +126,30 @@ const heroTextures = {
   leather: "js/m-textures/leather.jpg",
   metal: "js/m-textures/starwars.jpg"
 }
+
+/**
+ * Function to create the camera to add to the hero, the camera then is
+ * added to the torso in the Hero() function. Thanks to this view we can
+ * have a first person perspective.
+ * @param  {object} sizes  The sizes of the hero
+ * @return {object}        The perspective camera created.
+ */
+function createCamera(sizes){
+  const torsoHeight = sizes.torso.h;
+  const torsoWidth =  sizes.torso.w;
+  // Adding the camera
+  const fov = 80;
+  const aspect = 2;  // the canvas default
+  const zNear = 0.1;
+  const zFar = 1000;
+  const heroCamera = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
+  heroCamera.position.set(torsoWidth - 10.8, torsoHeight + 3.6, 2);
+  heroCamera.rotation.y = Math.PI;
+  heroCamera.name = "heroCamera";
+
+  return heroCamera
+}
+
 
 /**
  * Function to create the torso of the hero
@@ -194,7 +221,7 @@ function createArm(sizes, position){
     cyl.name = "heroLeftUpperArm";
   }
   else{
-    cyl.position.set(torsoWidth - 12.5, torsoHeight + 2, 2.4);
+    cyl.position.set(torsoWidth - 12.5, torsoHeight + 2.5, 2.4);
     cyl.name = "heroRightUpperArm";
   }
   armObj.add(cyl);
