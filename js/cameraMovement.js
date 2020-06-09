@@ -4,8 +4,10 @@ import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
+import {AnimateHero} from './main-char-animations.js';
 
 var scene, camera, robot;
+var mainChar, mainCharCamera, heroAnimation;
 
 var keyboard = {};
 var player = { height:5, speed:0.3, turnSpeed:Math.PI*0.01 };
@@ -62,11 +64,15 @@ function init(){
 	mesh.receiveShadow = true;
 	scene.add(mesh);
     
-    const mainChar = new Hero();
+    mainChar = new Hero();
 	mainChar.castShadow = true;
 	mainChar.receiveShadow = true;
+	mainCharCamera = mainChar.getObjectByName("heroCamera");
 	scene.add(mainChar);
 	
+	// instantiate the class for animations
+	heroAnimation = new AnimateHero(mainChar);
+
 	var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
     light.position.set(10, 10, 10); 			//default; light shining from top
     light.castShadow = true;            // default false
@@ -203,21 +209,21 @@ function animate(){
 	
 	// Keyboard movement inputs
 	if(keyboard[87]){ // W key
-		camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
-		camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+		// walk forward		
+		mainChar.position.z += 0.1;
 	}
 	if(keyboard[83]){ // S key
-		camera.position.x += Math.sin(camera.rotation.y) * player.speed;
-		camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
+		// walk back
+		mainChar.position.z -= 0.1;
 	}
 	if(keyboard[65]){ // A key
-		// Redirect motion by 90 degrees
-		camera.position.x += Math.sin(camera.rotation.y + Math.PI/2) * player.speed;
-		camera.position.z += -Math.cos(camera.rotation.y + Math.PI/2) * player.speed;
+		// walk left
+		mainChar.position.x += 0.1;
+		
 	}
 	if(keyboard[68]){ // D key
-		camera.position.x += Math.sin(camera.rotation.y - Math.PI/2) * player.speed;
-		camera.position.z += -Math.cos(camera.rotation.y - Math.PI/2) * player.speed;
+		// walk right
+		mainChar.position.x -= 0.1;
 	}
 	
 
@@ -228,16 +234,25 @@ function animate(){
 	
 	//camera.rotation.x += 0.05 * ( target.x - camera.rotation.x );
 	
-	//camera.rotation.x += ( target.y*2 - camera.rotation.x );
-	//camera.rotation.y += ( target.x*2 - camera.rotation.y );
+	//mainChar.rotation.x += ( target.y*2 - mainChar.rotation.x );
+	//mainChar.rotation.y += ( target.x*2 - mainChar.rotation.y );
 	//console.log("---------- " + camera.rotation.x);
 	
 
 	//AnimateRobot(robot);
+	
+	renderer.render(scene, mainCharCamera);
+
+	heroAnimation.reload();
+
+    if(keyboard[82]){ // R - for reload
+      // If the reload flag is false
+      if(!heroAnimation.reloadFlag){
+        heroAnimation.reloadFlag = true;
+      }
+	}
 
 	TWEEN.update();
-	
-	renderer.render(scene, camera);
 }
 
 function keyDown(event){
