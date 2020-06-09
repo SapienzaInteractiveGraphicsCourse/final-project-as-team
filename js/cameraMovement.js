@@ -1,5 +1,5 @@
 import * as THREE from './three.js-master/build/three.module.js';
-import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
+import {PointerLockControls} from './three.js-master/examples/jsm/controls/PointerLockControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js';
@@ -25,7 +25,6 @@ const canvas = document.querySelector('#c');
 const renderer = new THREE.WebGLRenderer({canvas});
 	  
 function init(){
-
 
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color('white');
@@ -137,19 +136,12 @@ function resizeRendererToDisplaySize(renderer) {
     return needResize;
 }
 
-function isKeyPressed(event) {
-	if (event.shiftKey) {
-		console.log("pressed");
-		
-	  alert("The SHIFT key was pressed!");
-	} else {
-	  alert("The SHIFT key was NOT pressed!");
-	}
+function normalize(val, max, min) { 
+	return (val - min) / (max - min); 
 }
 
-
 function animate(){
-	
+
 	requestAnimationFrame(animate);
 
 	if (resizeRendererToDisplaySize(renderer)) {
@@ -177,22 +169,7 @@ function animate(){
 	if(keyboard[68]){ // D key
 		// walk right
 		mainChar.position.x -= 0.1;
-	}
-	
-
-
-	target.x = ( mouse.x ) * 0.002;
-	target.y = ( mouse.y ) * 0.002;
-	
-	
-	//camera.rotation.x += 0.05 * ( target.x - camera.rotation.x );
-	
-	//mainChar.rotation.x += ( target.y*2 - mainChar.rotation.x );
-	//mainChar.rotation.y += ( target.x*2 - mainChar.rotation.y );
-	//console.log("---------- " + camera.rotation.x);
-	
-
-	//AnimateRobot(robot);
+	}	
 	
 	renderer.render(scene, mainCharCamera);
 
