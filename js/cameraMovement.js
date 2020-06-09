@@ -86,47 +86,26 @@ function init(){
 
 
 	// Create skybox effect with cube
-	let materialArray = [];
+	{
 
-	// Apply texture to each face of the cube
-	let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/arid2_ft.jpg');
-	let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/arid2_bk.jpg');
-	let texture_up = new THREE.TextureLoader().load( 'js/bg_images/arid2_up.jpg');
-	let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/arid2_dn.jpg');
-	let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/arid2_rt.jpg');
-	let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/arid2_lf.jpg');
-
-	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
-	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+		const path = "js/bg_images/"
+		const ls = [
+			"arid2_ft.jpg",
+			"arid2_bk.jpg",
+			"arid2_up.jpg",
+			"arid2_dn.jpg",
+			"arid2_rt.jpg",
+			"arid2_lf.jpg",
 	
-	// Texture filters
-	texture_ft.anisotropy = renderer.capabilities.getMaxAnisotropy();
-	texture_bk.anisotropy = renderer.capabilities.getMaxAnisotropy();
-	texture_up.anisotropy = renderer.capabilities.getMaxAnisotropy();
-	texture_dn.anisotropy = renderer.capabilities.getMaxAnisotropy();
-	texture_rt.anisotropy = renderer.capabilities.getMaxAnisotropy();
-	texture_lf.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
-	materialArray.map.magFilter = THREE.LinearMipMapLinearFilter;
-	/*materialArray[0].map.magFilter = THREE.LinearMipMapLinearFilter;
-	materialArray[1].map.magFilter = THREE.LinearMipMapLinearFilter;
-	materialArray[2].map.magFilter = THREE.LinearMipMapLinearFilter;
-	materialArray[3].map.magFilter = THREE.LinearMipMapLinearFilter;
-	materialArray[4].map.magFilter = THREE.LinearMipMapLinearFilter;
-	materialArray[5].map.magFilter = THREE.LinearMipMapLinearFilter;*/
-
-
-	for (let i = 0; i < 6; i++){
-		materialArray[i].side = THREE.BackSide;;
+		].map(x => path + x)
+	
+	
+	
+		const loader = new THREE.CubeTextureLoader();
+		const texture = loader.load(ls);
+		scene.background = texture;
+	
 	}
-	let skyboxGeo = new THREE.BoxGeometry( 4000, 4000, 4000);
-	let skybox = new THREE.Mesh( skyboxGeo, materialArray );
-
-	scene.add( skybox );
 
 	let worldAxis = new THREE.AxesHelper(20);
   	scene.add(worldAxis);
@@ -136,6 +115,7 @@ function init(){
 
 	animate();
 }
+
 
 // Capture mouse movements
 function onMouseMove( event ) {
@@ -157,6 +137,16 @@ function resizeRendererToDisplaySize(renderer) {
     return needResize;
 }
 
+function isKeyPressed(event) {
+	if (event.shiftKey) {
+		console.log("pressed");
+		
+	  alert("The SHIFT key was pressed!");
+	} else {
+	  alert("The SHIFT key was NOT pressed!");
+	}
+}
+
 
 function animate(){
 	
@@ -171,7 +161,7 @@ function animate(){
 	
 	// Keyboard movement inputs
 	if(keyboard[87]){ // W key
-		// walk forward		
+		// walk forward	
 		mainChar.position.z += 0.1;
 	}
 	if(keyboard[83]){ // S key
