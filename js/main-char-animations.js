@@ -11,9 +11,12 @@ class AnimateHero {
   constructor(root){
     this.root = root;
     this.reloadFlag = true;
+    this.walkingFlag = true;
     this.startingArmPos = root.getObjectByName("heroRightArm").position.z;
     this.startingGunMagazinePos = root.getObjectByName("gunCharger").position.z;
   }
+
+  verticalPosition = 0;
 
   /**
    * This is the function for getting the animation of the reload action once
@@ -34,6 +37,28 @@ class AnimateHero {
       if(this.root.getObjectByName("heroRightArm").position.z.toPrecision(2) != this.startingArmPos){
         this.root.getObjectByName("heroRightArm").position.z += 0.05;
         this.root.getObjectByName("gunCharger").position.z += 0.05;
+      }
+    }
+  }
+
+  walking(){
+    if(this.walkingFlag){
+      if(this.verticalPosition.toPrecision(1) != 1){
+        this.root.position.y += this.verticalPosition;
+        this.verticalPosition += 0.01;
+      }
+      else{
+        this.walkingFlag = false;
+      }
+    }
+    else{
+      if(this.verticalPosition.toPrecision(1) != -1){
+        this.root.position.y += this.update;
+        this.verticalPosition -= 0.01;
+        console.log(this.verticalPosition);
+      }
+      else{
+        this.walkingFlag = true;
       }
     }
   }

@@ -143,9 +143,10 @@ function main() {
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
-    renderer.render(scene, mainCharCamera);
-    //renderer.render(scene, camera);
+    //renderer.render(scene, mainCharCamera);
+    renderer.render(scene, camera);
     heroAnimation.reload();
+    heroAnimation.walking();
 
     if(keyboard[82]){ // R - for reload
       // If the reload flag is false
