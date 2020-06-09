@@ -5,9 +5,14 @@ import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
+import {Bullet} from './bullets.js';
 
 // Add event listener for pressing the keys on the keyboard
 let keyboard = {};
+// Add bullet array
+let bulletsArray = [];
+// Shooting interval (interval between one shot and the next)
+let shootingInterval = 0;
 
 function main() {
   const canvas = document.querySelector('#c');
@@ -143,6 +148,19 @@ function main() {
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
+
+    // go through bullets array and update position
+  	// remove bullets when appropriate
+  	for(var index=0; index<bulletsArray.length; index+=1){
+  		if( bulletsArray[index] === undefined ) continue;
+  		if( bulletsArray[index].alive == false ){
+  			bulletsArray.splice(index,1);
+  			continue;
+  		}
+
+		    bulletsArray[index].position.add(bulletsArray[index].velocity);
+	   }
+
     renderer.render(scene, mainCharCamera);
     //renderer.render(scene, camera);
     heroAnimation.reload();
@@ -152,9 +170,25 @@ function main() {
       heroAnimation.walking();
     }
     // If the space bar is pressed the shooting animation is triggered
-    if(keyboard[32]){
-      heroAnimation.shooting();
+    if(keyboard[32] && shootingInterval <= 0){
+      // heroAnimation.shooting();
+      let bullet = new Bullet(mainChar);
+      bullet.alive = true;
+
+      setTimeout(function () {
+        bullet.alive = false;
+        scene.remove(bullet);
+      }, 1000);
+
+      // Add the bullet to the scene and to the bullets array and
+      // then set the shootingInterval to 10, meaning that every 10
+      // frames there will be another bullet.
+  		bulletsArray.push(bullet);
+  		scene.add(bullet);
+  		shootingInterval = 10;
     }
+
+    if(shootingInterval > 0) shootingInterval -=1;
 
     if(keyboard[82]){ // R - for reload
       // If the reload flag is false
