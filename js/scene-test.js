@@ -143,10 +143,18 @@ function main() {
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
-    //renderer.render(scene, mainCharCamera);
-    renderer.render(scene, camera);
+    renderer.render(scene, mainCharCamera);
+    //renderer.render(scene, camera);
     heroAnimation.reload();
-    heroAnimation.walking();
+
+    // If the W is pressed, the walking animation is triggered
+    if(keyboard[87]){
+      heroAnimation.walking();
+    }
+    // If the space bar is pressed the shooting animation is triggered
+    if(keyboard[32]){
+      heroAnimation.shooting();
+    }
 
     if(keyboard[82]){ // R - for reload
       // If the reload flag is false
@@ -154,6 +162,15 @@ function main() {
         heroAnimation.reloadFlag = true;
       }
     }
+
+    if(keyboard[84]){ // T - for target mode
+      // This will trigger/not trigger the target mode
+      heroAnimation.activateTargetMode = true;
+    }
+    else{
+      heroAnimation.activateTargetMode = false;
+    }
+    heroAnimation.targetMode();
 
     // Calling the function to animate the robot
     AnimateRobot(robot);
