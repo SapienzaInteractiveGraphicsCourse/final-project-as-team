@@ -37,8 +37,8 @@ var Hero = function(){
     gunUpShoot  : {rTop: 0.35, rBot: 0.35, h: 2.5, radialSeg: 3},
     gunFire     : {rTop: 0.28, rBot: 0.28, h: 0.2, radialSeg: 3},
     gunTarget   : {
-                    support: {h: 1.2, w: 0.5, d: 5},
-                    window : {h: 1.2, w: 0.5, d: 5}
+                    support: {h: 0.1, w: 0.6, d: 0.3},
+                    window : {h: 0.7, w: 0.4, d: 0.1}
                   }
   }
 
@@ -690,23 +690,44 @@ function createGun(sizes){
   gunObj.add(detailMesh);
 
   // Create the target of the gun, that is made up of two parts
+  // Support of the target
   const targetSupW = sizes.gunTarget.support.w;
   const targetSupH = sizes.gunTarget.support.h;
   const targetSupD = sizes.gunTarget.support.d;
 
-  const targetGeoSupport = new THREE.BoxGeometry(targetSupW, targetSupH, targetSupH);
+  // Window of the target
+  const targetW = sizes.gunTarget.window.w;
+  const targetH = sizes.gunTarget.window.h;
+  const targetD = sizes.gunTarget.window.d;
+
+  // Building and adding the support
+  const targetGeoSupport = new THREE.BoxGeometry(targetSupW, targetSupH, targetSupD);
   const targetSupMap = new THREE.MeshToonMaterial({
     color: heroColors.darkGrey,
     map: bodyTexture,
     shininess: 0.0,
   });
-
   const target = new THREE.Mesh(targetGeoSupport, targetSupMap);
   target.castShadow = true;
   target.receiveShadow = true;
-  target.position.set(gunPosX, gunPosY, gunPosZ);
-  target.name = "gun";
-  gunObj.add(mesh);
+  target.position.set(gunPosX, gunPosY + 0.65, gunPosZ);
+  target.name = "gunTargetSupport";
+  gunObj.add(target);
+
+  // Building and adding the window
+  const targetGeoWindow = new THREE.BoxGeometry(targetW, targetH, targetD);
+  const targetWindowMap = new THREE.MeshToonMaterial({
+    color: heroColors.shinyRed,
+    map: bodyTexture,
+    opacity: 0.5,
+    transparent: true,
+  });
+  const targetWindow = new THREE.Mesh(targetGeoWindow, targetWindowMap);
+  targetWindow.castShadow = true;
+  targetWindow.receiveShadow = true;
+  targetWindow.position.set(gunPosX, gunPosY + 0.65, gunPosZ);
+  targetWindow.name = "gunTargetWindow";
+  gunObj.add(targetWindow);
 
   return gunObj;
 }

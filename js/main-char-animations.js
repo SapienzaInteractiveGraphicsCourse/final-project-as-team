@@ -60,7 +60,6 @@ class AnimateHero {
       if(this.verticalPosition.toPrecision(3) != -0.01){
         this.verticalPosition -= 0.0005;
         this.root.position.y += this.verticalPosition;
-        console.log(this.verticalPosition.toPrecision(3));
       }
       else{
         this.walkingFlag = true;
