@@ -38,7 +38,8 @@ var Hero = function(){
     gunFire     : {rTop: 0.28, rBot: 0.28, h: 0.2, radialSeg: 3},
     gunTarget   : {
                     support: {h: 0.1, w: 0.6, d: 0.3},
-                    window : {h: 0.7, w: 0.4, d: 0.1}
+                    window : {h: 0.7, w: 0.4, d: 0.1},
+                    last   : {h: 0.5, w: 0.06, d: 0.1}
                   }
   }
 
@@ -590,7 +591,7 @@ function createGun(sizes){
   const shooterMesh = new THREE.Mesh(shooterGeo, cubeMat);
   shooterMesh.castShadow = true;
   shooterMesh.receiveShadow = true;
-  shooterMesh.position.set(gunPosX, gunPosY - 0.2, gunPosZ + 3.7);
+  shooterMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ + 3.7);
   shooterMesh.name = "gunShooter";
   gunObj.add(shooterMesh);
 
@@ -606,7 +607,7 @@ function createGun(sizes){
     map: bodyTexture,
   });
   const shootMesh = new THREE.Mesh(shootLastGeo, shootLastMat);
-  shootMesh.position.set(gunPosX, gunPosY - 0.155, gunPosZ + 4);
+  shootMesh.position.set(gunPosX, gunPosY + 0.25, gunPosZ + 4);
   shootMesh.rotation.x = 90 * Math.PI/180;
   shootMesh.name = "gunShooterLast";
   gunObj.add(shootMesh);
@@ -624,7 +625,7 @@ function createGun(sizes){
     specular: heroColors.shinyRed
   });
   const fireMesh = new THREE.Mesh(fireLastGeo, fireLastMat);
-  fireMesh.position.set(gunPosX, gunPosY - 0.155, gunPosZ + 5.2);
+  fireMesh.position.set(gunPosX, gunPosY + 0.25, gunPosZ + 5.2);
   fireMesh.rotation.x = 90 * Math.PI/180;
   fireMesh.name = "gunFireLast";
   gunObj.add(fireMesh);
@@ -636,7 +637,7 @@ function createGun(sizes){
   //
   // Add details to the gun
   let detailGeo, detailMat, detailMesh, detailTexture;
-  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept - 0.1);
+  detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept - 0.5);
   detailMat = new THREE.MeshToonMaterial({
     color: heroColors.red, // red
     shininess: 200.0,
@@ -685,7 +686,7 @@ function createGun(sizes){
   detailMesh = new THREE.Mesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
-  detailMesh.position.set(gunPosX, gunPosY - 0.2, gunPosZ + 1.7);
+  detailMesh.position.set(gunPosX, gunPosY + 0.185, gunPosZ + 1.7);
   detailMesh.name = "shiningShooterDetailGun";
   gunObj.add(detailMesh);
 
@@ -699,6 +700,11 @@ function createGun(sizes){
   const targetW = sizes.gunTarget.window.w;
   const targetH = sizes.gunTarget.window.h;
   const targetD = sizes.gunTarget.window.d;
+
+  // Window of the target
+  const targetLastW = sizes.gunTarget.last.w;
+  const targetLastH = sizes.gunTarget.last.h;
+  const targetLastD = sizes.gunTarget.last.d;
 
   // Building and adding the support
   const targetGeoSupport = new THREE.BoxGeometry(targetSupW, targetSupH, targetSupD);
@@ -728,6 +734,15 @@ function createGun(sizes){
   targetWindow.position.set(gunPosX, gunPosY + 0.65, gunPosZ);
   targetWindow.name = "gunTargetWindow";
   gunObj.add(targetWindow);
+
+  // Building the last part of the target
+  const targetGeoLast = new THREE.BoxGeometry(targetLastW, targetLastH, targetLastD);
+  const targetLast = new THREE.Mesh(targetGeoLast, targetSupMap);
+  targetLast.castShadow = true;
+  targetLast.receiveShadow = true;
+  targetLast.position.set(gunPosX, gunPosY + 0.5, gunPosZ + 5);
+  targetLast.name = "gunTargetLast";
+  gunObj.add(targetLast);
 
   return gunObj;
 }
