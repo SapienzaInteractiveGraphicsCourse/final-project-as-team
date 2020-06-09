@@ -6,13 +6,16 @@ import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 
-var scene, camera, robot;
-var mainChar, mainCharCamera, heroAnimation;
+let scene, camera, robot;
+let mainChar, mainCharCamera, heroAnimation;
 
-var keyboard = {};
-var player = { height:5, speed:0.3, turnSpeed:Math.PI*0.01 };
-var USE_WIREFRAME = false;
+// Add event listener for pressing the keys on the keyboard
+let keyboard = {};
 
+let player = { height:5, speed:0.3, turnSpeed:Math.PI*0.01 };
+let USE_WIREFRAME = false;
+
+// Variables for mouse camera rotation
 const mouse = new THREE.Vector2();
 const target = new THREE.Vector2();
 const windowHalf = new THREE.Vector2( window.innerWidth / 2, window.innerHeight / 2 );
@@ -26,23 +29,8 @@ function init(){
 
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color('white');
-	const fov = 45;
-	const aspect = 2;  // the canvas default
-	const near = 1;
-	const far = 10000;
-	camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-	camera.position.set(0.5, 8, -3);
 
-	/*camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 500 );
-    camera.position.z = 50;*/
-	
-	/*mesh = new THREE.Mesh(
-		new THREE.BoxGeometry(1,1,1),
-		new THREE.MeshBasicMaterial({color:0xff4444, wireframe:USE_WIREFRAME})
-	);
-	mesh.position.y += 1; // Move the mesh up 1 meter
-	scene.add(mesh);*/
-	
+	// create floor and add texture
 	const planeSize = 4000;
 
 	const loader = new THREE.TextureLoader();
@@ -63,7 +51,8 @@ function init(){
 	mesh.rotation.x = Math.PI * -.5;
 	mesh.receiveShadow = true;
 	scene.add(mesh);
-    
+	
+	// Init the main character
     mainChar = new Hero();
 	mainChar.castShadow = true;
 	mainChar.receiveShadow = true;
@@ -72,21 +61,14 @@ function init(){
 	
 	// instantiate the class for animations
 	heroAnimation = new AnimateHero(mainChar);
-
-	var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-    light.position.set(10, 10, 10); 			//default; light shining from top
-    light.castShadow = true;            // default false
-	scene.add( light );
 	
-	//camera.position.set(0, player.height, -5);
-	camera.lookAt(new THREE.Vector3(0,0, 50));
 
 	{
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 	
 		// Create a DirectionalLight and turn on shadows for the light
-		var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
+		let light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
 		light.position.set(10, 10, 10); 			//default; light shining from top
 		light.castShadow = true;            // default false
 		scene.add( light );
@@ -97,13 +79,16 @@ function init(){
 		light.shadow.camera.near = 0.5;    // default
 		light.shadow.camera.far = 500;     // default
 	
-		//Create a helper for the shadow camera (optional)
-		var helper = new THREE.CameraHelper( light.shadow.camera );
+		// Create a helper for the shadow camera (optional)
+		let helper = new THREE.CameraHelper( light.shadow.camera );
 		scene.add( helper );
 	}
 
+
+	// Create skybox effect with cube
 	let materialArray = [];
 
+	// Apply texture to each face of the cube
 	let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/arid2_ft.jpg');
 	let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/arid2_bk.jpg');
 	let texture_up = new THREE.TextureLoader().load( 'js/bg_images/arid2_up.jpg');
@@ -118,6 +103,7 @@ function init(){
 	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
 	materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
 	
+	// Texture filters
 	texture_ft.anisotropy = renderer.capabilities.getMaxAnisotropy();
 	texture_bk.anisotropy = renderer.capabilities.getMaxAnisotropy();
 	texture_up.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -142,46 +128,21 @@ function init(){
 
 	scene.add( skybox );
 
-	var worldAxis = new THREE.AxesHelper(20);
+	let worldAxis = new THREE.AxesHelper(20);
   	scene.add(worldAxis);
 	
-	if (resizeRendererToDisplaySize(renderer)) {
-		const canvas = renderer.domElement;
-		camera.aspect = canvas.clientWidth / canvas.clientHeight;
-		camera.updateProjectionMatrix();
-	}
-	
+	// Event listener for mouse movements
 	document.addEventListener( 'mousemove', onMouseMove, false );
-    document.addEventListener( 'wheel', onMouseWheel, false );
-	window.addEventListener( 'resize', onResize, false );
 
 	animate();
 }
 
+// Capture mouse movements
 function onMouseMove( event ) {
 
 	mouse.x = ( event.clientX - windowHalf.x );
 	mouse.y = ( event.clientY - windowHalf.x );
 
-}
-
-function onMouseWheel( event ) {
-
-  camera.position.z += event.deltaY * 0.1; // move camera along z-axis
-
-}
-
-function onResize( event ) {
-
-	const width = window.innerWidth;
-	const height = window.innerHeight;
-  
-	windowHalf.set( width / 2, height / 2 );
-		
-	camera.aspect = width / height;
-	camera.updateProjectionMatrix();
-	renderer.setSize( width, height );
-				
 }
 
 
@@ -196,16 +157,17 @@ function resizeRendererToDisplaySize(renderer) {
     return needResize;
 }
 
-function inRange(x, min, max) {
-    return ((x-min)*(x-max) <= 0);
-}
 
 function animate(){
 	
 	requestAnimationFrame(animate);
+
+	if (resizeRendererToDisplaySize(renderer)) {
+		const canvas = renderer.domElement;
+		camera.aspect = canvas.clientWidth / canvas.clientHeight;
+		camera.updateProjectionMatrix();
+	  }
 	
-	//mesh.rotation.x += 0.01;
-	//mesh.rotation.y += 0.02;
 	
 	// Keyboard movement inputs
 	if(keyboard[87]){ // W key
@@ -255,14 +217,17 @@ function animate(){
 	TWEEN.update();
 }
 
+// Capture key pressure
 function keyDown(event){
 	keyboard[event.keyCode] = true;
 }
 
+// Capture key release
 function keyUp(event){
 	keyboard[event.keyCode] = false;
 }
 
+// Listerners for keys pressure
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
