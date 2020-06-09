@@ -162,7 +162,8 @@ function animate(){
 	// Keyboard movement inputs
 	if(keyboard[87]){ // W key
 		// walk forward	
-		mainChar.position.z += 0.1;
+		if(keyboard[16]) mainChar.position.z += 0.3;
+		else mainChar.position.z += 0.1;
 	}
 	if(keyboard[83]){ // S key
 		// walk back
