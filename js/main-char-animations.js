@@ -41,20 +41,25 @@ class AnimateHero {
     }
   }
 
+  /**
+   * This the function for recreating the walking movement of the hero, that
+   * is just an increment and a decrement of the y coordinate.
+   * @return {[type]} [description]
+   */
   walking(){
     if(this.walkingFlag){
-      if(this.verticalPosition.toPrecision(1) != 1){
+      if(this.verticalPosition.toPrecision(4) != 0.009){
+        this.verticalPosition += 0.0005;
         this.root.position.y += this.verticalPosition;
-        this.verticalPosition += 0.01;
       }
       else{
         this.walkingFlag = false;
       }
     }
     else{
-      if(this.verticalPosition.toPrecision(1) != -1){
-        this.root.position.y += this.update;
-        this.verticalPosition -= 0.01;
+      if(this.verticalPosition.toPrecision(4) != -0.01){
+        this.verticalPosition -= 0.0005;
+        this.root.position.y += this.verticalPosition;
         console.log(this.verticalPosition);
       }
       else{
