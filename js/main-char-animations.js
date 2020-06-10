@@ -63,7 +63,7 @@ class AnimateHero {
    * @return {void} The function just updates the position .
    */
   walking(){
-    this.root.position.y += Math.sin(this.verticalPosition) * 0.015;
+    this.root.position.y += Math.sin(this.verticalPosition) * 0.03;
     this.verticalPosition += Math.PI/32;
   }
 
