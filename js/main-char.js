@@ -50,6 +50,8 @@ var Hero = function(){
   const heroTorso = createTorso(heroSizes);
   hero.add(heroTorso);
 
+  heroTorso.rotation.y = Math.PI;
+
   const leftArm = createArm(heroSizes, "left");
   const leftLowerArm = createLowerArm(heroSizes, "left");
 
@@ -97,10 +99,10 @@ var Hero = function(){
   // Adding the arms to the torso
   heroTorso.add(rightArm);
   heroTorso.add(leftArm);
-  hero.add(createGun(heroSizes));
+  heroTorso.add(createGun(heroSizes));
 
   // Attach the camera to the torso
-  heroTorso.add(createCamera(heroSizes));
+  hero.add(createCamera(heroSizes));
 
   return hero;
 }
@@ -144,8 +146,9 @@ function createCamera(sizes){
   const zNear = 0.1;
   const zFar = 1000;
   const heroCamera = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
-  heroCamera.position.set(torsoWidth - 10.8, torsoHeight + 3.7, 2.5);
-  heroCamera.rotation.y = Math.PI;
+  heroCamera.position.set(torsoWidth + 2, torsoHeight + 3.7, - 2.5);
+  //heroCamera.lookAt(0, 0, 20);
+  //heroCamera.rotation.y = - Math.PI;
   heroCamera.name = "heroCamera";
 
   return heroCamera
