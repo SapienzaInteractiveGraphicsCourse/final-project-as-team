@@ -211,16 +211,18 @@ function onWindowResize() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
+// Capture mouse click event
 window.onmousedown = function(e) {
     switch(e.button) {
-        case 2:	//Right click
+        // Right click with aiming animation
+        case 2:	
             heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
             heroAnimation.targetMode();
             break;
+        // Left click with shooting animation
         case 0:
-            
             if(shootingInterval <= 0){
-                // heroAnimation.shooting();
+
                 let bullet = new Bullet(mainChar);
                 bullet.alive = true;
           
