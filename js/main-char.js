@@ -99,7 +99,7 @@ var Hero = function(){
   // Adding the arms to the torso
   heroTorso.add(rightArm);
   heroTorso.add(leftArm);
-  heroTorso.add(createGun(heroSizes));
+  hero.add(createGun(heroSizes));
 
   // Attach the camera to the torso
   hero.add(createCamera(heroSizes));
@@ -747,6 +747,7 @@ function createGun(sizes){
   targetLast.name = "gunTargetLast";
   gunObj.add(targetLast);
 
+  gunObj.rotation.y = Math.PI;
   return gunObj;
 }
 

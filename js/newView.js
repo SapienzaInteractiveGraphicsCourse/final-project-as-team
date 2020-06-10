@@ -5,6 +5,7 @@ import {PointerLockControls} from './three.js-master/examples/jsm/controls/Point
 //import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
+import {Bullet} from './bullets.js';
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -12,6 +13,11 @@ let mainChar, mainCharCamera, heroAnimation;
 var controls;
 var objects = [];
 let keyboard = {};
+
+// Add bullet array
+let bulletsArray = [];
+// Shooting interval (interval between one shot and the next)
+let shootingInterval = 0;
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
@@ -98,19 +104,19 @@ function init() {
         switch ( event.keyCode ) {
             case 38: // up
             case 87: // w
-                moveBackward = true;
+                moveForward = true;
                 break;
             case 37: // left
             case 65: // a
-                moveRight = true; 
+                moveLeft = true; 
                 break;
             case 40: // down
             case 83: // s
-                moveForward = true;
+                moveBackward = true;
                 break;
             case 39: // right
             case 68: // d
-                moveLeft = true;
+                moveRight = true;
                 break;
             case 32: // space
                 if ( canJump === true ) velocity.y += 350;
@@ -125,19 +131,19 @@ function init() {
         switch( event.keyCode ) {
             case 38: // up
             case 87: // w
-                moveBackward = false;
+                moveForward = false;
                 break;
             case 37: // left
             case 65: // a
-                moveRight = false;
+                moveLeft = false;
                 break;
             case 40: // down
             case 83: // s
-                moveForward = false;
+                moveBackward = false;
                 break;
             case 39: // right
             case 68: // d
-                moveLeft = false;
+                moveRight = false;
                 break;
         }
     };
@@ -187,8 +193,6 @@ function init() {
 	
     }
     
-    let worldAxis = new THREE.AxesHelper(20);
-  	scene.add(worldAxis);
 
     //
     renderer = new THREE.WebGLRenderer();
@@ -199,11 +203,43 @@ function init() {
     //
     window.addEventListener( 'resize', onWindowResize, false );
 }
+
+
 function onWindowResize() {
     mainCharCamera.aspect = window.innerWidth / window.innerHeight;
     mainCharCamera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
+
+window.onmousedown = function(e) {
+    switch(e.button) {
+        case 2:	//Right click
+            heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
+            heroAnimation.targetMode();
+            break;
+        case 0:
+            
+            if(shootingInterval <= 0){
+                // heroAnimation.shooting();
+                let bullet = new Bullet(mainChar);
+                bullet.alive = true;
+          
+                setTimeout(function () {
+                  bullet.alive = false;
+                  scene.remove(bullet);
+                }, 1000);
+          
+                // Add the bullet to the scene and to the bullets array and
+                // then set the shootingInterval to 10, meaning that every 10
+                // frames there will be another bullet.
+                    bulletsArray.push(bullet);
+                    scene.add(bullet);
+                    shootingInterval = 10;
+              }
+    }
+}
+
+
 function animate() {
     requestAnimationFrame( animate );
     if ( controlsEnabled ) {
@@ -230,6 +266,20 @@ function animate() {
         }
         prevTime = time;
     }
+
+    // go through bullets array and update position
+  	// remove bullets when appropriate
+  	for(var index=0; index<bulletsArray.length; index+=1){
+        if( bulletsArray[index] === undefined ) continue;
+        if( bulletsArray[index].alive == false ){
+            bulletsArray.splice(index,1);
+            continue;
+        }
+
+          bulletsArray[index].position.add(bulletsArray[index].velocity);
+    }
+
+    if(shootingInterval > 0) shootingInterval -=1;
 
     //mainChar.getObjectByName('heroCamera').rotation.x+=0.01;
     renderer.render( scene, mainCharCamera );
