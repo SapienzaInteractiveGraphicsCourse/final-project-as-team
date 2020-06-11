@@ -44,6 +44,7 @@ function main() {
   mainChar.receiveShadow = true;
   const mainCharCamera = mainChar.getObjectByName("heroCamera");
   scene.add(mainChar);
+  console.log(mainChar);
 
   {
     const planeSize = 40;
@@ -158,7 +159,7 @@ function main() {
   			continue;
   		}
 
-		    bulletsArray[index].position.add(bulletsArray[index].velocity);
+	    bulletsArray[index].position.add(bulletsArray[index].velocity);
 	   }
 
     renderer.render(scene, mainCharCamera);
