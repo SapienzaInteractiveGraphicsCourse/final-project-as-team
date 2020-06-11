@@ -77,8 +77,6 @@ if ( havePointerLock ) {
     instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
-init();
-animate();
 var controlsEnabled = false;
 var moveForward = false;
 var moveBackward = false;
@@ -106,8 +104,9 @@ function init() {
     heroAnimation = new AnimateHero(mainChar);
 
     controls = new PointerLockControls( mainChar );
-    scene.add( controls.getObject() );
-    var onKeyDown = function ( event ) {
+    scene.add(controls.getObject());
+
+    /*var onKeyDown = function ( event ) {
         switch ( event.keyCode ) {
             case 38: // up
             case 87: // w
@@ -155,7 +154,8 @@ function init() {
         }
     };
     document.addEventListener( 'keydown', onKeyDown, false );
-    document.addEventListener( 'keyup', onKeyUp, false );
+    document.addEventListener( 'keyup', onKeyUp, false );*/
+
     // create floor and add texture
     const planeSize = 4000;
 
@@ -216,43 +216,7 @@ function onWindowResize() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
-// Capture mouse click event
-/*
-window.onmousedown = function(e) {
-    switch(e.button) {
-        // Right click with aiming animation
-        case 2:
-            heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
-            heroAnimation.targetMode();
-            break;
-
-        // Left click with shooting animation
-        case 0:
-            // Triggering the shooting animation
-            heroAnimation.shooting();
-
-            if(shootingInterval <= 0){
-
-                let bullet = new Bullet(mainChar);
-                bullet.alive = true;
-
-                setTimeout(function () {
-                  bullet.alive = false;
-                  scene.remove(bullet);
-                }, 1000);
-
-                // Add the bullet to the scene and to the bullets array and
-                // then set the shootingInterval to 10, meaning that every 10
-                // frames there will be another bullet.
-                bulletsArray.push(bullet);
-                scene.add(bullet);
-                shootingInterval = 10;
-              }
-    }
-}*/
-
-
-
+// Functions for click listener
 /**
  * Function to handle the click of the mouse
  * @param  {object} event The event triggered by the click
@@ -271,88 +235,160 @@ function mouseUp(event){
   mouse[event.button] = false;
 }
 
+// Listeners
 window.addEventListener('mousedown', mouseDown);
 window.addEventListener('mouseup', mouseUp);
 
+// Thanks to https://www.youtube.com/watch?v=UUilwGxIj_Q
+/**
+ * Function to handle the click on a key
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the keyboad obj
+ */
+function keyDown(event){
+  keyboard[event.keyCode] = true;
+}
+/**
+ * Function to handle the un-click on a key
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the keyboad obj
+ */
+function keyUp(event){
+  keyboard[event.keyCode] = false;
+}
+
+// Listeners
+window.addEventListener('keydown', keyDown);
+window.addEventListener('keyup', keyUp);
+
 
 function animate() {
-    requestAnimationFrame( animate );
-    if ( controlsEnabled ) {
-        var time = performance.now();
-        var delta = ( time - prevTime ) / 1000;
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
-        velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-        if ( moveForward ) {
-            velocity.z -= 400.0 * delta;
-            //heroAnimation.walking();
-        }
-        if ( moveBackward ) velocity.z += 400.0 * delta;
-        if ( moveLeft ) velocity.x -= 400.0 * delta;
-        if ( moveRight ) velocity.x += 400.0 * delta;
-        //if ( isOnObject === true) {
-            velocity.y = Math.max( 0, velocity.y );
-            canJump = true;
-        //}
-        controls.getObject().translateX( velocity.x * delta );
-        controls.getObject().translateY( velocity.y * delta );
-        controls.getObject().translateZ( velocity.z * delta );
-        if ( controls.getObject().position.y < 10 ) {
-            velocity.y = 0;
-            controls.getObject().position.y = 10;
-            canJump = true;
-        }
-        prevTime = time;
+  /*if ( controlsEnabled ) {
+      var time = performance.now();
+      var delta = ( time - prevTime ) / 1000;
+      velocity.x -= velocity.x * 10.0 * delta;
+      velocity.z -= velocity.z * 10.0 * delta;
+      velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+      if ( moveForward ) {
+          velocity.z -= 400.0 * delta;
+          // mainChar.position.z = velocity.z;
+          //heroAnimation.walking();
+      }
+      if ( moveBackward ) velocity.z += 400.0 * delta;
+      if ( moveLeft ) velocity.x -= 400.0 * delta;
+      if ( moveRight ) velocity.x += 400.0 * delta;
+      //if ( isOnObject === true) {
+          velocity.y = Math.max( 0, velocity.y );
+          canJump = true;
+      //}
+      controls.getObject().translateX( velocity.x * delta );
+      controls.getObject().translateY( velocity.y * delta );
+      controls.getObject().translateZ( velocity.z * delta );
+      if (controls.getObject().position.y < 10 ) {
+          velocity.y = 0;
+          controls.getObject().position.y = 10;
+          canJump = true;
+      }
+      prevTime = time;
+  }*/
+
+  if(controlsEnabled){
+    var time = performance.now();
+    var delta = ( time - prevTime ) / 1000;
+    velocity.x -= velocity.x * 10.0 * delta;
+    velocity.z -= velocity.z * 10.0 * delta;
+    velocity.y -= 9.8 * 100.0 * delta;
+    // If W or Up are pressed
+    if(keyboard[87] || keyboard[38]){
+      velocity.z -= 400.0 * delta;
     }
-
-    // go through bullets array and update position
-  	// remove bullets when appropriate
-  	for(var index=0; index<bulletsArray.length; index+=1){
-        if( bulletsArray[index] === undefined ) continue;
-        if( bulletsArray[index].alive == false ){
-            bulletsArray.splice(index,1);
-            continue;
-        }
-
-          bulletsArray[index].position.add(bulletsArray[index].velocity);
+    // If S or Down are pressed
+    if(keyboard[83] || keyboard[40]){
+      velocity.z += 400.0 * delta;
     }
-
-
-    if(mouse[2]){ // Right-click of the mouse
-      heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
-      heroAnimation.targetMode();
+    // If A or Left are pressed
+    if(keyboard[65] || keyboard[37]){
+      velocity.x -= 400.0 * delta;
     }
-
-    // We need a separate if condition, otherwise the shooting animation
-    // will go ten frames slower.
-    if(mouse[0]){ // Left-click of the mouse
-      heroAnimation.shooting();
+    // If D or Right are pressed
+    if(keyboard[68] || keyboard[39]){
+       velocity.x += 400.0 * delta;
     }
-
-    // Here the bullets will go
-    if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
-      let bullet = new Bullet(mainChar);
-      bullet.alive = true;
-
-      setTimeout(function () {
-        bullet.alive = false;
-        scene.remove(bullet);
-      }, 1000);
-
-      // Add the bullet to the scene and to the bullets array and
-      // then set the shootingInterval to 10, meaning that every 10
-      // frames there will be another bullet.
-  		bulletsArray.push(bullet);
-  		scene.add(bullet);
-  		shootingInterval = 10;
+    velocity.y = Math.max( 0, velocity.y );
+    canJump = true;
+    controls.getObject().translateX( velocity.x * delta );
+    controls.getObject().translateY( velocity.y * delta );
+    controls.getObject().translateZ( velocity.z * delta );
+    if (controls.getObject().position.y < 10 ) {
+        velocity.y = 0;
+        controls.getObject().position.y = 10;
+        canJump = true;
     }
+    prevTime = time;
+  }
 
-    if(shootingInterval > 0) shootingInterval -=1;
+  // go through bullets array and update position
+  // remove bullets when appropriate
+  for(var index=0; index<bulletsArray.length; index+=1){
+      if( bulletsArray[index] === undefined ) continue;
+      if( bulletsArray[index].alive == false ){
+          bulletsArray.splice(index,1);
+          continue;
+      }
 
-    //mainChar.getObjectByName('heroCamera').rotation.x+=0.01;
-    renderer.render( scene, mainCharCamera );
+        bulletsArray[index].position.add(bulletsArray[index].velocity);
+  }
 
-    heroAnimation.reload();
+  // If the WASD is pressed, the walking animation is triggered
+  if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
+    heroAnimation.walking();
+  }
+  // If UpDownLeftRight is pressed, the walking animation is triggered
+  if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
+    heroAnimation.walking();
+  }
 
-	TWEEN.update();
+  if(mouse[2]){ // Right-click of the mouse
+    heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
+    heroAnimation.targetMode();
+  }
+
+  // We need a separate if condition, otherwise the shooting animation
+  // will go ten frames slower.
+  if(mouse[0]){ // Left-click of the mouse
+    heroAnimation.shooting();
+  }
+
+  // Here the bullets will go
+  if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+    let bullet = new Bullet(mainChar);
+    bullet.alive = true;
+
+    setTimeout(function () {
+      bullet.alive = false;
+      scene.remove(bullet);
+    }, 1000);
+
+    // Add the bullet to the scene and to the bullets array and
+    // then set the shootingInterval to 10, meaning that every 10
+    // frames there will be another bullet.
+  	bulletsArray.push(bullet);
+  	scene.add(bullet);
+  	shootingInterval = 10;
+  }
+
+  if(shootingInterval > 0) shootingInterval -=1;
+
+  //mainChar.getObjectByName('heroCamera').rotation.x+=0.01;
+  renderer.render( scene, mainCharCamera );
+
+  heroAnimation.reload();
+
+  requestAnimationFrame(animate);
+
+  TWEEN.update();
 }
+
+
+init();
+animate();

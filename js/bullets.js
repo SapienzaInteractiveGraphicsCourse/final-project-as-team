@@ -8,12 +8,21 @@ var Bullet = function(rootHero){
     flatShading: true
   });
 
+  let time = Date.now();
+  const camera = rootHero;
+
   const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
 	// Position the bullet at the end of player's gun
+	const r = rootHero.getObjectByName("heroTorso");
+  r.add(bullet);
+  bullet.rotation.y = r.rotation.y;
+  bullet.rotation.x = r.rotation.x;
+  bullet.rotation.z = r.rotation.z;
+
 	bullet.position.set(
-		rootHero.getObjectByName("gunBody").position.x + 6,
-		rootHero.getObjectByName("gunBody").position.y + 1.2,
-		rootHero.getObjectByName("gunBody").position.z + 3
+    r.position.x,
+		r.position.y,
+		r.position.z
 	);
 
 	// set the velocity of the bullet

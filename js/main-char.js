@@ -147,7 +147,6 @@ function createCamera(sizes){
   const zFar = 1000;
   const heroCamera = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
   heroCamera.position.set(torsoWidth + 2, torsoHeight + 3.7, - 2.5);
-  //heroCamera.lookAt(0, 0, 20);
   //heroCamera.rotation.y = - Math.PI;
   heroCamera.name = "heroCamera";
 
