@@ -12,7 +12,11 @@ var geometry, material, mesh;
 let mainChar, mainCharCamera, heroAnimation;
 var controls;
 var objects = [];
+
+// Add event listener for pressing the keys on the keyboard
 let keyboard = {};
+// Object of mouse key codes
+let mouse = {};
 
 // Add bullet array
 let bulletsArray = [];
@@ -21,6 +25,7 @@ let shootingInterval = 0;
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
+
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 if ( havePointerLock ) {
@@ -71,6 +76,7 @@ if ( havePointerLock ) {
 } else {
     instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
+
 init();
 animate();
 var controlsEnabled = false;
@@ -81,6 +87,7 @@ var moveRight = false;
 var canJump = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
+
 function init() {
     //camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     scene = new THREE.Scene();
@@ -90,14 +97,14 @@ function init() {
 
     // Init the main character
     mainChar = new Hero();
-	mainChar.castShadow = true;
-	mainChar.receiveShadow = true;
-	mainCharCamera = mainChar.getObjectByName("heroCamera");
-	scene.add(mainChar);
-	
+    mainChar.castShadow = true;
+    mainChar.receiveShadow = true;
+    mainCharCamera = mainChar.getObjectByName("heroCamera");
+    scene.add(mainChar);
+
 	// instantiate the class for animations
     heroAnimation = new AnimateHero(mainChar);
-    
+
     controls = new PointerLockControls( mainChar );
     scene.add( controls.getObject() );
     var onKeyDown = function ( event ) {
@@ -108,7 +115,7 @@ function init() {
                 break;
             case 37: // left
             case 65: // a
-                moveLeft = true; 
+                moveLeft = true;
                 break;
             case 40: // down
             case 83: // s
@@ -150,58 +157,56 @@ function init() {
     document.addEventListener( 'keydown', onKeyDown, false );
     document.addEventListener( 'keyup', onKeyUp, false );
     // create floor and add texture
-	const planeSize = 4000;
+    const planeSize = 4000;
 
-	const loader = new THREE.TextureLoader();
-	const texture = loader.load('js/bg_images/DarkredBlack.jpg');
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-	texture.magFilter = THREE.NearestFilter;
-	const repeats = planeSize / 2;
-	texture.repeat.set(repeats, repeats);
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load('js/bg_images/DarkredBlack.jpg');
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.magFilter = THREE.NearestFilter;
+    const repeats = planeSize / 2;
+    texture.repeat.set(repeats, repeats);
 
-	const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-	const planeMat = new THREE.MeshPhongMaterial({
-		map: texture,
-		side: THREE.DoubleSide,
-		shininess: 0,
-	});
-	const mesh = new THREE.Mesh(planeGeo, planeMat);
-	mesh.rotation.x = Math.PI * -.5;
-	mesh.receiveShadow = true;
-    scene.add(mesh);
-    
-    // Create skybox effect with cube
-	{
+    const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+    const planeMat = new THREE.MeshPhongMaterial({
+    	map: texture,
+    	side: THREE.DoubleSide,
+    	shininess: 0,
+    });
+    const mesh = new THREE.Mesh(planeGeo, planeMat);
+    mesh.rotation.x = Math.PI * -.5;
+    mesh.receiveShadow = true;
+      scene.add(mesh);
 
-		const path = "js/bg_images/"
-		const ls = [
-			"arid2_ft.jpg",
-			"arid2_bk.jpg",
-			"arid2_up.jpg",
-			"arid2_dn.jpg",
-			"arid2_rt.jpg",
-			"arid2_lf.jpg",
-	
-		].map(x => path + x)
-	
-	
-	
-		const loader = new THREE.CubeTextureLoader();
-		const texture = loader.load(ls);
-		scene.background = texture;
-	
-    }
-    
+      // Create skybox effect with cube
+    {
 
-    //
-    renderer = new THREE.WebGLRenderer();
-    renderer.setClearColor( 0xffffff );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
-    //
-    window.addEventListener( 'resize', onWindowResize, false );
+    	const path = "js/bg_images/"
+    	const ls = [
+    		"arid2_ft.jpg",
+    		"arid2_bk.jpg",
+    		"arid2_up.jpg",
+    		"arid2_dn.jpg",
+    		"arid2_rt.jpg",
+    		"arid2_lf.jpg",
+
+    	].map(x => path + x)
+
+
+    	const loader = new THREE.CubeTextureLoader();
+    	const texture = loader.load(ls);
+    	scene.background = texture;
+
+      }
+
+      //
+      renderer = new THREE.WebGLRenderer();
+      renderer.setClearColor( 0xffffff );
+      renderer.setPixelRatio( window.devicePixelRatio );
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      document.body.appendChild( renderer.domElement );
+      //
+      window.addEventListener( 'resize', onWindowResize, false );
 }
 
 
@@ -212,34 +217,62 @@ function onWindowResize() {
 }
 
 // Capture mouse click event
+/*
 window.onmousedown = function(e) {
     switch(e.button) {
         // Right click with aiming animation
-        case 2:	
+        case 2:
             heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
             heroAnimation.targetMode();
             break;
+
         // Left click with shooting animation
         case 0:
+            // Triggering the shooting animation
+            heroAnimation.shooting();
+
             if(shootingInterval <= 0){
 
                 let bullet = new Bullet(mainChar);
                 bullet.alive = true;
-          
+
                 setTimeout(function () {
                   bullet.alive = false;
                   scene.remove(bullet);
                 }, 1000);
-          
+
                 // Add the bullet to the scene and to the bullets array and
                 // then set the shootingInterval to 10, meaning that every 10
                 // frames there will be another bullet.
-                    bulletsArray.push(bullet);
-                    scene.add(bullet);
-                    shootingInterval = 10;
+                bulletsArray.push(bullet);
+                scene.add(bullet);
+                shootingInterval = 10;
               }
     }
+}*/
+
+
+
+/**
+ * Function to handle the click of the mouse
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the mouse obj
+ */
+function mouseDown(event){
+  mouse[event.button] = true;
 }
+
+/**
+ * Function to handle the un-click of the mouse
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the mouse obj
+ */
+function mouseUp(event){
+  mouse[event.button] = false;
+}
+
+window.addEventListener('mousedown', mouseDown);
+window.addEventListener('mouseup', mouseUp);
 
 
 function animate() {
@@ -252,7 +285,7 @@ function animate() {
         velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
         if ( moveForward ) {
             velocity.z -= 400.0 * delta;
-            //heroAnimation.walking();    
+            //heroAnimation.walking();
         }
         if ( moveBackward ) velocity.z += 400.0 * delta;
         if ( moveLeft ) velocity.x -= 400.0 * delta;
@@ -282,6 +315,36 @@ function animate() {
         }
 
           bulletsArray[index].position.add(bulletsArray[index].velocity);
+    }
+
+
+    if(mouse[2]){ // Right-click of the mouse
+      heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
+      heroAnimation.targetMode();
+    }
+
+    // We need a separate if condition, otherwise the shooting animation
+    // will go ten frames slower.
+    if(mouse[0]){ // Left-click of the mouse
+      heroAnimation.shooting();
+    }
+
+    // Here the bullets will go
+    if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+      let bullet = new Bullet(mainChar);
+      bullet.alive = true;
+
+      setTimeout(function () {
+        bullet.alive = false;
+        scene.remove(bullet);
+      }, 1000);
+
+      // Add the bullet to the scene and to the bullets array and
+      // then set the shootingInterval to 10, meaning that every 10
+      // frames there will be another bullet.
+  		bulletsArray.push(bullet);
+  		scene.add(bullet);
+  		shootingInterval = 10;
     }
 
     if(shootingInterval > 0) shootingInterval -=1;
