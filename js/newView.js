@@ -3,13 +3,13 @@ import {PointerLockControls} from './three.js-master/examples/jsm/controls/Point
 //import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 //import {AnimateRobot} from './robot-animations.js';
 //import {KillingRobot} from './robot.js';
-import {Hero} from './main-char.js';
+import {Hero, CreateFPSCamera} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 
 var camera, scene, renderer;
 var geometry, material, mesh;
-let mainChar, mainCharCamera, heroAnimation;
+let mainChar, heroAnimation;
 var controls;
 var objects = [];
 
@@ -25,6 +25,8 @@ let shootingInterval = 0;
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
+
+let toRotate = {x:0, y: 0, z: 0};
 
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -87,132 +89,83 @@ var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 
 function init() {
-    //camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-    scene = new THREE.Scene();
-    var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-    light.position.set( 0.5, 1, 0.75 );
-    scene.add( light );
+  // Create the FPS camera for the hero
+  camera = new CreateFPSCamera();
 
-    // Init the main character
-    mainChar = new Hero();
-    mainChar.castShadow = true;
-    mainChar.receiveShadow = true;
-    mainCharCamera = mainChar.getObjectByName("heroCamera");
-    scene.add(mainChar);
+  scene = new THREE.Scene();
+  var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
+  light.position.set( 0.5, 1, 0.75 );
+  scene.add( light );
 
-	// instantiate the class for animations
-    heroAnimation = new AnimateHero(mainChar);
+  // Init the main character
+  mainChar = new Hero();
+  mainChar.castShadow = true;
+  mainChar.receiveShadow = true;
+  scene.add(mainChar);
 
-    controls = new PointerLockControls( mainChar );
-    scene.add(controls.getObject());
+  // instantiate the class for animations
+  // heroAnimation = new AnimateHero(mainChar);
 
-    /*var onKeyDown = function ( event ) {
-        switch ( event.keyCode ) {
-            case 38: // up
-            case 87: // w
-                moveForward = true;
-                break;
-            case 37: // left
-            case 65: // a
-                moveLeft = true;
-                break;
-            case 40: // down
-            case 83: // s
-                moveBackward = true;
-                break;
-            case 39: // right
-            case 68: // d
-                moveRight = true;
-                break;
-            case 32: // space
-                if ( canJump === true ) velocity.y += 350;
-                canJump = false;
-                break;
-            case 82:
-                if(!heroAnimation.reloadFlag) heroAnimation.reloadFlag = true;
-                break;
-        }
-    };
-    var onKeyUp = function ( event ) {
-        switch( event.keyCode ) {
-            case 38: // up
-            case 87: // w
-                moveForward = false;
-                break;
-            case 37: // left
-            case 65: // a
-                moveLeft = false;
-                break;
-            case 40: // down
-            case 83: // s
-                moveBackward = false;
-                break;
-            case 39: // right
-            case 68: // d
-                moveRight = false;
-                break;
-        }
-    };
-    document.addEventListener( 'keydown', onKeyDown, false );
-    document.addEventListener( 'keyup', onKeyUp, false );*/
+  controls = new PointerLockControls(camera);
+  scene.add(controls.getObject());
 
-    // create floor and add texture
-    const planeSize = 4000;
+  // create floor and add texture
+  const planeSize = 4000;
 
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load('js/bg_images/DarkredBlack.jpg');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.magFilter = THREE.NearestFilter;
-    const repeats = planeSize / 2;
-    texture.repeat.set(repeats, repeats);
+  const loader = new THREE.TextureLoader();
+  const texture = loader.load('js/bg_images/DarkredBlack.jpg');
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.magFilter = THREE.NearestFilter;
+  const repeats = planeSize / 2;
+  texture.repeat.set(repeats, repeats);
 
-    const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-    const planeMat = new THREE.MeshPhongMaterial({
-    	map: texture,
-    	side: THREE.DoubleSide,
-    	shininess: 0,
-    });
-    const mesh = new THREE.Mesh(planeGeo, planeMat);
-    mesh.rotation.x = Math.PI * -.5;
-    mesh.receiveShadow = true;
-      scene.add(mesh);
+  const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+  const planeMat = new THREE.MeshPhongMaterial({
+  	map: texture,
+  	side: THREE.DoubleSide,
+  	shininess: 0,
+  });
+  const mesh = new THREE.Mesh(planeGeo, planeMat);
+  mesh.rotation.x = Math.PI * -.5;
+  mesh.receiveShadow = true;
+    scene.add(mesh);
 
-      // Create skybox effect with cube
-    {
+    // Create skybox effect with cube
+  {
 
-    	const path = "js/bg_images/"
-    	const ls = [
-    		"arid2_ft.jpg",
-    		"arid2_bk.jpg",
-    		"arid2_up.jpg",
-    		"arid2_dn.jpg",
-    		"arid2_rt.jpg",
-    		"arid2_lf.jpg",
+  	const path = "js/bg_images/"
+  	const ls = [
+  		"arid2_ft.jpg",
+  		"arid2_bk.jpg",
+  		"arid2_up.jpg",
+  		"arid2_dn.jpg",
+  		"arid2_rt.jpg",
+  		"arid2_lf.jpg",
 
-    	].map(x => path + x)
+  	].map(x => path + x)
 
 
-    	const loader = new THREE.CubeTextureLoader();
-    	const texture = loader.load(ls);
-    	scene.background = texture;
+  	const loader = new THREE.CubeTextureLoader();
+  	const texture = loader.load(ls);
+  	scene.background = texture;
 
-      }
+    }
 
-      //
-      renderer = new THREE.WebGLRenderer();
-      renderer.setClearColor( 0xffffff );
-      renderer.setPixelRatio( window.devicePixelRatio );
-      renderer.setSize( window.innerWidth, window.innerHeight );
-      document.body.appendChild( renderer.domElement );
-      //
-      window.addEventListener( 'resize', onWindowResize, false );
+    //
+    renderer = new THREE.WebGLRenderer();
+    renderer.setClearColor( 0xffffff );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
+    //
+    window.addEventListener( 'resize', onWindowResize, false );
 }
 
 
 function onWindowResize() {
-    mainCharCamera.aspect = window.innerWidth / window.innerHeight;
-    mainCharCamera.updateProjectionMatrix();
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
@@ -319,13 +272,25 @@ function animate() {
     controls.getObject().translateX( velocity.x * delta );
     controls.getObject().translateY( velocity.y * delta );
     controls.getObject().translateZ( velocity.z * delta );
+
     if (controls.getObject().position.y < 10 ) {
         velocity.y = 0;
         controls.getObject().position.y = 10;
         canJump = true;
     }
     prevTime = time;
+
   }
+
+  /*mainChar.position.set(
+    camera.position.x - Math.sin(camera.rotation.y + Math.PI/6) * 0.75,
+		camera.position.y - 0.5 + Math.sin(time*4 + camera.position.x + camera.position.z)*0.01,
+		camera.position.z + Math.cos(camera.rotation.y + Math.PI/6) * 0.75
+  );*/
+
+  mainChar.rotation.x = controls.getObject().rotation.x;
+  mainChar.rotation.y = controls.getObject().rotation.y;
+  mainChar.rotation.z = controls.getObject().rotation.z;
 
   // go through bullets array and update position
   // remove bullets when appropriate
@@ -335,33 +300,33 @@ function animate() {
           bulletsArray.splice(index,1);
           continue;
       }
-
-        bulletsArray[index].position.add(bulletsArray[index].velocity);
+      //bulletsArray[index].position.z +=-50 * new THREE.Clock().getDelta();
+      bulletsArray[index].position.add(bulletsArray[index].velocity);
   }
 
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
-    heroAnimation.walking();
+    // heroAnimation.walking();
   }
   // If UpDownLeftRight is pressed, the walking animation is triggered
   if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
-    heroAnimation.walking();
+    // heroAnimation.walking();
   }
 
   if(mouse[2]){ // Right-click of the mouse
-    heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
-    heroAnimation.targetMode();
+    // heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
+    // heroAnimation.targetMode();
   }
 
   // We need a separate if condition, otherwise the shooting animation
   // will go ten frames slower.
   if(mouse[0]){ // Left-click of the mouse
-    heroAnimation.shooting();
+    // heroAnimation.shooting();
   }
 
   // Here the bullets will go
   if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
-    let bullet = new Bullet(mainChar);
+    let bullet = new Bullet(controls);
     bullet.alive = true;
 
     setTimeout(function () {
@@ -379,10 +344,9 @@ function animate() {
 
   if(shootingInterval > 0) shootingInterval -=1;
 
-  //mainChar.getObjectByName('heroCamera').rotation.x+=0.01;
-  renderer.render( scene, mainCharCamera );
+  renderer.render(scene, camera);
 
-  heroAnimation.reload();
+  // heroAnimation.reload();
 
   requestAnimationFrame(animate);
 
