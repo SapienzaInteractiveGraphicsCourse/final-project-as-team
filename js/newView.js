@@ -3,13 +3,13 @@ import {PointerLockControls} from './three.js-master/examples/jsm/controls/Point
 //import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 //import {AnimateRobot} from './robot-animations.js';
 //import {KillingRobot} from './robot.js';
-import {Hero, CreateFPSCamera} from './main-char.js';
+import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 
 var camera, scene, renderer;
 var geometry, material, mesh;
-let mainChar, heroAnimation;
+let mainChar, mainCharCamera, heroAnimation;
 var controls;
 var objects = [];
 
@@ -25,8 +25,6 @@ let shootingInterval = 0;
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
-
-let toRotate = {x:0, y: 0, z: 0};
 
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -79,6 +77,9 @@ if ( havePointerLock ) {
     instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
+init();
+animate();
+
 var controlsEnabled = false;
 var moveForward = false;
 var moveBackward = false;
@@ -87,29 +88,32 @@ var moveRight = false;
 var canJump = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
+var rotation = new THREE.Vector3();
 
 function init() {
-  // Create the FPS camera for the hero
-  camera = new CreateFPSCamera();
-
   scene = new THREE.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
-  scene.add( light );
+  scene.add(light);
+
+
+  var axesHelper = new THREE.AxesHelper( 20 );
+  scene.add( axesHelper );
 
   // Init the main character
   mainChar = new Hero();
   mainChar.castShadow = true;
   mainChar.receiveShadow = true;
+  mainCharCamera = mainChar.getObjectByName("heroCamera");
   scene.add(mainChar);
 
-  // instantiate the class for animations
-  // heroAnimation = new AnimateHero(mainChar);
+  // Instantiate the class for animations
+  heroAnimation = new AnimateHero(mainChar);
 
-  controls = new PointerLockControls(camera);
+  controls = new PointerLockControls(mainChar);
   scene.add(controls.getObject());
 
-  // create floor and add texture
+  // Create floor and add texture
   const planeSize = 4000;
 
   const loader = new THREE.TextureLoader();
@@ -122,50 +126,48 @@ function init() {
 
   const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
   const planeMat = new THREE.MeshPhongMaterial({
-  	map: texture,
-  	side: THREE.DoubleSide,
-  	shininess: 0,
+  map: texture,
+  side: THREE.DoubleSide,
+  shininess: 0,
   });
   const mesh = new THREE.Mesh(planeGeo, planeMat);
   mesh.rotation.x = Math.PI * -.5;
   mesh.receiveShadow = true;
-    scene.add(mesh);
+  scene.add(mesh);
 
-    // Create skybox effect with cube
+  // Create skybox effect with cube
   {
 
-  	const path = "js/bg_images/"
-  	const ls = [
-  		"arid2_ft.jpg",
-  		"arid2_bk.jpg",
-  		"arid2_up.jpg",
-  		"arid2_dn.jpg",
-  		"arid2_rt.jpg",
-  		"arid2_lf.jpg",
+  const path = "js/bg_images/"
+  const ls = [
+  	"arid2_ft.jpg",
+  	"arid2_bk.jpg",
+  	"arid2_up.jpg",
+  	"arid2_dn.jpg",
+  	"arid2_rt.jpg",
+  	"arid2_lf.jpg",
 
-  	].map(x => path + x)
+  ].map(x => path + x)
 
+  const loader = new THREE.CubeTextureLoader();
+  const texture = loader.load(ls);
+  scene.background = texture;
 
-  	const loader = new THREE.CubeTextureLoader();
-  	const texture = loader.load(ls);
-  	scene.background = texture;
+  }
 
-    }
+  renderer = new THREE.WebGLRenderer();
+  renderer.setClearColor( 0xffffff );
+  renderer.setPixelRatio( window.devicePixelRatio );
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  document.body.appendChild( renderer.domElement );
 
-    //
-    renderer = new THREE.WebGLRenderer();
-    renderer.setClearColor( 0xffffff );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
-    //
-    window.addEventListener( 'resize', onWindowResize, false );
+  // Listener for resize
+  window.addEventListener( 'resize', onWindowResize, false );
 }
 
-
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    mainCharCamera.aspect = window.innerWidth / window.innerHeight;
+    mainCharCamera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
@@ -210,87 +212,58 @@ function keyUp(event){
   keyboard[event.keyCode] = false;
 }
 
+
 // Listeners
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
-
 function animate() {
-  /*if ( controlsEnabled ) {
+    // Start with the reload animation, initially this is done once.
+    heroAnimation.reload();
+
+    if(controlsEnabled){
       var time = performance.now();
       var delta = ( time - prevTime ) / 1000;
       velocity.x -= velocity.x * 10.0 * delta;
       velocity.z -= velocity.z * 10.0 * delta;
-      velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-      if ( moveForward ) {
-          velocity.z -= 400.0 * delta;
-          // mainChar.position.z = velocity.z;
-          //heroAnimation.walking();
+      velocity.y -= 9.8 * 100.0 * delta;
+
+      // R - for reload the gun
+      if(keyboard[82]){
+        // If the reload flag is false
+        if(!heroAnimation.reloadFlag){
+          heroAnimation.reloadFlag = true;
+        }
       }
-      if ( moveBackward ) velocity.z += 400.0 * delta;
-      if ( moveLeft ) velocity.x -= 400.0 * delta;
-      if ( moveRight ) velocity.x += 400.0 * delta;
-      //if ( isOnObject === true) {
-          velocity.y = Math.max( 0, velocity.y );
-          canJump = true;
-      //}
+      // If W or Up are pressed
+      if(keyboard[87] || keyboard[38]){
+        velocity.z -= 400.0 * delta;
+      }
+      // If S or Down are pressed
+      if(keyboard[83] || keyboard[40]){
+        velocity.z += 400.0 * delta;
+      }
+      // If A or Left are pressed
+      if(keyboard[65] || keyboard[37]){
+        velocity.x -= 400.0 * delta;
+      }
+      // If D or Right are pressed
+      if(keyboard[68] || keyboard[39]){
+         velocity.x += 400.0 * delta;
+      }
+      velocity.y = Math.max( 0, velocity.y );
+      canJump = true;
       controls.getObject().translateX( velocity.x * delta );
       controls.getObject().translateY( velocity.y * delta );
       controls.getObject().translateZ( velocity.z * delta );
+
       if (controls.getObject().position.y < 10 ) {
           velocity.y = 0;
           controls.getObject().position.y = 10;
           canJump = true;
       }
       prevTime = time;
-  }*/
-
-  if(controlsEnabled){
-    var time = performance.now();
-    var delta = ( time - prevTime ) / 1000;
-    velocity.x -= velocity.x * 10.0 * delta;
-    velocity.z -= velocity.z * 10.0 * delta;
-    velocity.y -= 9.8 * 100.0 * delta;
-    // If W or Up are pressed
-    if(keyboard[87] || keyboard[38]){
-      velocity.z -= 400.0 * delta;
-    }
-    // If S or Down are pressed
-    if(keyboard[83] || keyboard[40]){
-      velocity.z += 400.0 * delta;
-    }
-    // If A or Left are pressed
-    if(keyboard[65] || keyboard[37]){
-      velocity.x -= 400.0 * delta;
-    }
-    // If D or Right are pressed
-    if(keyboard[68] || keyboard[39]){
-       velocity.x += 400.0 * delta;
-    }
-    velocity.y = Math.max( 0, velocity.y );
-    canJump = true;
-    controls.getObject().translateX( velocity.x * delta );
-    controls.getObject().translateY( velocity.y * delta );
-    controls.getObject().translateZ( velocity.z * delta );
-
-    if (controls.getObject().position.y < 10 ) {
-        velocity.y = 0;
-        controls.getObject().position.y = 10;
-        canJump = true;
-    }
-    prevTime = time;
-
   }
-
-  /*mainChar.position.set(
-    camera.position.x - Math.sin(camera.rotation.y + Math.PI/6) * 0.75,
-		camera.position.y - 0.5 + Math.sin(time*4 + camera.position.x + camera.position.z)*0.01,
-		camera.position.z + Math.cos(camera.rotation.y + Math.PI/6) * 0.75
-  );*/
-
-  mainChar.rotation.x = controls.getObject().rotation.x;
-  mainChar.rotation.y = controls.getObject().rotation.y;
-  mainChar.rotation.z = controls.getObject().rotation.z;
 
   // go through bullets array and update position
   // remove bullets when appropriate
@@ -344,15 +317,9 @@ function animate() {
 
   if(shootingInterval > 0) shootingInterval -=1;
 
-  renderer.render(scene, camera);
-
-  // heroAnimation.reload();
+  renderer.render( scene, mainCharCamera );
 
   requestAnimationFrame(animate);
 
-  TWEEN.update();
+	TWEEN.update();
 }
-
-
-init();
-animate();

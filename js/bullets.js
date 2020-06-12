@@ -1,4 +1,4 @@
-var Bullet = function(controls){
+var Bullet = function(rootHero){
   const bulletGeometry = new THREE.BoxGeometry(0.1, 0.1, 2);
   const bulletMaterial = new THREE.MeshToonMaterial({
     color: 0x124212, // red
@@ -7,28 +7,25 @@ var Bullet = function(controls){
     specular: 0xdb55,
     flatShading: true
   });
-
-  let time = Date.now();
-  const camera = controls.getObject();
-
+  let camera = rootHero.getObject();
+  let v = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
   const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
 	// Position the bullet at the end of player's gun
-
 	bullet.position.set(
-    controls.getObject().position.x,
-		controls.getObject().position.y + 2.5,
-		controls.getObject().position.z
+		camera.position.x + 6,
+		camera.position.y + 2,
+		camera.position.z - 10
 	);
 
-  // bullet.rotation.y = Math.PI;
-  console.log(controls.getObject());
+  bullet.rotation.set(
+    rootHero.getObject().rotation.x,
+    rootHero.getObject().rotation.y,
+    rootHero.getObject().rotation.z
+  )
+
 	// set the velocity of the bullet
-	bullet.velocity = new THREE.Vector3(
-		-Math.sin(controls.getObject().rotation.y), //-Math.sin(camera.rotation.y),
-		0,
-		Math.cos(controls.getObject().rotation.y) //Math.cos(camera.rotation.y)
-	);
-
+	bullet.velocity = rootHero.getDirection(v);
+  console.log(bullet.velocity);
   return bullet;
 }
 

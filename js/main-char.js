@@ -45,8 +45,11 @@ var Hero = function(){
 
   // Creating the root element of the robot
   const hero = new THREE.Object3D();
+  hero.position.set(6, 1, -3);
 
   const heroTorso = createTorso(heroSizes);
+  hero.add(heroTorso);
+
   heroTorso.rotation.y = Math.PI;
 
   const leftArm = createArm(heroSizes, "left");
@@ -96,11 +99,10 @@ var Hero = function(){
   // Adding the arms to the torso
   heroTorso.add(rightArm);
   heroTorso.add(leftArm);
+  heroTorso.add(createGun(heroSizes));
 
-  hero.add(heroTorso);
-  // heroTorso.rotation.y = Math.PI;
-
-  hero.add(createGun(heroSizes));
+  // Attach the camera to the torso
+  hero.add(createCamera(heroSizes));
 
   return hero;
 }
@@ -127,6 +129,31 @@ const heroTextures = {
   leather: "js/m-textures/leather.jpg",
   metal: "js/m-textures/starwars.jpg"
 }
+
+/**
+ * Function to create the camera to add to the hero, the camera then is
+ * added to the torso in the Hero() function. Thanks to this view we can
+ * have a first person perspective.
+ * @param  {object} sizes  The sizes of the hero
+ * @return {object}        The perspective camera created.
+ */
+function createCamera(sizes){
+  const torsoHeight = sizes.torso.h;
+  const torsoWidth =  sizes.torso.w;
+  // Adding the camera
+  const fov = 80;
+  const aspect = 2;  // the canvas default
+  const zNear = 0.1;
+  const zFar = 1000;
+  const heroCamera = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
+  heroCamera.position.set(torsoWidth + 2, torsoHeight + 3.7, - 2.5);
+  //heroCamera.lookAt(0, 0, 20);
+  //heroCamera.rotation.y = - Math.PI;
+  heroCamera.name = "heroCamera";
+
+  return heroCamera
+}
+
 
 /**
  * Function to create the torso of the hero
@@ -720,30 +747,7 @@ function createGun(sizes){
   targetLast.name = "gunTargetLast";
   gunObj.add(targetLast);
 
-  gunObj.rotation.y = Math.PI;
   return gunObj;
 }
 
-/**
- * Function to create the camera. Thanks to this view we can
- * have a first person perspective.
- * @param  {object} sizes  The sizes of the hero
- * @return {object}        The perspective camera created.
- */
-var CreateFPSCamera = function(){
-  const torsoHeight = 1.8;
-  const torsoWidth =  4.5;
-  // Adding the camera
-  const fov = 80;
-  const aspect = 2;  // the canvas default
-  const zNear = 0.1;
-  const zFar = 1000;
-  const heroCamera = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
-  heroCamera.position.set(torsoWidth + 4, torsoHeight + 3.7, 2.5);
-  // heroCamera.rotation.y = Math.PI;
-  // heroCamera.name = "heroCamera";
-
-  return heroCamera
-}
-
-export {Hero, CreateFPSCamera}
+export {Hero}
