@@ -1,158 +1,403 @@
 import * as THREE from './three.js-master/build/three.module.js';
-import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
+import {PointerLockControls} from './three.js-master/examples/jsm/controls/PointerLockControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
-import {AnimateRobot} from './robot-animations.js';
-import {KillingRobot} from './robot.js'
+//import {AnimateRobot} from './robot-animations.js';
+//import {KillingRobot} from './robot.js';
+import {Hero} from './main-char.js';
+import {AnimateHero} from './main-char-animations.js';
+import {Bullet} from './bullets.js';
 
-function main() {
-  const canvas = document.querySelector('#c');
-  const renderer = new THREE.WebGLRenderer({canvas});
+var camera, scene, renderer;
+var geometry, material, mesh;
+let mainChar, mainCharCamera, heroAnimation;
+var controls;
+var objects = [];
 
-  renderer.setPixelRatio(window.devicePixelRatio);
+// Add event listener for pressing the keys on the keyboard
+let keyboard = {};
+// Object of mouse key codes
+let mouse = {};
 
-  const fov = 45;
-  const aspect = 2;  // the canvas default
-  const near = 1;
-  const far = 10000;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(0, 10, 20);
+// Add bullet array
+let bulletsArray = [];
+// Shooting interval (interval between one shot and the next)
+let shootingInterval = 0;
 
-  const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 5, 0);
-  controls.update();
+var blocker = document.getElementById( 'blocker' );
+var instructions = document.getElementById( 'instructions' );
 
-  let root;
-  let position = { x:0 };
-
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color('white');
-
-  const robot = new KillingRobot();
-  robot.castShadow = true;
-  robot.receiveShadow = true;
-  scene.add(robot);
-
-
-  {
-    const planeSize = 4000;
-
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load('js/bg_images/DarkredBlack.jpg');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.magFilter = THREE.NearestFilter;
-    const repeats = planeSize / 2;
-    texture.repeat.set(repeats, repeats);
-
-    const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-    const planeMat = new THREE.MeshPhongMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-      shininess: 0,
-    });
-    const mesh = new THREE.Mesh(planeGeo, planeMat);
-    mesh.rotation.x = Math.PI * -.5;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-  }
-
-
-
-  {
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-
-    // Create a DirectionalLight and turn on shadows for the light
-    var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-    light.position.set(10, 10, 10); 			//default; light shining from top
-    light.castShadow = true;            // default false
-    scene.add( light );
-
-    // Set up shadow properties for the light
-    light.shadow.mapSize.width = 512;  // default
-    light.shadow.mapSize.height = 512; // default
-    light.shadow.camera.near = 0.5;    // default
-    light.shadow.camera.far = 500;     // default
-
-    //Create a helper for the shadow camera (optional)
-    var helper = new THREE.CameraHelper( light.shadow.camera );
-    scene.add( helper );
-  }
-
-  let materialArray = [];
-  /*let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/penguins (30)/raspberry_lf.jpg');*/
-  let texture_ft = new THREE.TextureLoader().load( 'js/bg_images/arid2_ft.jpg');
-  let texture_bk = new THREE.TextureLoader().load( 'js/bg_images/arid2_bk.jpg');
-  let texture_up = new THREE.TextureLoader().load( 'js/bg_images/arid2_up.jpg');
-  let texture_dn = new THREE.TextureLoader().load( 'js/bg_images/arid2_dn.jpg');
-  let texture_rt = new THREE.TextureLoader().load( 'js/bg_images/arid2_rt.jpg');
-  let texture_lf = new THREE.TextureLoader().load( 'js/bg_images/arid2_lf.jpg');
-
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
-  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
-  
-  texture_ft.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  texture_bk.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  texture_up.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  texture_dn.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  texture_rt.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  texture_lf.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
-  materialArray.map.magFilter = THREE.LinearMipMapLinearFilter;
-  /*materialArray[0].map.magFilter = THREE.LinearMipMapLinearFilter;
-  materialArray[1].map.magFilter = THREE.LinearMipMapLinearFilter;
-  materialArray[2].map.magFilter = THREE.LinearMipMapLinearFilter;
-  materialArray[3].map.magFilter = THREE.LinearMipMapLinearFilter;
-  materialArray[4].map.magFilter = THREE.LinearMipMapLinearFilter;
-  materialArray[5].map.magFilter = THREE.LinearMipMapLinearFilter;*/
-
-
-  for (let i = 0; i < 6; i++){
-    materialArray[i].side = THREE.BackSide;;
-  }
-  let skyboxGeo = new THREE.BoxGeometry( 4000, 4000, 4000);
-  let skybox = new THREE.Mesh( skyboxGeo, materialArray );
-
-  scene.add( skybox );
-
-  function resizeRendererToDisplaySize(renderer) {
-    const canvas = renderer.domElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const needResize = canvas.width !== width || canvas.height !== height;
-    if (needResize) {
-      renderer.setSize(width, height, false);
-    }
-    return needResize;
-  }
-
-  function render() {
-    if (resizeRendererToDisplaySize(renderer)) {
-      const canvas = renderer.domElement;
-      camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      camera.updateProjectionMatrix();
-    }
-
-    renderer.render(scene, camera);
-
-    AnimateRobot(robot);
-
-    TWEEN.update();
-    requestAnimationFrame(render);
-  }
-
-  render();
-
-  //requestAnimationFrame(render);
+// https://www.html5rocks.com/en/tutorials/pointerlock/intro/
+var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+if ( havePointerLock ) {
+    var element = document.body;
+    var pointerlockchange = function ( event ) {
+        if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
+            controlsEnabled = true;
+            controls.enabled = true;
+            blocker.style.display = 'none';
+        } else {
+            controls.enabled = false;
+            blocker.style.display = '-webkit-box';
+            blocker.style.display = '-moz-box';
+            blocker.style.display = 'box';
+            instructions.style.display = '';
+        }
+    };
+    var pointerlockerror = function ( event ) {
+        instructions.style.display = '';
+    };
+    // Hook pointer lock state change events
+    document.addEventListener( 'pointerlockchange', pointerlockchange, false );
+    document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
+    document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+    document.addEventListener( 'pointerlockerror', pointerlockerror, false );
+    document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
+    document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+    instructions.addEventListener( 'click', function ( event ) {
+        instructions.style.display = 'none';
+        // Ask the browser to lock the pointer
+        element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+        if ( /Firefox/i.test( navigator.userAgent ) ) {
+            var fullscreenchange = function ( event ) {
+                if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
+                    document.removeEventListener( 'fullscreenchange', fullscreenchange );
+                    document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
+                    element.requestPointerLock();
+                }
+            };
+            document.addEventListener( 'fullscreenchange', fullscreenchange, false );
+            document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
+            element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+            element.requestFullscreen();
+        } else {
+            element.requestPointerLock();
+        }
+    }, false );
+} else {
+    instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
-main();
+init();
+animate();
+
+var controlsEnabled = false;
+var moveForward = false;
+var moveBackward = false;
+var moveLeft = false;
+var moveRight = false;
+var canJump = false;
+var prevTime = performance.now();
+var velocity = new THREE.Vector3();
+var rotation = new THREE.Vector3();
+
+
+function init() {
+
+  scene = new THREE.Scene();
+  var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
+  light.position.set( 0.5, 1, 0.75 );
+  scene.add(light);
+
+  // Create a DirectionalLight and turn on shadows for the light
+  var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
+  light2.position.set(-5, 10, 20); 			//default; light shining from top
+  light2.castShadow = true;            // default false
+  scene.add( light2 );
+
+  // Set up shadow properties for the light
+  light2.shadow.mapSize.width = 512;  // default
+  light2.shadow.mapSize.height = 512; // default
+  light2.shadow.camera.near = 0.5;    // default
+  light2.shadow.camera.far = 500;     // default
+
+
+  var axesHelper = new THREE.AxesHelper( 20 );
+  scene.add( axesHelper );
+
+  // Init the main character
+  mainChar = new Hero();
+  mainChar.castShadow = true;
+  mainChar.receiveShadow = true;
+  mainCharCamera = mainChar.getObjectByName("heroCamera");
+  scene.add(mainChar);
+
+  // Instantiate the class for animations
+  heroAnimation = new AnimateHero(mainChar);
+
+  controls = new PointerLockControls(mainChar);
+  scene.add(controls.getObject());
+
+  // Create floor and add texture
+  const planeSize = 4000;
+
+  const loader = new THREE.TextureLoader();
+  const texture = loader.load('js/bg_images/DarkredBlack.jpg');
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.magFilter = THREE.NearestFilter;
+  const repeats = planeSize / 2;
+  texture.repeat.set(repeats, repeats);
+
+  const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+  const planeMat = new THREE.MeshPhongMaterial({
+  map: texture,
+  side: THREE.DoubleSide,
+  shininess: 0,
+  });
+  const mesh = new THREE.Mesh(planeGeo, planeMat);
+  mesh.rotation.x = Math.PI * -.5;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+
+  // Create skybox effect with cube
+  {
+
+  const path = "js/bg_images/"
+  const ls = [
+  	"arid2_ft.jpg",
+  	"arid2_bk.jpg",
+  	"arid2_up.jpg",
+  	"arid2_dn.jpg",
+  	"arid2_rt.jpg",
+  	"arid2_lf.jpg",
+
+  ].map(x => path + x)
+
+  const loader = new THREE.CubeTextureLoader();
+  const texture = loader.load(ls);
+  scene.background = texture;
+
+  }
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setClearColor( 0xffffff );
+  renderer.setPixelRatio( window.devicePixelRatio );
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  document.body.appendChild( renderer.domElement );
+
+  {
+    var loaderTree1 = new GLTFLoader();
+
+    for (var i=0; i<50; i++) {
+      loaderTree1.load( './js/models/tree6/scene.gltf', function ( gltf ) {
+
+        gltf.scene.scale.set(5, 5, 5);
+
+        gltf.scene.position.x = ((Math.random() + Math.random()) / 2) * 2000 - 1000;
+        gltf.scene.position.z = ((Math.random() + Math.random()) / 2) * 1000 - 500;
+        gltf.scene.position.y = 0;
+
+        scene.add( gltf.scene );
+  
+      }, undefined, function ( error ) {
+  
+        console.error( error );
+  
+      } );
+
+    }
+  }
+
+  /*{
+    var loaderTree1 = new GLTFLoader();
+
+
+    // Load a glTF resource
+    loaderTree1.load(
+      // resource URL
+      './js/models/tree6/scene.gltf',
+      // called when the resource is loaded
+      function ( gltf ) {
+
+        scene.add( gltf.scene );
+
+        gltf.scene.scale.set(5, 5, 5);
+
+        //gltf.animations; // Array<THREE.AnimationClip>
+        gltf.scene; // THREE.Group
+        gltf.scenes; // Array<THREE.Group>
+        gltf.cameras; // Array<THREE.Camera>
+        gltf.asset; // Object
+
+        //render();
+
+      },
+      // called while loading is progressing
+      function ( xhr ) {
+
+        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+      },
+      // called when loading has errors
+      function ( error ) {
+
+        console.log( 'An error happened' );
+
+      }
+    );
+  }*/
+
+  // Listener for resize
+  window.addEventListener( 'resize', onWindowResize, false );
+}
+
+function onWindowResize() {
+    mainCharCamera.aspect = window.innerWidth / window.innerHeight;
+    mainCharCamera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+// Functions for click listener
+/**
+ * Function to handle the click of the mouse
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the mouse obj
+ */
+function mouseDown(event){
+  mouse[event.button] = true;
+}
+
+/**
+ * Function to handle the un-click of the mouse
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the mouse obj
+ */
+function mouseUp(event){
+  mouse[event.button] = false;
+}
+
+// Listeners
+window.addEventListener('mousedown', mouseDown);
+window.addEventListener('mouseup', mouseUp);
+
+// Thanks to https://www.youtube.com/watch?v=UUilwGxIj_Q
+/**
+ * Function to handle the click on a key
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the keyboad obj
+ */
+function keyDown(event){
+  keyboard[event.keyCode] = true;
+}
+/**
+ * Function to handle the un-click on a key
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the keyboad obj
+ */
+function keyUp(event){
+  keyboard[event.keyCode] = false;
+}
+
+
+// Listeners
+window.addEventListener('keydown', keyDown);
+window.addEventListener('keyup', keyUp);
+
+function animate() {
+
+    // Start with the reload animation, initially this is done once.
+    heroAnimation.reload();
+
+    if(controlsEnabled){
+      var time = performance.now();
+      var delta = ( time - prevTime ) / 1000;
+      velocity.x -= velocity.x * 10.0 * delta;
+      velocity.z -= velocity.z * 10.0 * delta;
+      velocity.y -= 9.8 * 100.0 * delta;
+
+      // R - for reload the gun
+      if(keyboard[82]){
+        // If the reload flag is false
+        if(!heroAnimation.reloadFlag){
+          heroAnimation.reloadFlag = true;
+        }
+      }
+      // If W or Up are pressed
+      if(keyboard[87] || keyboard[38]){
+        velocity.z -= 400.0 * delta;
+      }
+      // If S or Down are pressed
+      if(keyboard[83] || keyboard[40]){
+        velocity.z += 400.0 * delta;
+      }
+      // If A or Left are pressed
+      if(keyboard[65] || keyboard[37]){
+        velocity.x -= 400.0 * delta;
+      }
+      // If D or Right are pressed
+      if(keyboard[68] || keyboard[39]){
+         velocity.x += 400.0 * delta;
+      }
+      velocity.y = Math.max( 0, velocity.y );
+      canJump = true;
+      controls.getObject().translateX( velocity.x * delta );
+      controls.getObject().translateY( velocity.y * delta );
+      controls.getObject().translateZ( velocity.z * delta );
+
+      if (controls.getObject().position.y < 10 ) {
+          velocity.y = 0;
+          controls.getObject().position.y = 10;
+          canJump = true;
+      }
+      prevTime = time;
+  }
+
+  // go through bullets array and update position
+  // remove bullets when appropriate
+  for(var index=0; index<bulletsArray.length; index+=1){
+      if( bulletsArray[index] === undefined ) continue;
+      if( bulletsArray[index].alive == false ){
+          bulletsArray.splice(index,1);
+          continue;
+      }
+      //bulletsArray[index].position.z +=-50 * new THREE.Clock().getDelta();
+      bulletsArray[index].position.add(bulletsArray[index].velocity);
+  }
+
+  // If the WASD is pressed, the walking animation is triggered
+  if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
+    // heroAnimation.walking();
+  }
+  // If UpDownLeftRight is pressed, the walking animation is triggered
+  if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
+    // heroAnimation.walking();
+  }
+
+  if(mouse[2]){ // Right-click of the mouse
+    // heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
+    // heroAnimation.targetMode();
+  }
+
+  // We need a separate if condition, otherwise the shooting animation
+  // will go ten frames slower.
+  if(mouse[0]){ // Left-click of the mouse
+    // heroAnimation.shooting();
+  }
+
+  // Here the bullets will go
+  if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+    let bullet = new Bullet(controls);
+    bullet.alive = true;
+
+    setTimeout(function () {
+      bullet.alive = false;
+      scene.remove(bullet);
+    }, 1000);
+
+    // Add the bullet to the scene and to the bullets array and
+    // then set the shootingInterval to 10, meaning that every 10
+    // frames there will be another bullet.
+  	bulletsArray.push(bullet);
+  	scene.add(bullet);
+  	shootingInterval = 10;
+  }
+
+  if(shootingInterval > 0) shootingInterval -=1;
+
+  //renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.render( scene, mainCharCamera );
+
+  requestAnimationFrame(animate);
+
+	TWEEN.update();
+}
