@@ -96,10 +96,6 @@ function init() {
   light.position.set( 0.5, 1, 0.75 );
   scene.add(light);
 
-
-  var axesHelper = new THREE.AxesHelper( 20 );
-  scene.add( axesHelper );
-
   // Init the main character
   mainChar = new Hero();
   mainChar.castShadow = true;
@@ -107,11 +103,12 @@ function init() {
   mainCharCamera = mainChar.getObjectByName("heroCamera");
   scene.add(mainChar);
 
-  // Instantiate the class for animations
-  heroAnimation = new AnimateHero(mainChar);
-
+  // Use the pointer to rotate the main char
   controls = new PointerLockControls(mainChar);
   scene.add(controls.getObject());
+
+  // Instantiate the class for animations
+  heroAnimation = new AnimateHero(mainChar);
 
   // Create floor and add texture
   const planeSize = 4000;
@@ -267,11 +264,11 @@ function animate() {
 
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
-    // heroAnimation.walking();
+    heroAnimation.walking();
   }
   // If UpDownLeftRight is pressed, the walking animation is triggered
   if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
-    // heroAnimation.walking();
+    heroAnimation.walking();
   }
 
   if(mouse[2]){ // Right-click of the mouse
@@ -282,7 +279,7 @@ function animate() {
   // We need a separate if condition, otherwise the shooting animation
   // will go ten frames slower.
   if(mouse[0]){ // Left-click of the mouse
-    // heroAnimation.shooting();
+    heroAnimation.shooting();
   }
 
   // Here the bullets will go

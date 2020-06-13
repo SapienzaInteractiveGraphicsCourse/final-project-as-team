@@ -63,7 +63,7 @@ class AnimateHero {
    * @return {void} The function just updates the position .
    */
   walking(){
-    this.root.position.y += Math.sin(this.verticalPosition) * 0.03;
+    this.root.getObjectByName("heroCamera").position.y += Math.sin(this.verticalPosition) * 0.0025;
     this.verticalPosition += Math.PI/32;
   }
 
@@ -72,7 +72,7 @@ class AnimateHero {
    * @return {void} The function simply applies a sinusoid on the z axis.
    */
   shooting(){
-    this.root.position.z += Math.sin(this.horizontalPosition) * 0.1;
+    this.root.getObjectByName("heroCamera").position.z += Math.sin(this.horizontalPosition) * 0.05;
     this.horizontalPosition += Math.PI/8;
   }
 
