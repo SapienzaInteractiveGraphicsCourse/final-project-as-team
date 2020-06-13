@@ -20,7 +20,7 @@ var Bullet = function(rootHero){
   // in order to assign it to the the bullet.
   let position = new THREE.Vector3();
   // The position is the world space
-  position.getPositionFromMatrix(shiningShooterDetailGun.matrixWorld);
+  position.setFromMatrixPosition(shiningShooterDetailGun.matrixWorld);
 
   // The velocity is just the direction of the radius of the goniometric circumference
   // in the plaze XZ, since we rotate along the Y axis. The radius is given by

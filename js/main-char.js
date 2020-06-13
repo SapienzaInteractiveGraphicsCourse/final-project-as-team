@@ -100,6 +100,7 @@ var Hero = function(){
   heroTorso.add(rightArm);
   heroTorso.add(leftArm);
   heroTorso.add(createGun(heroSizes));
+  heroTorso.name = "torso";
 
   // Attach the camera to the torso
   hero.add(createCamera(heroSizes));

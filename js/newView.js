@@ -271,10 +271,13 @@ function animate() {
     heroAnimation.walking();
   }
 
-  if(mouse[2]){ // Right-click of the mouse
-    // heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
-    // heroAnimation.targetMode();
+  // Activate the target mode if we right-click once
+  if(keyboard[16] && !heroAnimation.deactivateTargetMode){
+    heroAnimation.activateTargetMode = true;
   }
+
+  // heroAnimation.targetMode();
+  // heroAnimation.returnFromTargetMode();
 
   // We need a separate if condition, otherwise the shooting animation
   // will go ten frames slower.
@@ -311,7 +314,6 @@ function animate() {
           bulletsArray.splice(index,1);
           continue;
       }
-      //bulletsArray[index].position.z +=-50 * new THREE.Clock().getDelta();
       bulletsArray[index].position.add(bulletsArray[index].velocity);
   }
 

@@ -16,6 +16,7 @@ class AnimateHero {
     this.reloadFlag = true;
     // Look through the target
     this.activateTargetMode = false;
+    this.deactivateTargetMode = false;
 
     // Original position used for animations
     this.startingArmPos = root.getObjectByName("heroRightArm").position.z;
@@ -31,8 +32,6 @@ class AnimateHero {
   // This variables are used for the animations (for sinusoids)
   verticalPosition = 0;
   horizontalPosition = 0;
-
-  cameraDestPos = {x: -5.5, y: 5.8, z: 5};
 
   /**
    * This is the function for getting the animation of the reload action once
@@ -72,7 +71,7 @@ class AnimateHero {
    * @return {void} The function simply applies a sinusoid on the z axis.
    */
   shooting(){
-    this.root.getObjectByName("heroCamera").position.z += Math.sin(this.horizontalPosition) * 0.05;
+    this.root.getObjectByName("torso").position.z += Math.sin(this.horizontalPosition) * 0.05;
     this.horizontalPosition += Math.PI/8;
   }
 
@@ -83,26 +82,50 @@ class AnimateHero {
   targetMode(){
     // Go in target mode
     if(this.activateTargetMode){
-      if(this.root.getObjectByName("heroCamera").position.x.toPrecision(2) != this.cameraDestPos.x.toPrecision(2)){
-        this.root.getObjectByName("heroCamera").position.x += 0.1;
+      // Get the target support position
+      let cameraDestPos = new THREE.Vector3(
+        this.root.getObjectByName("gunTargetSupport").position.x,
+        this.root.getObjectByName("gunTargetSupport").position.y,
+        this.root.getObjectByName("gunTargetSupport").position.z
+      );
+
+      // Adjust some value
+      cameraDestPos.x *= -1;
+      cameraDestPos.y += 0.5;
+      cameraDestPos.z *= -1;
+      cameraDestPos.z += 2;
+
+      if(this.root.getObjectByName("heroCamera").position.x.toPrecision(2) != cameraDestPos.x.toPrecision(2)){
+        this.root.getObjectByName("heroCamera").position.x -= 0.1;
       }
-      if(this.root.getObjectByName("heroCamera").position.y.toPrecision(2) != this.cameraDestPos.y.toPrecision(2)){
+      if(this.root.getObjectByName("heroCamera").position.y.toPrecision(2) != cameraDestPos.y.toPrecision(2)){
         this.root.getObjectByName("heroCamera").position.y += 0.1;
       }
-      if(this.root.getObjectByName("heroCamera").position.z.toPrecision(2) != this.cameraDestPos.z.toPrecision(2)){
-        this.root.getObjectByName("heroCamera").position.z += 0.5;
+      if(this.root.getObjectByName("heroCamera").position.z.toPrecision(2) != cameraDestPos.z.toPrecision(2)){
+        this.root.getObjectByName("heroCamera").position.z -= 0.5;
+      }
+
+      if(
+        this.root.getObjectByName("heroCamera").position.x.toPrecision(2) == cameraDestPos.x.toPrecision(2) &&
+        this.root.getObjectByName("heroCamera").position.y.toPrecision(2) == cameraDestPos.y.toPrecision(2) &&
+        this.root.getObjectByName("heroCamera").position.z.toPrecision(2) == cameraDestPos.z.toPrecision(2)
+      ){
+        this.activateTargetMode = false;
       }
     }
+  }
+
+  returnFromTargetMode(){
     // Came back to the orginal view
-    else{
+    if(!this.activateTargetMode){
       if(this.root.getObjectByName("heroCamera").position.x.toPrecision(2) != this.cameraOriginalPos.x.toPrecision(2)){
-        this.root.getObjectByName("heroCamera").position.x -= 0.1;
+        this.root.getObjectByName("heroCamera").position.x += 0.1;
       }
       if(this.root.getObjectByName("heroCamera").position.y.toPrecision(2) != this.cameraOriginalPos.y.toPrecision(2)){
         this.root.getObjectByName("heroCamera").position.y -= 0.1;
       }
       if(this.root.getObjectByName("heroCamera").position.z.toPrecision(2) != this.cameraOriginalPos.z.toPrecision(2)){
-        this.root.getObjectByName("heroCamera").position.z -= 0.5;
+        this.root.getObjectByName("heroCamera").position.z += 0.5;
       }
     }
   }
