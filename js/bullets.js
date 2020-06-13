@@ -1,3 +1,10 @@
+/**
+ * This is the class for defining the bullegs fired by the hero gun. Creates the
+ * geometry of the bullet, assign a shining material since the bullets are more
+ * like laser beams.
+ * @param  {object} rootHero This is the root object of the hero moved by the pointer
+ * @return {object}          The function returns the bullet object.
+ */
 var Bullet = function(rootHero){
   const bulletGeometry = new THREE.BoxGeometry(0.1, 0.1, 2);
   const bulletMaterial = new THREE.MeshToonMaterial({
@@ -15,8 +22,11 @@ var Bullet = function(rootHero){
   // The position is the world space
   position.getPositionFromMatrix(shiningShooterDetailGun.matrixWorld);
 
-
-  let vel = new THREE.Vector3(-Math.sin(camera.rotation.y), 0, Math.cos(camera.rotation.y));
+  // The velocity is just the direction of the radius of the goniometric circumference
+  // in the plaze XZ, since we rotate along the Y axis. The radius is given by
+  // the cosine and the sine. When we rotate up or down the direction is always the same
+  // what changes is just the position.
+  let vel = new THREE.Vector3(-Math.sin(shiningShooterDetailGun.rotation.y), 0, Math.cos(shiningShooterDetailGun.rotation.y));
   const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
 
   // We copy the position
@@ -30,12 +40,15 @@ var Bullet = function(rootHero){
     rootHero.getObject().rotation.z
   )
 
-	// set the velocity of the bullet
+	// Assign the velocity to the bullet, this will be used to increment the
+	// position once the user will fire the shoot.
 	bullet.velocity = new THREE.Vector3(
-    rootHero.getDirection(v).x,
-    rootHero.getDirection(v).y,
-    rootHero.getDirection(v).z
+    rootHero.getDirection(vel).x,
+    rootHero.getDirection(vel).y,
+    rootHero.getDirection(vel).z
   );
+
+  // Return the bullet mesh
   return bullet;
 }
 
