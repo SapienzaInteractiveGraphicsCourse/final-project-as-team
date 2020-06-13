@@ -287,6 +287,7 @@ function animate() {
 
   // Here the bullets will go
   if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+    // Create the bullet
     let bullet = new Bullet(controls);
     bullet.alive = true;
 
