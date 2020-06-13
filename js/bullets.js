@@ -7,16 +7,23 @@ var Bullet = function(rootHero){
     specular: 0xdb55,
     flatShading: true
   });
-  let camera = rootHero.getObject();
-  let v = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
-  const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-	// Position the bullet at the end of player's gun
-	bullet.position.set(
-		camera.position.x + 6,
-		camera.position.y + 2,
-		camera.position.z - 10
-	);
+  let shiningShooterDetailGun = rootHero.getObject().getObjectByName("shiningShooterDetailGun");
 
+  // We get the position of the last part of the gun, the one where the bullets came from,
+  // in order to assign it to the the bullet.
+  let position = new THREE.Vector3();
+  // The position is the world space
+  position.getPositionFromMatrix(shiningShooterDetailGun.matrixWorld);
+
+
+  let vel = new THREE.Vector3(-Math.sin(camera.rotation.y), 0, Math.cos(camera.rotation.y));
+  const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+
+  // We copy the position
+  bullet.position.copy(position);
+
+  // The bullet should always be straight, so should follow the rotation
+  // of the hero, which is controlled by the pointer.
   bullet.rotation.set(
     rootHero.getObject().rotation.x,
     rootHero.getObject().rotation.y,
@@ -24,8 +31,11 @@ var Bullet = function(rootHero){
   )
 
 	// set the velocity of the bullet
-	bullet.velocity = rootHero.getDirection(v);
-  console.log(bullet.velocity);
+	bullet.velocity = new THREE.Vector3(
+    rootHero.getDirection(v).x,
+    rootHero.getDirection(v).y,
+    rootHero.getDirection(v).z
+  );
   return bullet;
 }
 

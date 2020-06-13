@@ -265,18 +265,6 @@ function animate() {
       prevTime = time;
   }
 
-  // go through bullets array and update position
-  // remove bullets when appropriate
-  for(var index=0; index<bulletsArray.length; index+=1){
-      if( bulletsArray[index] === undefined ) continue;
-      if( bulletsArray[index].alive == false ){
-          bulletsArray.splice(index,1);
-          continue;
-      }
-      //bulletsArray[index].position.z +=-50 * new THREE.Clock().getDelta();
-      bulletsArray[index].position.add(bulletsArray[index].velocity);
-  }
-
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
     // heroAnimation.walking();
@@ -317,7 +305,19 @@ function animate() {
 
   if(shootingInterval > 0) shootingInterval -=1;
 
-  renderer.render( scene, mainCharCamera );
+  // go through bullets array and update position
+  // remove bullets when appropriate
+  for(var index=0; index<bulletsArray.length; index+=1){
+      if( bulletsArray[index] === undefined ) continue;
+      if( bulletsArray[index].alive == false ){
+          bulletsArray.splice(index,1);
+          continue;
+      }
+      //bulletsArray[index].position.z +=-50 * new THREE.Clock().getDelta();
+      bulletsArray[index].position.add(bulletsArray[index].velocity);
+  }
+
+  renderer.render(scene, mainCharCamera);
 
   requestAnimationFrame(animate);
 
