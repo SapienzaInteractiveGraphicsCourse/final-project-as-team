@@ -20,6 +20,21 @@ let mouse = {};
 let bulletsArray = [];
 // Shooting interval (interval between one shot and the next)
 let shootingInterval = 0;
+// Instantiate the sound manager for the effects of the game
+const soundManager = new SoundManager();
+// Create the audio Listener
+const listener = new THREE.AudioListener();
+var context = new AudioContext();
+// Create the sounds
+/*const blasterSound = soundManager.createSound(listener, "blaster");
+const reloadSound = soundManager.createSound(listener, "reload");
+const breathingSound = soundManager.createSound(listener, "breath");*/
+var audioLoader = new THREE.AudioLoader();
+var audio = new THREE.Audio(listener);
+audio.crossOrigin = "anonymous";
+audioLoader.load("js/sounds/walking.wav", function(buffer) {
+	audio.setBuffer(buffer);
+});
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
@@ -84,11 +99,6 @@ var canJump = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
-
-// Instantiate the sound manager for the effects of the game
-const soundManager = new SoundManager();
-// Create the audio Listener
-const listener = new THREE.AudioListener();
 
 function init() {
   scene = new THREE.Scene();
@@ -173,9 +183,6 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
 
-  // Play the breath sound
-  soundManager.playSound(listener, "breath");
-
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
 }
@@ -217,6 +224,11 @@ window.addEventListener('mouseup', mouseUp);
  */
 function keyDown(event){
   keyboard[event.keyCode] = true;
+  context.resume().then(() => {
+    if(keyboard[87]){
+      audio.play();
+    }
+  });
 }
 /**
  * Function to handle the un-click on a key
@@ -225,8 +237,12 @@ function keyDown(event){
  */
 function keyUp(event){
   keyboard[event.keyCode] = false;
+  context.resume().then(() => {
+    if(!keyboard[87]){
+      audio.stop();
+    }
+  });
 }
-
 
 // Listeners
 window.addEventListener('keydown', keyDown);
@@ -248,7 +264,6 @@ function animate() {
         // If the reload flag is false
         if(!heroAnimation.reloadFlag){
           heroAnimation.reloadFlag = true;
-          soundManager.playSound(listener, "reload");
         }
       }
       // If W or Up are pressed
@@ -313,10 +328,6 @@ function animate() {
     let bullet = new Bullet(controls);
     bullet.alive = true;
 
-    if(bullet.alive){
-      soundManager.playSound(listener, "blaster");
-    }
-
     setTimeout(function () {
       bullet.alive = false;
       scene.remove(bullet);
@@ -349,7 +360,6 @@ function animate() {
 
 	TWEEN.update();
 }
-
 
 init();
 animate();
