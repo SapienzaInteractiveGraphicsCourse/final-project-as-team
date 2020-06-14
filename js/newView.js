@@ -1,11 +1,9 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {PointerLockControls} from './three.js-master/examples/jsm/controls/PointerLockControls.js';
-//import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
-//import {AnimateRobot} from './robot-animations.js';
-//import {KillingRobot} from './robot.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
+import {SoundManager} from './sound-manager.js'
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -87,12 +85,10 @@ var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 
-// create an AudioListener and add it to the camera
-var listener = new THREE.AudioListener();
-// load a sound and set it as the Audio object's buffer
-var audioLoader = new THREE.AudioLoader();
-// create a global audio source
-var sound = new THREE.Audio(listener);
+// Instantiate the sound manager for the effects of the game
+const soundManager = new SoundManager();
+// Create the audio Listener
+const listener = new THREE.AudioListener();
 
 function init() {
   scene = new THREE.Scene();
@@ -119,6 +115,7 @@ function init() {
   mainCharCamera = mainChar.getObjectByName("heroCamera");
   scene.add(mainChar);
 
+  // Add the listener to the camera
   mainCharCamera.add(listener);
 
   // Use the pointer to rotate the main char
@@ -176,6 +173,8 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
 
+  // Play the breath sound
+  soundManager.playSound(listener, "breath");
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
@@ -249,11 +248,7 @@ function animate() {
         // If the reload flag is false
         if(!heroAnimation.reloadFlag){
           heroAnimation.reloadFlag = true;
-          audioLoader.load('js/sounds/reload.wav', function( buffer ) {
-          	sound.setBuffer(buffer);
-          	sound.setVolume(2);
-          	sound.play();
-          });
+          soundManager.playSound(listener, "reload");
         }
       }
       // If W or Up are pressed
@@ -319,12 +314,7 @@ function animate() {
     bullet.alive = true;
 
     if(bullet.alive){
-      audioLoader.load('js/sounds/blaster.wav', function( buffer ) {
-      	sound.setBuffer(buffer);
-      	sound.setVolume(2);
-        sound.duration = 0.3;
-      	sound.play();
-      });
+      soundManager.playSound(listener, "blaster");
     }
 
     setTimeout(function () {
