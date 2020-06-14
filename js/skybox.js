@@ -89,6 +89,7 @@ var canJump = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
+var isWalking = false;
 
 function init() {
   scene = new THREE.Scene();
@@ -270,19 +271,24 @@ function animate() {
       // If W or Up are pressed
       if(keyboard[87] || keyboard[38]){
         velocity.z -= 400.0 * delta;
+        isWalking = true;
       }
       // If S or Down are pressed
       if(keyboard[83] || keyboard[40]){
         velocity.z += 400.0 * delta;
+        isWalking = true;
       }
       // If A or Left are pressed
       if(keyboard[65] || keyboard[37]){
         velocity.x -= 400.0 * delta;
+        isWalking = true;
       }
       // If D or Right are pressed
       if(keyboard[68] || keyboard[39]){
          velocity.x += 400.0 * delta;
+         isWalking = true;
       }
+
       velocity.y = Math.max( 0, velocity.y );
       canJump = true;
       controls.getObject().translateX( velocity.x * delta );
@@ -297,13 +303,21 @@ function animate() {
       prevTime = time;
   }
 
+  if (isWalking) mainChar.position.y = 10;
+  
+
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
-    heroAnimation.walking();
+    heroAnimation.walking();  
+    console.log(mainChar.position.y);  
+    //mainChar.position.y = 1;
   }
   // If UpDownLeftRight is pressed, the walking animation is triggered
   if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
     heroAnimation.walking();
+    console.log(mainChar.position.y);
+    //console.log("prima " + mainChar.position.y);  
+    //mainChar.position.y = 1;
   }
 
   // Activate the target mode if we right-click once
