@@ -90,9 +90,7 @@ var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 
-
 function init() {
-
   scene = new THREE.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
@@ -110,10 +108,6 @@ function init() {
   light2.shadow.camera.near = 0.5;    // default
   light2.shadow.camera.far = 500;     // default
 
-
-  var axesHelper = new THREE.AxesHelper( 20 );
-  scene.add( axesHelper );
-
   // Init the main character
   mainChar = new Hero();
   mainChar.castShadow = true;
@@ -121,11 +115,12 @@ function init() {
   mainCharCamera = mainChar.getObjectByName("heroCamera");
   scene.add(mainChar);
 
-  // Instantiate the class for animations
-  heroAnimation = new AnimateHero(mainChar);
-
+  // Use the pointer to rotate the main char
   controls = new PointerLockControls(mainChar);
   scene.add(controls.getObject());
+
+  // Instantiate the class for animations
+  heroAnimation = new AnimateHero(mainChar);
 
   // Create floor and add texture
   const planeSize = 4000;
@@ -198,45 +193,6 @@ function init() {
     }
   }
 
-  /*{
-    var loaderTree1 = new GLTFLoader();
-
-
-    // Load a glTF resource
-    loaderTree1.load(
-      // resource URL
-      './js/models/tree6/scene.gltf',
-      // called when the resource is loaded
-      function ( gltf ) {
-
-        scene.add( gltf.scene );
-
-        gltf.scene.scale.set(5, 5, 5);
-
-        //gltf.animations; // Array<THREE.AnimationClip>
-        gltf.scene; // THREE.Group
-        gltf.scenes; // Array<THREE.Group>
-        gltf.cameras; // Array<THREE.Camera>
-        gltf.asset; // Object
-
-        //render();
-
-      },
-      // called while loading is progressing
-      function ( xhr ) {
-
-        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-      },
-      // called when loading has errors
-      function ( error ) {
-
-        console.log( 'An error happened' );
-
-      }
-    );
-  }*/
-
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
 }
@@ -294,7 +250,6 @@ window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
 function animate() {
-
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
 
@@ -342,40 +297,35 @@ function animate() {
       prevTime = time;
   }
 
-  // go through bullets array and update position
-  // remove bullets when appropriate
-  for(var index=0; index<bulletsArray.length; index+=1){
-      if( bulletsArray[index] === undefined ) continue;
-      if( bulletsArray[index].alive == false ){
-          bulletsArray.splice(index,1);
-          continue;
-      }
-      //bulletsArray[index].position.z +=-50 * new THREE.Clock().getDelta();
-      bulletsArray[index].position.add(bulletsArray[index].velocity);
-  }
-
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
-    // heroAnimation.walking();
+    heroAnimation.walking();
   }
   // If UpDownLeftRight is pressed, the walking animation is triggered
   if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
-    // heroAnimation.walking();
+    heroAnimation.walking();
   }
 
-  if(mouse[2]){ // Right-click of the mouse
-    // heroAnimation.activateTargetMode = !heroAnimation.activateTargetMode;
-    // heroAnimation.targetMode();
+  // Activate the target mode if we right-click once
+  if(keyboard[16]){
+    heroAnimation.activateTargetMode = true;
   }
+  else{
+    heroAnimation.activateTargetMode = false;
+  }
+
+  heroAnimation.targetMode();
+  heroAnimation.returnFromTargetMode();
 
   // We need a separate if condition, otherwise the shooting animation
   // will go ten frames slower.
   if(mouse[0]){ // Left-click of the mouse
-    // heroAnimation.shooting();
+    heroAnimation.shooting();
   }
 
   // Here the bullets will go
   if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+    // Create the bullet
     let bullet = new Bullet(controls);
     bullet.alive = true;
 
@@ -394,8 +344,18 @@ function animate() {
 
   if(shootingInterval > 0) shootingInterval -=1;
 
-  //renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.render( scene, mainCharCamera );
+  // go through bullets array and update position
+  // remove bullets when appropriate
+  for(var index=0; index<bulletsArray.length; index+=1){
+      if( bulletsArray[index] === undefined ) continue;
+      if( bulletsArray[index].alive == false ){
+          bulletsArray.splice(index,1);
+          continue;
+      }
+      bulletsArray[index].position.add(bulletsArray[index].velocity);
+  }
+
+  renderer.render(scene, mainCharCamera);
 
   requestAnimationFrame(animate);
 
