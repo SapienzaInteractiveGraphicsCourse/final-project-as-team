@@ -12,6 +12,7 @@ var geometry, material, mesh;
 let mainChar, mainCharCamera, heroAnimation;
 var controls;
 var objects = [];
+var step = 1;
 
 // Add event listener for pressing the keys on the keyboard
 let keyboard = {};
@@ -85,7 +86,6 @@ var moveForward = false;
 var moveBackward = false;
 var moveLeft = false;
 var moveRight = false;
-var canJump = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
@@ -198,6 +198,7 @@ function init() {
   window.addEventListener( 'resize', onWindowResize, false );
 }
 
+
 function onWindowResize() {
     mainCharCamera.aspect = window.innerWidth / window.innerHeight;
     mainCharCamera.updateProjectionMatrix();
@@ -288,9 +289,7 @@ function animate() {
          velocity.x += 400.0 * delta;
          isWalking = true;
       }
-
       velocity.y = Math.max( 0, velocity.y );
-      canJump = true;
       controls.getObject().translateX( velocity.x * delta );
       controls.getObject().translateY( velocity.y * delta );
       controls.getObject().translateZ( velocity.z * delta );
@@ -298,7 +297,6 @@ function animate() {
       if (controls.getObject().position.y < 10 ) {
           velocity.y = 0;
           controls.getObject().position.y = 10;
-          canJump = true;
       }
       prevTime = time;
   }
@@ -309,15 +307,10 @@ function animate() {
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
     heroAnimation.walking();  
-    console.log(mainChar.position.y);  
-    //mainChar.position.y = 1;
   }
   // If UpDownLeftRight is pressed, the walking animation is triggered
   if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
     heroAnimation.walking();
-    console.log(mainChar.position.y);
-    //console.log("prima " + mainChar.position.y);  
-    //mainChar.position.y = 1;
   }
 
   // Activate the target mode if we right-click once
