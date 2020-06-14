@@ -77,9 +77,6 @@ if ( havePointerLock ) {
     instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
-init();
-animate();
-
 var controlsEnabled = false;
 var moveForward = false;
 var moveBackward = false;
@@ -89,6 +86,13 @@ var canJump = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
+
+// create an AudioListener and add it to the camera
+var listener = new THREE.AudioListener();
+// load a sound and set it as the Audio object's buffer
+var audioLoader = new THREE.AudioLoader();
+// create a global audio source
+var sound = new THREE.Audio(listener);
 
 function init() {
   scene = new THREE.Scene();
@@ -114,6 +118,8 @@ function init() {
   mainChar.receiveShadow = true;
   mainCharCamera = mainChar.getObjectByName("heroCamera");
   scene.add(mainChar);
+
+  mainCharCamera.add(listener);
 
   // Use the pointer to rotate the main char
   controls = new PointerLockControls(mainChar);
@@ -307,6 +313,16 @@ function animate() {
     let bullet = new Bullet(controls);
     bullet.alive = true;
 
+    if(bullet.alive){
+      audioLoader.load('js/sounds/blaster.wav', function( buffer ) {
+      	sound.setBuffer(buffer);
+      	sound.setVolume(2);
+        sound.duration = 0.3;
+      	sound.play();
+        console.log(sound.duration);
+      });
+    }
+
     setTimeout(function () {
       bullet.alive = false;
       scene.remove(bullet);
@@ -339,3 +355,7 @@ function animate() {
 
 	TWEEN.update();
 }
+
+
+init();
+animate();
