@@ -249,6 +249,11 @@ function animate() {
         // If the reload flag is false
         if(!heroAnimation.reloadFlag){
           heroAnimation.reloadFlag = true;
+          audioLoader.load('js/sounds/reload.wav', function( buffer ) {
+          	sound.setBuffer(buffer);
+          	sound.setVolume(2);
+          	sound.play();
+          });
         }
       }
       // If W or Up are pressed
@@ -319,7 +324,6 @@ function animate() {
       	sound.setVolume(2);
         sound.duration = 0.3;
       	sound.play();
-        console.log(sound.duration);
       });
     }
 
