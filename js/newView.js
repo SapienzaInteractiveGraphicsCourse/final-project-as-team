@@ -272,12 +272,15 @@ function animate() {
   }
 
   // Activate the target mode if we right-click once
-  if(keyboard[16] && !heroAnimation.deactivateTargetMode){
+  if(keyboard[16]){
     heroAnimation.activateTargetMode = true;
   }
+  else{
+    heroAnimation.activateTargetMode = false;
+  }
 
-  // heroAnimation.targetMode();
-  // heroAnimation.returnFromTargetMode();
+  heroAnimation.targetMode();
+  heroAnimation.returnFromTargetMode();
 
   // We need a separate if condition, otherwise the shooting animation
   // will go ten frames slower.

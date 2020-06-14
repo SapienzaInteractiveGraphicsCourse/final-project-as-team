@@ -14,9 +14,8 @@ class AnimateHero {
     // Flags for triggering animations
     // Reload
     this.reloadFlag = true;
-    // Look through the target
+    // Look through the target boolean flag
     this.activateTargetMode = false;
-    this.deactivateTargetMode = false;
 
     // Original position used for animations
     this.startingArmPos = root.getObjectByName("heroRightArm").position.z;
@@ -62,8 +61,8 @@ class AnimateHero {
    * @return {void} The function just updates the position .
    */
   walking(){
-    this.root.getObjectByName("heroCamera").position.y += Math.sin(this.verticalPosition) * 0.0025;
-    this.verticalPosition += Math.PI/32;
+    this.root.getObjectByName("torso").position.y += Math.sin(this.verticalPosition) * 0.0025;
+    this.verticalPosition += Math.PI/16;
   }
 
   /**
@@ -104,17 +103,14 @@ class AnimateHero {
       if(this.root.getObjectByName("heroCamera").position.z.toPrecision(2) != cameraDestPos.z.toPrecision(2)){
         this.root.getObjectByName("heroCamera").position.z -= 0.5;
       }
-
-      if(
-        this.root.getObjectByName("heroCamera").position.x.toPrecision(2) == cameraDestPos.x.toPrecision(2) &&
-        this.root.getObjectByName("heroCamera").position.y.toPrecision(2) == cameraDestPos.y.toPrecision(2) &&
-        this.root.getObjectByName("heroCamera").position.z.toPrecision(2) == cameraDestPos.z.toPrecision(2)
-      ){
-        this.activateTargetMode = false;
-      }
     }
   }
 
+  /**
+   * This function allows to set back the camera as it was, in order to return
+   * to the correct view
+   * @return {void} The function does not return anything.
+   */
   returnFromTargetMode(){
     // Came back to the orginal view
     if(!this.activateTargetMode){
