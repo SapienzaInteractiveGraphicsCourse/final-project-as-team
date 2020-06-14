@@ -96,6 +96,18 @@ function init() {
   light.position.set( 0.5, 1, 0.75 );
   scene.add(light);
 
+  // Create a DirectionalLight and turn on shadows for the light
+  var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
+  light2.position.set(-5, 10, 20); 			//default; light shining from top
+  light2.castShadow = true;            // default false
+  scene.add( light2 );
+
+  // Set up shadow properties for the light
+  light2.shadow.mapSize.width = 512;  // default
+  light2.shadow.mapSize.height = 512; // default
+  light2.shadow.camera.near = 0.5;    // default
+  light2.shadow.camera.far = 500;     // default
+
   // Init the main character
   mainChar = new Hero();
   mainChar.castShadow = true;
@@ -157,6 +169,7 @@ function init() {
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
+
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
