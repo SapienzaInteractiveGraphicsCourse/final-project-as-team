@@ -91,6 +91,10 @@ const models = {
   tree:    { url: './js/models/tree6/scene.gltf' },
   tower:    { url: './js/models/tower1/scene.gltf' },
   railing:  { url: './js/models/railing/scene.gltf' },
+  tree:    { url: './js/models/tree6/scene.gltf' },
+  tree:    { url: './js/models/tree6/scene.gltf' },
+  tree:    { url: './js/models/tree6/scene.gltf' },
+  tree:    { url: './js/models/tree6/scene.gltf' },
 };
 {
   const gltfLoader = new GLTFLoader(manager);
@@ -282,10 +286,6 @@ function init() {
 
     Object.values(models).forEach((model, ndx) => {
       const clonedScene = SkeletonUtils.clone(model.gltf.scene);
-      if (models == tree) {
-        console.log(models.url);
-        
-      }
       const root = new THREE.Object3D();
       root.add(clonedScene);
       scene.add(root);
