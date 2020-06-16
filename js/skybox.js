@@ -1,6 +1,8 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {PointerLockControls} from './three.js-master/examples/jsm/controls/PointerLockControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
+import {MTLLoader} from './three.js-master/examples/jsm/loaders/MTLLoader.js';
+import {OBJLoader} from './three.js-master/examples/jsm/loaders/OBJLoader.js';
 //import {AnimateRobot} from './robot-animations.js';
 //import {KillingRobot} from './robot.js';
 import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.js';
@@ -20,6 +22,8 @@ let keyboard = {};
 // Object of mouse key codes
 let mouse = {};
 
+var loadingManager = null;
+
 // Add bullet array
 let bulletsArray = [];
 // Shooting interval (interval between one shot and the next)
@@ -27,6 +31,10 @@ let shootingInterval = 0;
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
+
+var mtlLoader = new MTLLoader();
+var objLoader = new OBJLoader();
+
 
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -88,24 +96,160 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
 };
 
 const models = {
-  tree:    { url: './js/models/tree6/scene.gltf' },
-  tower:    { url: './js/models/tower1/scene.gltf' },
-  railing:  { url: './js/models/railing/scene.gltf' },
-  tree:    { url: './js/models/tree6/scene.gltf' },
-  tree:    { url: './js/models/tree6/scene.gltf' },
-  tree:    { url: './js/models/tree6/scene.gltf' },
-  tree:    { url: './js/models/tree6/scene.gltf' },
-};
-{
-  const gltfLoader = new GLTFLoader(manager);
-  for (const model of Object.values(models)) {
-    gltfLoader.load(model.url, (gltf) => {
-      model.gltf = gltf;
-    });
-  }
+  1: {
+      obj: "./js/models/space-kit/metalStructure.obj",
+      mtl: "./js/models/space-kit/metalStructure.mtl",
+      mesh: null,
+      nameMesh: "metalStructure",
+      internal: false
+  },
+
+  2: {
+      obj: "./js/models/space-kit/alien.obj",
+      mtl: "./js/models/space-kit/alien.mtl",
+      mesh: null,
+      nameMesh: "alien",
+      internal: false
+  },
+  
+  3: {
+    obj: "./js/models/space-kit/astronaut.obj",
+    mtl: "./js/models/space-kit/astronaut.mtl",
+    mesh: null,
+    nameMesh: "astronaut",
+    internal: false
+  },
+
+  4: {
+    obj: "./js/models/space-kit/barrel.obj",
+    mtl: "./js/models/space-kit/barrel.mtl",
+    mesh: null,
+    nameMesh: "barrel",
+    internal: false
+  },
+
+  5: {
+    obj: "./js/models/space-kit/buildingCorner.obj",
+    mtl: "./js/models/space-kit/buildingCorner.mtl",
+    mesh: null,
+    nameMesh: "buildingCorner",
+    internal: false
+  },
+
+  6: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  7: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  8: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  9: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  10: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  11: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  12: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  13: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  14: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  15: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  16: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  17: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  18: {
+    obj: "./js/models/space-kit/craterLarge.obj",
+    mtl: "./js/models/space-kit/craterLarge.mtl",
+    mesh: null,
+    nameMesh: "craterLarge",
+    internal: false
+  },
+
+  19: {
+    obj: "./js/models/space-kit/spaceCraft1.obj",
+    mtl: "./js/models/space-kit/spaceCraft1.mtl",
+    mesh: null,
+    nameMesh: "spaceCraft1",
+    internal: false
+  },
 }
 
-//init();
+init();
 
 var controlsEnabled = false;
 var moveForward = false;
@@ -202,6 +346,41 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
 
+  var x = -20;
+  var z = -20;
+  for (var _key in models) {
+    (function (key) {
+        if (models[key].internal==false) {
+
+          mtlLoader = new MTLLoader();
+
+          mtlLoader.load(models[key].mtl, function (materials) {
+              materials.preload();
+
+              objLoader = new OBJLoader();
+              objLoader.setMaterials(materials);
+              objLoader.load(models[key].obj, function (mesh) {
+
+
+                      mesh.traverse(function (child) {
+                              child.castShadow = true;
+                              child.receiveShadow = true;
+                          });
+
+                  models[key].mesh = mesh;
+                  mesh.position.set(x, 0, z);
+                  x -= 20;
+                  z -= 20;
+                  scene.add(mesh);
+
+              });
+          });
+        }
+        else {
+          models[key].mesh=createInternalMesh(models[key].texture, models[key].size1, models[key].size2, models[key].size3, models[key].shape);
+        }
+    })(_key);
+  }
   /*{
     var loaderModels = new GLTFLoader();
 
@@ -284,18 +463,42 @@ function init() {
 
     }*/
 
-    Object.values(models).forEach((model, ndx) => {
+    /*Object.values(models).forEach((model, ndx) => {
       const clonedScene = SkeletonUtils.clone(model.gltf.scene);
       const root = new THREE.Object3D();
       root.add(clonedScene);
       scene.add(root);
       root.position.x = (ndx - 3) * 3;
-    });
+    });*/
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
 
   animate();
+}
+
+function loadModels() {
+  for (var key in models) {
+        if (models[key].internal==false) {
+
+          var mtlLoader = new MTLLoader(loadingManager);
+          console.log(models[key].mtl);
+          
+          mtlLoader.load(models[key].mtl, function (materials) {
+              materials.preload();
+
+              var objLoader = new OBJLoader(loadingManager);
+
+              objLoader.setMaterials(materials);
+              objLoader.load(models[key].obj, function (mesh) {
+
+              scene.add(mesh);
+              //models[key].mesh = mesh;
+
+              });
+          });
+        }
+  }
 }
 
 
