@@ -4,12 +4,22 @@ import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 import {SoundManager} from './sound-manager.js'
+import { EffectComposer } from './three.js-master/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from './three.js-master/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from './three.js-master/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 var camera, scene, renderer;
 var geometry, material, mesh;
 let mainChar, mainCharCamera, heroAnimation;
 var controls;
 var objects = [];
+var composer;
+var params = {
+				exposure: 0.7,
+				bloomStrength: 0.3,
+				bloomThreshold: 0,
+				bloomRadius: 3
+			};
 
 // Add event listener for pressing the keys on the keyboard
 let keyboard = {};
@@ -239,6 +249,15 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
 
+  var bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+	bloomPass.threshold = params.bloomThreshold;
+	bloomPass.strength = params.bloomStrength;
+	bloomPass.radius = params.bloomRadius;
+  var renderScene = new RenderPass( scene, mainCharCamera );
+	composer = new EffectComposer( renderer );
+	composer.addPass( renderScene );
+	composer.addPass( bloomPass );
+
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
 
@@ -252,6 +271,8 @@ function onWindowResize() {
     mainCharCamera.aspect = window.innerWidth / window.innerHeight;
     mainCharCamera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
+
+    composer.setSize( window.innerWidth,  window.innerHeight );
 }
 
 // Functions for click listener
@@ -433,6 +454,8 @@ function animate() {
   }
 
   renderer.render(scene, mainCharCamera);
+
+  composer.render();
 
   requestAnimationFrame(animate);
 
