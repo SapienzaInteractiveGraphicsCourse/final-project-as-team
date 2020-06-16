@@ -27,8 +27,12 @@ var Bullet = function(rootHero){
   // the cosine and the sine. When we rotate up or down the direction is always the same
   // what changes is just the position.
   let vel = new THREE.Vector3(-Math.sin(shiningShooterDetailGun.rotation.y), 0, Math.cos(shiningShooterDetailGun.rotation.y));
-  const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-
+  const bullet = new Physijs.BoxMesh(
+		  bulletGeometry,
+			bulletMaterial,
+			300 // mass
+		);//new THREE.Mesh(bulletGeometry, bulletMaterial);
+    bullet.name = "laserBeam";
   // We copy the position
   bullet.position.copy(position);
 

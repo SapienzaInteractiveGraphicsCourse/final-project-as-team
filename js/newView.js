@@ -100,13 +100,34 @@ function init() {
   // Box
 	let box = new Physijs.BoxMesh(
 			new THREE.CubeGeometry( 20, 20, 20 ),
-			new THREE.MeshBasicMaterial({ color: 0x888888 }),
-      100
+			new THREE.MeshPhongMaterial({ color: 0x888888 }),
+      300
 		);
+  box.castShadow = true;
+  box.receiveShadow = true;
+  box.position.set(0, 50, -60);
   scene.add(box);
 
+  // Box
+	let box2 = new Physijs.BoxMesh(
+			new THREE.CubeGeometry( 20, 20, 20 ),
+			new THREE.MeshToonMaterial({ color: "#FF0000" }),
+      280
+		);
+  box2.position.set(0, 10, -60);
+  box2.castShadow = true;
+  box2.receiveShadow = true;
+  scene.add(box2);
+  box2.addEventListener('collision', function(other_object, relative_velocity, relative_rotation, contact_normal) {
+    // `this` has collided with `other_object` with an impact speed of `relative_velocity` and a rotational force of `relative_rotation` and at normal `contact_normal`
+    if(other_object.name == "laserBeam"){
+      // scene.remove(box2);
+      console.log(box2.material);
+    }
+  });
+
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-  light.position.set( 0.5, 1, 0.75 );
+  light.position.set( 0.5, 20, 0.75 );
   scene.add(light);
 
   // Create a DirectionalLight and turn on shadows for the light
@@ -151,13 +172,20 @@ function init() {
   const repeats = planeSize / 2;
   texture.repeat.set(repeats, repeats);
 
-  const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+  const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
   const planeMat = new THREE.MeshPhongMaterial({
   map: texture,
   side: THREE.DoubleSide,
   shininess: 0,
   });
-  const mesh = new THREE.Mesh(planeGeo, planeMat);
+  // const mesh = new THREE.Mesh(planeGeo, planeMat);
+
+  // Define the ground
+  const mesh = new Physijs.PlaneMesh(
+    planeGeo,
+    planeMat,
+    0
+  );
   mesh.rotation.x = Math.PI * -.5;
   mesh.receiveShadow = true;
   scene.add(mesh);
@@ -377,6 +405,8 @@ function animate() {
           continue;
       }
       bulletsArray[index].position.add(bulletsArray[index].velocity);
+      bulletsArray[index].__dirtyPosition = true;
+      //bulletsArray[index]
   }
 
   renderer.render(scene, mainCharCamera);
