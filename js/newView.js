@@ -4,9 +4,9 @@ import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 import {SoundManager} from './sound-manager.js'
-import { EffectComposer } from './three.js-master/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from './three.js-master/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from './three.js-master/examples/jsm/postprocessing/UnrealBloomPass.js';
+import {EffectComposer} from './three.js-master/examples/jsm/postprocessing/EffectComposer.js';
+import {RenderPass} from './three.js-master/examples/jsm/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from './three.js-master/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 var camera, scene, renderer;
 var geometry, material, mesh;
