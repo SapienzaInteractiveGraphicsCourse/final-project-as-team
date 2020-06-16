@@ -35,6 +35,10 @@ var instructions = document.getElementById( 'instructions' );
 var mtlLoader = new MTLLoader();
 var objLoader = new OBJLoader();
 
+// Configure the Physijs physic engine scripts
+Physijs.scripts.worker = './js/physijs/physijs_worker.js';
+Physijs.scripts.ammo = './ammo.js';
+
 
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -99,6 +103,12 @@ const models = {
   1: {
       obj: "./js/models/space-kit/metalStructure.obj",
       mtl: "./js/models/space-kit/metalStructure.mtl",
+      x: -10,
+      y: 0,
+      z: -10,
+      size1: 1,
+      size2: 1,
+      size3: 1,
       mesh: null,
       nameMesh: "metalStructure",
       internal: false
@@ -107,6 +117,12 @@ const models = {
   2: {
       obj: "./js/models/space-kit/alien.obj",
       mtl: "./js/models/space-kit/alien.mtl",
+      x: -20,
+      y: 0,
+      z: -30,
+      size1: 1,
+      size2: 1,
+      size3: 1,
       mesh: null,
       nameMesh: "alien",
       internal: false
@@ -115,6 +131,12 @@ const models = {
   3: {
     obj: "./js/models/space-kit/astronaut.obj",
     mtl: "./js/models/space-kit/astronaut.mtl",
+    x: -30,
+    y: 0,
+    z: -40,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "astronaut",
     internal: false
@@ -123,6 +145,12 @@ const models = {
   4: {
     obj: "./js/models/space-kit/barrel.obj",
     mtl: "./js/models/space-kit/barrel.mtl",
+    x: -40,
+    y: 0,
+    z: -50,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "barrel",
     internal: false
@@ -132,6 +160,12 @@ const models = {
     obj: "./js/models/space-kit/buildingCorner.obj",
     mtl: "./js/models/space-kit/buildingCorner.mtl",
     mesh: null,
+    x: -50,
+    y: 0,
+    z: -60,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     nameMesh: "buildingCorner",
     internal: false
   },
@@ -139,6 +173,12 @@ const models = {
   6: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: -60,
+    y: 0,
+    z: -70,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -147,6 +187,12 @@ const models = {
   7: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: -70,
+    y: 0,
+    z: -80,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -155,6 +201,12 @@ const models = {
   8: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 10,
+    y: 0,
+    z: 10,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -163,6 +215,12 @@ const models = {
   9: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 20,
+    y: 0,
+    z: 30,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -171,6 +229,12 @@ const models = {
   10: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 30,
+    y: 0,
+    z: 50,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -179,6 +243,12 @@ const models = {
   11: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 40,
+    y: 0,
+    z: 60,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -187,6 +257,12 @@ const models = {
   12: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 50,
+    y: 0,
+    z: 70,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -195,6 +271,12 @@ const models = {
   13: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 60,
+    y: 0,
+    z: 80,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -203,6 +285,12 @@ const models = {
   14: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 70,
+    y: 0,
+    z: 90,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -211,6 +299,12 @@ const models = {
   15: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 80,
+    y: 0,
+    z: 100,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -219,6 +313,12 @@ const models = {
   16: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 90,
+    y: 0,
+    z: 110,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -227,6 +327,12 @@ const models = {
   17: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 100,
+    y: 0,
+    z: 120,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -235,6 +341,12 @@ const models = {
   18: {
     obj: "./js/models/space-kit/craterLarge.obj",
     mtl: "./js/models/space-kit/craterLarge.mtl",
+    x: 120,
+    y: 0,
+    z: 140,
+    size1: 1,
+    size2: 1,
+    size3: 1,
     mesh: null,
     nameMesh: "craterLarge",
     internal: false
@@ -243,6 +355,12 @@ const models = {
   19: {
     obj: "./js/models/space-kit/spaceCraft1.obj",
     mtl: "./js/models/space-kit/spaceCraft1.mtl",
+    x: 140,
+    y: 0,
+    z: 160,
+    size1: 10,
+    size2: 10,
+    size3: 10,
     mesh: null,
     nameMesh: "spaceCraft1",
     internal: false
@@ -267,7 +385,7 @@ function init() {
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
 
-  scene = new THREE.Scene();
+  scene = new Physijs.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add(light);
@@ -346,8 +464,17 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
 
-  var x = -20;
-  var z = -20;
+  loadLandscapeModels();
+  
+
+  // Listener for resize
+  window.addEventListener( 'resize', onWindowResize, false );
+
+  animate();
+}
+
+// load models and set position/size
+function loadLandscapeModels() {
   for (var _key in models) {
     (function (key) {
         if (models[key].internal==false) {
@@ -368,136 +495,14 @@ function init() {
                           });
 
                   models[key].mesh = mesh;
-                  mesh.position.set(x, 0, z);
-                  x -= 20;
-                  z -= 20;
+                  mesh.position.set(models[key].x, models[key].y, models[key].z);
+                  mesh.scale.set(models[key].size1, models[key].size2, models[key].size3);
                   scene.add(mesh);
 
               });
           });
         }
-        else {
-          models[key].mesh=createInternalMesh(models[key].texture, models[key].size1, models[key].size2, models[key].size3, models[key].shape);
-        }
     })(_key);
-  }
-  /*{
-    var loaderModels = new GLTFLoader();
-
-    for (var i=0; i<25; i++) {
-      loaderModels.load( './js/models/tree6/scene.gltf', function ( gltf ) {
-
-        gltf.scene.scale.set(8, 8, 8);
-
-        gltf.scene.position.x = ((Math.random() + Math.random()) / 2) * 2000 - 1000;
-        gltf.scene.position.z = ((Math.random() + Math.random()) / 2) * 1000 - 500;
-        gltf.scene.position.y = 0;
-
-        scene.add( gltf.scene );
-  
-      }, undefined, function ( error ) {
-  
-        console.error( error );
-  
-      } );
-
-    }
-
-    loaderModels.load( './js/models/tower1/scene.gltf', function ( gltf ) {
-
-        gltf.scene.scale.set(0.07, 0.07, 0.07);
-
-        gltf.scene.position.x = -400;
-        gltf.scene.position.z = -400;
-        gltf.scene.position.y = 0;
-        
-        scene.add( gltf.scene );
-  
-      }, undefined, function ( error ) {
-        
-        console.error( error );
-  
-      } );
-      var x_rail = -40;
-      for (var i=0; i<20; i++) {
-        loaderModels.load( './js/models/railing/scene.gltf', function ( gltf ) {
-
-          gltf.scene.scale.set(20, 20, 20);          
-
-          gltf.scene.position.x = x_rail;
-          x_rail += 42;
-          console.log(gltf.scene.position.x);
-          
-          gltf.scene.position.z = -40;
-          gltf.scene.position.y = 6;
-          
-          scene.add( gltf.scene );
-    
-        }, undefined, function ( error ) {
-          
-          console.error( error );
-    
-        } );
-    }
-
-    for (var i=0; i<20; i++) {
-      loaderModels.load( './js/models/railing/scene.gltf', function ( gltf ) {
-
-        gltf.scene.scale.set(20, 20, 20);          
-
-        gltf.scene.position.x = x_rail;
-        x_rail += 42;
-        console.log(gltf.scene.position.x);
-        
-        gltf.scene.position.z = 40;
-        gltf.scene.position.y = 6;
-        
-        scene.add( gltf.scene );
-  
-      }, undefined, function ( error ) {
-        
-        console.error( error );
-  
-      } );
-  }
-
-    }*/
-
-    /*Object.values(models).forEach((model, ndx) => {
-      const clonedScene = SkeletonUtils.clone(model.gltf.scene);
-      const root = new THREE.Object3D();
-      root.add(clonedScene);
-      scene.add(root);
-      root.position.x = (ndx - 3) * 3;
-    });*/
-
-  // Listener for resize
-  window.addEventListener( 'resize', onWindowResize, false );
-
-  animate();
-}
-
-function loadModels() {
-  for (var key in models) {
-        if (models[key].internal==false) {
-
-          var mtlLoader = new MTLLoader(loadingManager);
-          console.log(models[key].mtl);
-          
-          mtlLoader.load(models[key].mtl, function (materials) {
-              materials.preload();
-
-              var objLoader = new OBJLoader(loadingManager);
-
-              objLoader.setMaterials(materials);
-              objLoader.load(models[key].obj, function (mesh) {
-
-              scene.add(mesh);
-              //models[key].mesh = mesh;
-
-              });
-          });
-        }
   }
 }
 
