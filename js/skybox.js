@@ -365,6 +365,48 @@ const models = {
     nameMesh: "spaceCraft1",
     internal: false
   },
+
+  20: {
+    obj: "./js/models/martian/city colony.obj",
+    mtl: "./js/models/martian/city_colony.mtl",
+    x: 180,
+    y: 0,
+    z: 200,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    mesh: null,
+    nameMesh: "city_colon",
+    internal: false
+  },
+
+  21: {
+    obj: "./js/models/space-kit/stationLarge.obj",
+    mtl: "./js/models/space-kit/stationLarge.mtl",
+    x: -400,
+    y: 0,
+    z: -400,
+    size1: 50,
+    size2: 50,
+    size3: 50,
+    mesh: null,
+    nameMesh: "stationLarge",
+    internal: false
+  },
+
+  22: {
+    obj: "./js/models/space-kit/portal.obj",
+    mtl: "./js/models/space-kit/portal.mtl",
+    x: -400,
+    y: 0,
+    z: 400,
+    size1: 20,
+    size2: 20,
+    size3: 20,
+    mesh: null,
+    nameMesh: "portal",
+    internal: false
+  },
 }
 
 init();
