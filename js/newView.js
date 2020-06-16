@@ -24,17 +24,6 @@ let shootingInterval = 0;
 const soundManager = new SoundManager();
 // Create the audio Listener
 const listener = new THREE.AudioListener();
-var context = new AudioContext();
-// Create the sounds
-/*const blasterSound = soundManager.createSound(listener, "blaster");
-const reloadSound = soundManager.createSound(listener, "reload");
-const breathingSound = soundManager.createSound(listener, "breath");*/
-var audioLoader = new THREE.AudioLoader();
-var audio = new THREE.Audio(listener);
-audio.crossOrigin = "anonymous";
-audioLoader.load("js/sounds/walking.wav", function(buffer) {
-	audio.setBuffer(buffer);
-});
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
@@ -127,6 +116,8 @@ function init() {
 
   // Add the listener to the camera
   mainCharCamera.add(listener);
+  // Load all the sounds
+  soundManager.loadSounds(listener);
 
   // Use the pointer to rotate the main char
   controls = new PointerLockControls(mainChar);
@@ -185,6 +176,11 @@ function init() {
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
+
+  // Breathing all the time
+  soundManager.soundEffects["breath"].sound.context.resume().then(() => {
+    soundManager.soundEffects["breath"].sound.play();
+  });
 }
 
 function onWindowResize() {
@@ -224,11 +220,12 @@ window.addEventListener('mouseup', mouseUp);
  */
 function keyDown(event){
   keyboard[event.keyCode] = true;
-  context.resume().then(() => {
-    if(keyboard[87]){
-      audio.play();
-    }
-  });
+  // If the WASD is pressed, the walking sound is triggered
+  if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
+    soundManager.soundEffects["walking"].sound.context.resume().then(() => {
+      soundManager.soundEffects["walking"].sound.play();
+    });
+  }
 }
 /**
  * Function to handle the un-click on a key
@@ -237,11 +234,12 @@ function keyDown(event){
  */
 function keyUp(event){
   keyboard[event.keyCode] = false;
-  context.resume().then(() => {
-    if(!keyboard[87]){
-      audio.stop();
-    }
-  });
+  // If the WASD is not pressed, the walking sound is turned off
+  if(!keyboard[87] || !keyboard[65] || !keyboard[83] || !keyboard[68]){
+    soundManager.soundEffects["walking"].sound.context.resume().then(() => {
+      soundManager.soundEffects["walking"].sound.stop();
+    });
+  }
 }
 
 // Listeners
@@ -264,6 +262,10 @@ function animate() {
         // If the reload flag is false
         if(!heroAnimation.reloadFlag){
           heroAnimation.reloadFlag = true;
+          // Play the reload sound
+          soundManager.soundEffects["reload"].sound.context.resume().then(() => {
+            soundManager.soundEffects["reload"].sound.play();
+          });
         }
       }
       // If W or Up are pressed
@@ -327,6 +329,13 @@ function animate() {
     // Create the bullet
     let bullet = new Bullet(controls);
     bullet.alive = true;
+
+    // If the bullet is not disappear we play the sound
+    if(bullet.alive){
+      soundManager.soundEffects["blaster"].sound.context.resume().then(() => {
+        soundManager.soundEffects["blaster"].sound.play();
+      });
+    }
 
     setTimeout(function () {
       bullet.alive = false;
