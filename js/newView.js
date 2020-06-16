@@ -111,18 +111,37 @@ function init() {
   // Box
 	let box2 = new Physijs.BoxMesh(
 			new THREE.CubeGeometry( 20, 20, 20 ),
-			new THREE.MeshToonMaterial({ color: "#FF0000" }),
-      280
+      Physijs.createMaterial(
+        new THREE.MeshPhongMaterial({
+          color: "#00FF00",
+          shininess: 100,
+        }),
+        1,  // Friction
+        0.3   // Bounciness - restitution
+      ),
+      290
 		);
   box2.position.set(0, 10, -60);
   box2.castShadow = true;
   box2.receiveShadow = true;
   scene.add(box2);
+  box2.collisions = 0;
   box2.addEventListener('collision', function(other_object, relative_velocity, relative_rotation, contact_normal) {
     // `this` has collided with `other_object` with an impact speed of `relative_velocity` and a rotational force of `relative_rotation` and at normal `contact_normal`
     if(other_object.name == "laserBeam"){
-      // scene.remove(box2);
-      console.log(box2.material);
+      box2.collisions++;
+      if(box2.collisions == 1){
+        box2.material.color.set("#ECA348");
+      }
+      if(box2.collisions == 2){
+        box2.material.color.set("#E56947");
+      }
+      if(box2.collisions == 3){
+        box2.material.color.set("#F93600");
+      }
+      if(box2.collisions == 4){
+        scene.remove(box2);
+      }
     }
   });
 
@@ -173,12 +192,16 @@ function init() {
   texture.repeat.set(repeats, repeats);
 
   const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-  const planeMat = new THREE.MeshPhongMaterial({
-  map: texture,
-  side: THREE.DoubleSide,
-  shininess: 0,
-  });
-  // const mesh = new THREE.Mesh(planeGeo, planeMat);
+  // Material with friction
+  const planeMat = Physijs.createMaterial(
+    new THREE.MeshPhongMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+      shininess: 0,
+    }),
+    0.8,  // Friction
+    0.3   // Bounciness - restitution
+  );
 
   // Define the ground
   const mesh = new Physijs.PlaneMesh(
