@@ -25,6 +25,10 @@ const soundManager = new SoundManager();
 // Create the audio Listener
 const listener = new THREE.AudioListener();
 
+// Configure the Physijs physic engine scripts
+Physijs.scripts.worker = './js/physijs/physijs_worker.js';
+Physijs.scripts.ammo = './ammo.js';
+
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
 
@@ -90,7 +94,17 @@ var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 
 function init() {
-  scene = new THREE.Scene();
+  scene = new Physijs.Scene();
+  scene.setGravity(new THREE.Vector3( 0, -9.8, 0 ));
+
+  // Box
+	let box = new Physijs.BoxMesh(
+			new THREE.CubeGeometry( 20, 20, 20 ),
+			new THREE.MeshBasicMaterial({ color: 0x888888 }),
+      100
+		);
+  scene.add(box);
+
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add(light);
@@ -247,55 +261,57 @@ window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
 function animate() {
-    // Start with the reload animation, initially this is done once.
-    heroAnimation.reload();
+  // Run Physics
+  scene.simulate();
+  // Start with the reload animation, initially this is done once.
+  heroAnimation.reload();
 
-    if(controlsEnabled){
-      var time = performance.now();
-      var delta = ( time - prevTime ) / 1000;
-      velocity.x -= velocity.x * 10.0 * delta;
-      velocity.z -= velocity.z * 10.0 * delta;
-      velocity.y -= 9.8 * 100.0 * delta;
+  if(controlsEnabled){
+    var time = performance.now();
+    var delta = ( time - prevTime ) / 1000;
+    velocity.x -= velocity.x * 10.0 * delta;
+    velocity.z -= velocity.z * 10.0 * delta;
+    velocity.y -= 9.8 * 100.0 * delta;
 
-      // R - for reload the gun
-      if(keyboard[82]){
-        // If the reload flag is false
-        if(!heroAnimation.reloadFlag){
-          heroAnimation.reloadFlag = true;
-          // Play the reload sound
-          soundManager.soundEffects["reload"].sound.context.resume().then(() => {
-            soundManager.soundEffects["reload"].sound.play();
-          });
-        }
+    // R - for reload the gun
+    if(keyboard[82]){
+      // If the reload flag is false
+      if(!heroAnimation.reloadFlag){
+        heroAnimation.reloadFlag = true;
+        // Play the reload sound
+        soundManager.soundEffects["reload"].sound.context.resume().then(() => {
+          soundManager.soundEffects["reload"].sound.play();
+        });
       }
-      // If W or Up are pressed
-      if(keyboard[87] || keyboard[38]){
-        velocity.z -= 400.0 * delta;
-      }
-      // If S or Down are pressed
-      if(keyboard[83] || keyboard[40]){
-        velocity.z += 400.0 * delta;
-      }
-      // If A or Left are pressed
-      if(keyboard[65] || keyboard[37]){
-        velocity.x -= 400.0 * delta;
-      }
-      // If D or Right are pressed
-      if(keyboard[68] || keyboard[39]){
-         velocity.x += 400.0 * delta;
-      }
-      velocity.y = Math.max( 0, velocity.y );
-      canJump = true;
-      controls.getObject().translateX( velocity.x * delta );
-      controls.getObject().translateY( velocity.y * delta );
-      controls.getObject().translateZ( velocity.z * delta );
+    }
+    // If W or Up are pressed
+    if(keyboard[87] || keyboard[38]){
+      velocity.z -= 400.0 * delta;
+    }
+    // If S or Down are pressed
+    if(keyboard[83] || keyboard[40]){
+      velocity.z += 400.0 * delta;
+    }
+    // If A or Left are pressed
+    if(keyboard[65] || keyboard[37]){
+      velocity.x -= 400.0 * delta;
+    }
+    // If D or Right are pressed
+    if(keyboard[68] || keyboard[39]){
+       velocity.x += 400.0 * delta;
+    }
+    velocity.y = Math.max( 0, velocity.y );
+    canJump = true;
+    controls.getObject().translateX( velocity.x * delta );
+    controls.getObject().translateY( velocity.y * delta );
+    controls.getObject().translateZ( velocity.z * delta );
 
-      if (controls.getObject().position.y < 10 ) {
-          velocity.y = 0;
-          controls.getObject().position.y = 10;
-          canJump = true;
-      }
-      prevTime = time;
+    if (controls.getObject().position.y < 10 ) {
+        velocity.y = 0;
+        controls.getObject().position.y = 10;
+        canJump = true;
+    }
+    prevTime = time;
   }
 
   // If the WASD is pressed, the walking animation is triggered
@@ -367,7 +383,7 @@ function animate() {
 
   requestAnimationFrame(animate);
 
-	TWEEN.update();
+  TWEEN.update();
 }
 
 init();

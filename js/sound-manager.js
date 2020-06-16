@@ -10,10 +10,10 @@ class SoundManager {
     this.audioLoader =  new THREE.AudioLoader();
 
     this.soundEffects = {
-      blaster : { path: "js/sounds/blaster.wav", duration: 0.3, loop: false, volume: 0.8 },
+      blaster : { path: "js/sounds/blaster.wav", duration: 0.3, loop: false, volume: 0.6 },
       reload  : { path: "js/sounds/reload.wav", duration: -1, loop: false, volume: 0.4 },
-      walking : { path: "js/sounds/walking.aiff", duration: -1, loop: false, volume: null },
-      breath : { path: "js/sounds/breath.wav", duration: -1, loop: true, volume: 1 }
+      walking : { path: "js/sounds/walking.wav", duration: -1, loop: false, volume: 0.1 },
+      breath : { path: "js/sounds/breath.wav", duration: -1, loop: true, volume: 0.6 }
     }
   }
 
@@ -37,7 +37,7 @@ class SoundManager {
             newSound.duration = duration;
         }
         if(volume != null){
-          newSound.setVolume = volume;
+          newSound.setVolume(volume);
         }
         // Setting the loop
         newSound.setLoop(loop);
