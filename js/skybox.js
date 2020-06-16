@@ -3,6 +3,7 @@ import {PointerLockControls} from './three.js-master/examples/jsm/controls/Point
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 //import {AnimateRobot} from './robot-animations.js';
 //import {KillingRobot} from './robot.js';
+import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
@@ -78,8 +79,29 @@ if ( havePointerLock ) {
     instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
-init();
-animate();
+const manager = new THREE.LoadingManager();
+manager.onLoad = init;
+
+const progressbarElem = document.querySelector('#progressbar');
+manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+  progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
+};
+
+const models = {
+  tree:    { url: './js/models/tree6/scene.gltf' },
+  tower:    { url: './js/models/tower1/scene.gltf' },
+  railing:  { url: './js/models/railing/scene.gltf' },
+};
+{
+  const gltfLoader = new GLTFLoader(manager);
+  for (const model of Object.values(models)) {
+    gltfLoader.load(model.url, (gltf) => {
+      model.gltf = gltf;
+    });
+  }
+}
+
+//init();
 
 var controlsEnabled = false;
 var moveForward = false;
@@ -92,6 +114,11 @@ var rotation = new THREE.Vector3();
 var isWalking = false;
 
 function init() {
+
+  // hide the loading bar
+  const loadingElem = document.querySelector('#loading');
+  loadingElem.style.display = 'none';
+
   scene = new THREE.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
@@ -127,7 +154,7 @@ function init() {
   const planeSize = 4000;
 
   const loader = new THREE.TextureLoader();
-  const texture = loader.load('js/bg_images/DarkredBlack.jpg');
+  const texture = loader.load('js/bg_images/sabbia2.jpg');
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.magFilter = THREE.NearestFilter;
@@ -171,13 +198,13 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
 
-  {
-    var loaderTree1 = new GLTFLoader();
+  /*{
+    var loaderModels = new GLTFLoader();
 
-    for (var i=0; i<50; i++) {
-      loaderTree1.load( './js/models/tree6/scene.gltf', function ( gltf ) {
+    for (var i=0; i<25; i++) {
+      loaderModels.load( './js/models/tree6/scene.gltf', function ( gltf ) {
 
-        gltf.scene.scale.set(5, 5, 5);
+        gltf.scene.scale.set(8, 8, 8);
 
         gltf.scene.position.x = ((Math.random() + Math.random()) / 2) * 2000 - 1000;
         gltf.scene.position.z = ((Math.random() + Math.random()) / 2) * 1000 - 500;
@@ -192,10 +219,83 @@ function init() {
       } );
 
     }
+
+    loaderModels.load( './js/models/tower1/scene.gltf', function ( gltf ) {
+
+        gltf.scene.scale.set(0.07, 0.07, 0.07);
+
+        gltf.scene.position.x = -400;
+        gltf.scene.position.z = -400;
+        gltf.scene.position.y = 0;
+        
+        scene.add( gltf.scene );
+  
+      }, undefined, function ( error ) {
+        
+        console.error( error );
+  
+      } );
+      var x_rail = -40;
+      for (var i=0; i<20; i++) {
+        loaderModels.load( './js/models/railing/scene.gltf', function ( gltf ) {
+
+          gltf.scene.scale.set(20, 20, 20);          
+
+          gltf.scene.position.x = x_rail;
+          x_rail += 42;
+          console.log(gltf.scene.position.x);
+          
+          gltf.scene.position.z = -40;
+          gltf.scene.position.y = 6;
+          
+          scene.add( gltf.scene );
+    
+        }, undefined, function ( error ) {
+          
+          console.error( error );
+    
+        } );
+    }
+
+    for (var i=0; i<20; i++) {
+      loaderModels.load( './js/models/railing/scene.gltf', function ( gltf ) {
+
+        gltf.scene.scale.set(20, 20, 20);          
+
+        gltf.scene.position.x = x_rail;
+        x_rail += 42;
+        console.log(gltf.scene.position.x);
+        
+        gltf.scene.position.z = 40;
+        gltf.scene.position.y = 6;
+        
+        scene.add( gltf.scene );
+  
+      }, undefined, function ( error ) {
+        
+        console.error( error );
+  
+      } );
   }
+
+    }*/
+
+    Object.values(models).forEach((model, ndx) => {
+      const clonedScene = SkeletonUtils.clone(model.gltf.scene);
+      if (models == tree) {
+        console.log(models.url);
+        
+      }
+      const root = new THREE.Object3D();
+      root.add(clonedScene);
+      scene.add(root);
+      root.position.x = (ndx - 3) * 3;
+    });
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
+
+  animate();
 }
 
 
