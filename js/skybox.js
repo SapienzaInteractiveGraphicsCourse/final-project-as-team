@@ -100,9 +100,9 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
 };
 
 const models = {
-  1: {
-      obj: "./js/models/space-kit/metalStructure.obj",
-      mtl: "./js/models/space-kit/metalStructure.mtl",
+  /*1: {
+      obj: "./js/models/platform/tech_pedestal.obj",
+      mtl: "./js/models/platform/tech_pedestal.mtl",
       x: -10,
       y: 0,
       z: -10,
@@ -110,39 +110,45 @@ const models = {
       size2: 1,
       size3: 1,
       mesh: null,
-      nameMesh: "metalStructure",
+      nameMesh: "scene",
       internal: false
-  },
+  },*/
 
   2: {
-      obj: "./js/models/space-kit/buildingCorner.obj",
-      mtl: "./js/models/space-kit/buildingCorner.mtl",
-      x: -20,
-      y: 0,
-      z: -30,
-      size1: 2,
-      size2: 2,
-      size3: 2,
+      obj: "./js/models/Kameri lunar colony/Kameri lunar colony.obj",
+      mtl: "./js/models/Kameri lunar colony/Kameri_lunar_colony.mtl",
+      x: 0,
+      y: 140,
+      z: 500,
+      size1: 1,
+      size2: 1,
+      size3: 1,
+      rotation1: 0,
+      rotation2: Math.PI/2,
+      rotation3: 0,
       mesh: null,
-      nameMesh: "buildingCorner",
+      nameMesh: "Kameri_lunar_colony",
       internal: false
   },
   
   3: {
-    obj: "./js/models/space-kit/buildingCorridorOpen.obj",
-    mtl: "./js/models/space-kit/buildingCorridorOpen.mtl",
-    x: -30,
+    obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
+    mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
+    x: 1100,
     y: 0,
-    z: -40,
-    size1: 2,
-    size2: 2,
-    size3: 2,
+    z: 600,
+    size1: 10,
+    size2: 10,
+    size3: 10,
+    rotation1: 0,
+    rotation2: -Math.PI/2,
+    rotation3: 0,
     mesh: null,
     nameMesh: "buildingCorridorOpen",
     internal: false
   },
 
-  4: {
+  /*4: {
     obj: "./js/models/space-kit/itemWeapon.obj",
     mtl: "./js/models/space-kit/itemWeapon.mtl",
     x: -40,
@@ -213,146 +219,35 @@ const models = {
   },
 
   9: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 20,
+    obj: "./js/models/relay/source/VoT_PatrikRoy_b02_sketchfab.obj",
+    mtl: "./js/models/relay/source/VoT_PatrikRoy_b02_sketchfab.mtl",
+    x: 100,
     y: 0,
-    z: 30,
-    size1: 1,
-    size2: 1,
-    size3: 1,
+    z: 100,
+    size1: 10,
+    size2: 10,
+    size3: 10,
     mesh: null,
-    nameMesh: "craterLarge",
+    nameMesh: "relay",
     internal: false
   },
 
   10: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 30,
+    obj: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.obj",
+    mtl: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.mtl",
+    x: -200,
     y: 0,
-    z: 50,
-    size1: 1,
-    size2: 1,
-    size3: 1,
+    z: 200,
+    size1: 10,
+    size2: 10,
+    size3: 10,
     mesh: null,
-    nameMesh: "craterLarge",
+    nameMesh: "bigPharma",
     internal: false
   },
+
 
   11: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 40,
-    y: 0,
-    z: 60,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  12: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 50,
-    y: 0,
-    z: 70,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  13: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 60,
-    y: 0,
-    z: 80,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  14: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 70,
-    y: 0,
-    z: 90,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  15: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 80,
-    y: 0,
-    z: 100,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  16: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 90,
-    y: 0,
-    z: 110,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  17: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 100,
-    y: 0,
-    z: 120,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  18: {
-    obj: "./js/models/space-kit/craterLarge.obj",
-    mtl: "./js/models/space-kit/craterLarge.mtl",
-    x: 120,
-    y: 0,
-    z: 140,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "craterLarge",
-    internal: false
-  },
-
-  19: {
     obj: "./js/models/space-kit/spaceCraft1.obj",
     mtl: "./js/models/space-kit/spaceCraft1.mtl",
     x: 140,
@@ -366,7 +261,7 @@ const models = {
     internal: false
   },
 
-  20: {
+  12: {
     obj: "./js/models/martian/city colony.obj",
     mtl: "./js/models/martian/city_colony.mtl",
     x: 500,
@@ -380,7 +275,7 @@ const models = {
     internal: false
   },
 
-  21: {
+  13: {
     obj: "./js/models/space-kit/stationLarge.obj",
     mtl: "./js/models/space-kit/stationLarge.mtl",
     x: -400,
@@ -394,7 +289,7 @@ const models = {
     internal: false
   },
 
-  22: {
+  14: {
     obj: "./js/models/space-kit/portal.obj",
     mtl: "./js/models/space-kit/portal.mtl",
     x: -400,
@@ -406,7 +301,7 @@ const models = {
     mesh: null,
     nameMesh: "portal",
     internal: false
-  },
+  },*/
 }
 
 init();
@@ -531,15 +426,18 @@ function loadLandscapeModels() {
               objLoader.load(models[key].obj, function (mesh) {
 
 
-                      mesh.traverse(function (child) {
-                              child.castShadow = true;
-                              child.receiveShadow = true;
-                          });
+              mesh.traverse(function (child) {
+                      child.castShadow = true;
+                      child.receiveShadow = true;
+                  });
 
-                  models[key].mesh = mesh;
-                  mesh.position.set(models[key].x, models[key].y, models[key].z);
-                  mesh.scale.set(models[key].size1, models[key].size2, models[key].size3);
-                  scene.add(mesh);
+              models[key].mesh = mesh;
+              mesh.position.set(models[key].x, models[key].y, models[key].z);
+              mesh.scale.set(models[key].size1, models[key].size2, models[key].size3);
+              mesh.rotation.x = models[key].rotation1;
+              mesh.rotation.y = models[key].rotation2;
+              mesh.rotation.z = models[key].rotation3;
+              scene.add(mesh);
 
               });
           });
@@ -621,7 +519,7 @@ function animate() {
       }
       // If W or Up are pressed
       if(keyboard[87] || keyboard[38]){
-        velocity.z -= 400.0 * delta;
+        velocity.z -= 10000.0 * delta;
         isWalking = true;
       }
       // If S or Down are pressed
