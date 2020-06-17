@@ -135,11 +135,11 @@ const models = {
     obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
     mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
     x: 1100,
-    y: 0,
+    y: -55,
     z: 600,
-    size1: 10,
-    size2: 10,
-    size3: 10,
+    size1: 9,
+    size2: 9,
+    size3: 9,
     rotation1: 0,
     rotation2: -Math.PI/2,
     rotation3: 0,
@@ -316,6 +316,8 @@ var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 var isWalking = false;
 
+var cam;
+
 function init() {
 
   // hide the loading bar
@@ -344,17 +346,29 @@ function init() {
   mainChar.castShadow = true;
   mainChar.receiveShadow = true;
   mainCharCamera = mainChar.getObjectByName("heroCamera");
+  console.log("fov " + mainCharCamera.fov);
+  console.log("aspect " + mainCharCamera.aspect);
+  console.log("near " + mainCharCamera.near);
+  console.log("far " + mainCharCamera.far);
+  
   scene.add(mainChar);
 
+  // camera temporanea
+  const fov = 80;
+  const aspect = 2;  // the canvas default
+  const zNear = 0.1;
+  const zFar = 1000000000000;
+  cam = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
+
   // Use the pointer to rotate the main char
-  controls = new PointerLockControls(mainChar);
+  controls = new PointerLockControls(cam);
   scene.add(controls.getObject());
 
   // Instantiate the class for animations
   heroAnimation = new AnimateHero(mainChar);
 
   // Create floor and add texture
-  const planeSize = 4000;
+  const planeSize = 6000;
 
   const loader = new THREE.TextureLoader();
   const texture = loader.load('js/bg_images/sabbia2.jpg');
@@ -579,7 +593,7 @@ function animate() {
   }
 
   // Here the bullets will go
-  if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+  /*if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
     // Create the bullet
     let bullet = new Bullet(controls);
     bullet.alive = true;
@@ -608,9 +622,9 @@ function animate() {
           continue;
       }
       bulletsArray[index].position.add(bulletsArray[index].velocity);
-  }
+  }*/
 
-  renderer.render(scene, mainCharCamera);
+  renderer.render(scene, cam);
 
   requestAnimationFrame(animate);
 
