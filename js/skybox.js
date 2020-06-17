@@ -134,7 +134,7 @@ const models = {
   3: {
     obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
     mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
-    x: 1100,
+    x: 1200,
     y: -55,
     z: 600,
     size1: 9,
@@ -216,23 +216,23 @@ const models = {
     mesh: null,
     nameMesh: "VoT_PatrikRoy_b03_sketchfab",
     internal: false
-  },
+  },*/
 
   9: {
     obj: "./js/models/relay/source/VoT_PatrikRoy_b02_sketchfab.obj",
     mtl: "./js/models/relay/source/VoT_PatrikRoy_b02_sketchfab.mtl",
-    x: 100,
+    x: 6000,
     y: 0,
-    z: 100,
-    size1: 10,
-    size2: 10,
-    size3: 10,
+    z: 1000,
+    size1: 100,
+    size2: 100,
+    size3: 100,
     mesh: null,
     nameMesh: "relay",
     internal: false
   },
 
-  10: {
+  /*10: {
     obj: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.obj",
     mtl: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.mtl",
     x: -200,
