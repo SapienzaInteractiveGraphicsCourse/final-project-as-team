@@ -145,7 +145,7 @@ function createCamera(sizes){
   const fov = 80;
   const aspect = 2;  // the canvas default
   const zNear = 0.1;
-  const zFar = 100000000000000;
+  const zFar = 10000000000000;
   const heroCamera = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
   heroCamera.position.set(torsoWidth + 2, torsoHeight + 3.7, - 2.5);
   //heroCamera.lookAt(0, 0, 20);
