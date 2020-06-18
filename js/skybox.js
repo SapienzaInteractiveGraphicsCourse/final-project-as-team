@@ -101,7 +101,7 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
   progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
 };
 
-const models = {
+var models = {
   /*1: {
       obj: "./js/models/platform/tech_pedestal.obj",
       mtl: "./js/models/platform/tech_pedestal.mtl",
@@ -119,7 +119,7 @@ const models = {
   1: {
       obj: "./js/models/Kameri lunar colony/Kameri lunar colony.obj",
       mtl: "./js/models/Kameri lunar colony/Kameri_lunar_colony.mtl",
-      x: 0,
+      x: -1000,
       y: 140,
       z: 500,
       size1: 1,
@@ -136,14 +136,14 @@ const models = {
   2: {
     obj: "./js/models/Organodron City/Organodron City.obj",
     mtl: "./js/models/Organodron City/Organodron_City.mtl",
-    x: 1500,
-    y: 0,
-    z: 600,
+    x: 2500,
+    y: 250,
+    z: 2500,
     size1: 9,
     size2: 9,
     size3: 9,
     rotation1: 0,
-    rotation2: 0,
+    rotation2: Math.PI,
     rotation3: 0,
     mesh: null,
     nameMesh: "buildingCorridorOpen",
@@ -152,8 +152,8 @@ const models = {
   3: {
     obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
     mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
-    x: 1500,
-    y: -55,
+    x: 0,
+    y: -80,
     z: 600,
     size1: 9,
     size2: 9,
@@ -162,7 +162,7 @@ const models = {
     rotation2: -Math.PI/2,
     rotation3: 0,
     mesh: null,
-    nameMesh: "buildingCorridorOpen",
+    nameMesh: "floating_city",
     internal: false
   },
 
@@ -428,8 +428,9 @@ function init() {
   document.body.appendChild( renderer.domElement );
 
   //loadLandscapeModels();
+  loadModels();
 
-  {
+  /*{
     const mtlLoader = new MTLLoader();
     mtlLoader.load(models[3].mtl, (mtlParseResult) => {
     const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
@@ -487,7 +488,7 @@ function init() {
       scene.add(root);
     });
   });
-  }
+  }*/
 
   
 
@@ -501,14 +502,29 @@ function init() {
 
 // load models and set position/size
 function loadLandscapeModels() {  
-  for (var key in models) {          
-          const mtlLoader = new MTLLoader();
+
+  var mtlLoader;
+  var objLoader;
+    for (var key in models) {  
+    //console.log(key);    
+    //console.log(models[key].mtl);
+    mtlLoader  = new MTLLoader();
+    objLoader  = new OBJLoader2();
+    console.log(key);
+    console.log("prima del load: " + models[key].nameMesh);
+    
+    
+            
+          
           mtlLoader.load(models[key].mtl, (mtlParseResult) => {
-          const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-          for (const material of Object.values(materials)) {
+            console.log("processato " + models[key].nameMesh);
+            
+            
+          var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+          for (var material of Object.values(materials)) {
             material.side = THREE.DoubleSide;
           }
-          const objLoader = new OBJLoader2();
+          
           objLoader.addMaterials(materials);
           objLoader.load(models[key].obj, (root) => {
             root.position.set(models[key].x, models[key].y, models[key].z);
@@ -519,8 +535,51 @@ function loadLandscapeModels() {
             console.log(root);
             
             scene.add(root);
+            console.log("mandato " + models[key].nameMesh);
           });
         });
+  }
+}
+
+function loadModels() {
+
+  var mtlLoader;
+  var objLoader;
+  for (var _key in models) {
+      (function (key) {
+          //console.log(key);    
+          //console.log(models[key].mtl);
+          mtlLoader  = new MTLLoader();
+          console.log(key);
+          console.log("prima del load: " + models[key].nameMesh);
+          
+          
+                  
+                
+                mtlLoader.load(models[key].mtl, (mtlParseResult) => {
+                  console.log("processato " + models[key].nameMesh);
+                  
+                  
+                var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+                for (var material of Object.values(materials)) {
+                  material.side = THREE.DoubleSide;
+                }
+                
+                objLoader  = new OBJLoader2();
+                objLoader.addMaterials(materials);
+                objLoader.load(models[key].obj, (root) => {
+                  root.position.set(models[key].x, models[key].y, models[key].z);
+                  root.scale.set(models[key].size1, models[key].size2, models[key].size3);
+                  root.rotation.x = models[key].rotation1;
+                  root.rotation.y = models[key].rotation2;
+                  root.rotation.z = models[key].rotation3;
+                  console.log(root);
+                  
+                  scene.add(root);
+                  console.log("mandato " + models[key].nameMesh);
+                });
+              });
+      })(_key);
   }
 }
 
