@@ -3,6 +3,8 @@ import {PointerLockControls} from './three.js-master/examples/jsm/controls/Point
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 import {MTLLoader} from './three.js-master/examples/jsm/loaders/MTLLoader.js';
 import {OBJLoader} from './three.js-master/examples/jsm/loaders/OBJLoader.js';
+import {OBJLoader2} from './three.js-master/examples/jsm/loaders/OBJLoader2.js';
+import {MtlObjBridge} from './three.js-master/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
 //import {AnimateRobot} from './robot-animations.js';
 //import {KillingRobot} from './robot.js';
 import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.js';
@@ -32,8 +34,8 @@ let shootingInterval = 0;
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
 
-var mtlLoader = new MTLLoader();
-var objLoader = new OBJLoader();
+//var mtlLoader = new MTLLoader();
+//var objLoader = new OBJLoader2();
 
 // Configure the Physijs physic engine scripts
 Physijs.scripts.worker = './js/physijs/physijs_worker.js';
@@ -114,7 +116,7 @@ const models = {
       internal: false
   },*/
 
-  2: {
+  1: {
       obj: "./js/models/Kameri lunar colony/Kameri lunar colony.obj",
       mtl: "./js/models/Kameri lunar colony/Kameri_lunar_colony.mtl",
       x: 0,
@@ -131,10 +133,26 @@ const models = {
       internal: false
   },
   
+  2: {
+    obj: "./js/models/Organodron City/Organodron City.obj",
+    mtl: "./js/models/Organodron City/Organodron_City.mtl",
+    x: 1500,
+    y: 0,
+    z: 600,
+    size1: 9,
+    size2: 9,
+    size3: 9,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buildingCorridorOpen",
+    internal: false
+  },
   3: {
     obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
     mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
-    x: 1200,
+    x: 1500,
     y: -55,
     z: 600,
     size1: 9,
@@ -149,14 +167,14 @@ const models = {
   },
 
   /*4: {
-    obj: "./js/models/space-kit/itemWeapon.obj",
-    mtl: "./js/models/space-kit/itemWeapon.mtl",
+    obj: "./js/models/tunnel/tunnel-obj.obj",
+    mtl: "./js/models/tunnel/tunnel-obj.mtl",
     x: -40,
     y: 0,
     z: -50,
-    size1: 2,
-    size2: 2,
-    size3: 2,
+    size1: 3,
+    size2: 3,
+    size3: 3,
     mesh: null,
     nameMesh: "itemWeapon",
     internal: false
@@ -216,7 +234,7 @@ const models = {
     mesh: null,
     nameMesh: "VoT_PatrikRoy_b03_sketchfab",
     internal: false
-  },*/
+  },
 
   9: {
     obj: "./js/models/relay/source/VoT_PatrikRoy_b02_sketchfab.obj",
@@ -232,7 +250,7 @@ const models = {
     internal: false
   },
 
-  /*10: {
+  10: {
     obj: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.obj",
     mtl: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.mtl",
     x: -200,
@@ -346,22 +364,12 @@ function init() {
   mainChar.castShadow = true;
   mainChar.receiveShadow = true;
   mainCharCamera = mainChar.getObjectByName("heroCamera");
-  console.log("fov " + mainCharCamera.fov);
-  console.log("aspect " + mainCharCamera.aspect);
-  console.log("near " + mainCharCamera.near);
-  console.log("far " + mainCharCamera.far);
   
   scene.add(mainChar);
 
-  // camera temporanea
-  const fov = 80;
-  const aspect = 2;  // the canvas default
-  const zNear = 0.1;
-  const zFar = 1000000000000;
-  cam = new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
 
   // Use the pointer to rotate the main char
-  controls = new PointerLockControls(cam);
+  controls = new PointerLockControls(mainChar);
   scene.add(controls.getObject());
 
   // Instantiate the class for animations
@@ -413,9 +421,76 @@ function init() {
   renderer.setClearColor( 0xffffff );
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
+
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.BasicShadowMap;
+
   document.body.appendChild( renderer.domElement );
 
-  loadLandscapeModels();
+  //loadLandscapeModels();
+
+  {
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load(models[3].mtl, (mtlParseResult) => {
+    const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+    for (const material of Object.values(materials)) {
+      material.side = THREE.DoubleSide;
+    }
+    const objLoader = new OBJLoader2();
+    objLoader.addMaterials(materials);
+    objLoader.load(models[3].obj, (root) => {
+      root.position.set(models[3].x, models[3].y, models[3].z);
+      root.scale.set(models[3].size1, models[3].size2, models[3].size3);
+      root.rotation.x = models[3].rotation1;
+      root.rotation.y = models[3].rotation2;
+      root.rotation.z = models[3].rotation3;
+      scene.add(root);
+    });
+  });
+  }
+
+  {
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load(models[2].mtl, (mtlParseResult) => {
+    const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+    for (const material of Object.values(materials)) {
+      material.side = THREE.DoubleSide;
+    }
+    const objLoader = new OBJLoader2();
+    objLoader.addMaterials(materials);
+    objLoader.load(models[2].obj, (root) => {
+      root.position.set(models[2].x, models[2].y, models[2].z);
+      root.scale.set(models[2].size1, models[2].size2, models[2].size3);
+      root.rotation.x = models[2].rotation1;
+      root.rotation.y = models[2].rotation2;
+      root.rotation.z = models[2].rotation3;
+      scene.add(root);
+    });
+  });
+  }
+
+  {
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load(models[1].mtl, (mtlParseResult) => {
+    const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+    for (const material of Object.values(materials)) {
+      material.side = THREE.DoubleSide;
+    }
+    const objLoader = new OBJLoader2();
+    objLoader.addMaterials(materials);
+    objLoader.load(models[1].obj, (root) => {
+      root.position.set(models[1].x, models[1].y, models[1].z);
+      root.scale.set(models[1].size1, models[1].size2, models[1].size3);
+      root.rotation.x = models[1].rotation1;
+      root.rotation.y = models[1].rotation2;
+      root.rotation.z = models[1].rotation3;
+      scene.add(root);
+    });
+  });
+  }
+
+  
+
   
 
   // Listener for resize
@@ -425,38 +500,27 @@ function init() {
 }
 
 // load models and set position/size
-function loadLandscapeModels() {
-  for (var _key in models) {
-    (function (key) {
-        if (models[key].internal==false) {
-
-          mtlLoader = new MTLLoader();
-
-          mtlLoader.load(models[key].mtl, function (materials) {
-              materials.preload();
-
-              objLoader = new OBJLoader();
-              objLoader.setMaterials(materials);
-              objLoader.load(models[key].obj, function (mesh) {
-
-
-              mesh.traverse(function (child) {
-                      child.castShadow = true;
-                      child.receiveShadow = true;
-                  });
-
-              models[key].mesh = mesh;
-              mesh.position.set(models[key].x, models[key].y, models[key].z);
-              mesh.scale.set(models[key].size1, models[key].size2, models[key].size3);
-              mesh.rotation.x = models[key].rotation1;
-              mesh.rotation.y = models[key].rotation2;
-              mesh.rotation.z = models[key].rotation3;
-              scene.add(mesh);
-
-              });
+function loadLandscapeModels() {  
+  for (var key in models) {          
+          const mtlLoader = new MTLLoader();
+          mtlLoader.load(models[key].mtl, (mtlParseResult) => {
+          const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+          for (const material of Object.values(materials)) {
+            material.side = THREE.DoubleSide;
+          }
+          const objLoader = new OBJLoader2();
+          objLoader.addMaterials(materials);
+          objLoader.load(models[key].obj, (root) => {
+            root.position.set(models[key].x, models[key].y, models[key].z);
+            root.scale.set(models[key].size1, models[key].size2, models[key].size3);
+            root.rotation.x = models[key].rotation1;
+            root.rotation.y = models[key].rotation2;
+            root.rotation.z = models[key].rotation3;
+            console.log(root);
+            
+            scene.add(root);
           });
-        }
-    })(_key);
+        });
   }
 }
 
@@ -593,7 +657,7 @@ function animate() {
   }
 
   // Here the bullets will go
-  /*if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+  if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
     // Create the bullet
     let bullet = new Bullet(controls);
     bullet.alive = true;
@@ -622,9 +686,9 @@ function animate() {
           continue;
       }
       bulletsArray[index].position.add(bulletsArray[index].velocity);
-  }*/
+  }
 
-  renderer.render(scene, cam);
+  renderer.render(scene, mainCharCamera);
 
   requestAnimationFrame(animate);
 
