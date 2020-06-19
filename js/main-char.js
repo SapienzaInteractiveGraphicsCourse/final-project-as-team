@@ -177,8 +177,7 @@ function createTorso(sizes){
   const cubeMat = new THREE.MeshToonMaterial({
     color: heroColors.blue,
   });
-  // const mesh = new THREE.Mesh(cubeGeo, cubeMat);
-  const mesh = new Physijs.BoxMesh(cubeGeo, cubeMat);
+  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   mesh.position.set(width - 10, height + 3, 2);
@@ -216,8 +215,7 @@ function createArm(sizes, position){
     flatShading: true,
     map: texture
   } );
-  // const cyl = new THREE.Mesh(cylGeo, cylMat);
-  const cyl = new Physijs.CylinderMesh(cylGeo, cylMat);
+  const cyl = new THREE.Mesh(cylGeo, cylMat);
   cyl.castShadow = true;
   cyl.receiveShadow = true;
 
@@ -265,8 +263,7 @@ function createLowerArm(sizes, position){
     flatShading: true,
     map: texture
   } );
-  // const cyl = new THREE.Mesh(cylGeo, cylMat);
-  const cyl = new Physijs.CylinderMesh(cylGeo, cylMat);
+  const cyl = new THREE.Mesh(cylGeo, cylMat);
   cyl.castShadow = true;
   cyl.receiveShadow = true;
 
@@ -316,8 +313,7 @@ function createHand(sizes, position){
     flatShading: true,
     map: texture,
   } );
-  // const cube = new THREE.Mesh(cubeGeo, cubeMat);
-  const cube = new Physijs.BoxMesh(cubeGeo, cubeMat);
+  const cube = new THREE.Mesh(cubeGeo, cubeMat);
   cube.castShadow = true;
   cube.receiveShadow = true;
 
