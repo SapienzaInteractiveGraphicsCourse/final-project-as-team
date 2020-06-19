@@ -528,7 +528,7 @@ function createGun(sizes){
   const gunPosY = torsoHeight + 3;
   const gunPosZ = 7;
 
-  const gunObj = new THREE.Object3D();
+  // const mesh = new THREE.Object3D();
   // Texture loader
   const loadManager = new THREE.LoadingManager();
   const loader = new THREE.TextureLoader(loadManager);
@@ -541,12 +541,14 @@ function createGun(sizes){
     shininess: 0.0,
   });
 
-  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  // const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+  const mesh = new Physijs.BoxMesh(cubeGeo, cubeMat);
+
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   mesh.position.set(gunPosX, gunPosY, gunPosZ);
   mesh.name = "gunBody";
-  gunObj.add(mesh);
+  mesh.add(mesh);
 
   // Charger of the gun
   const wChar = sizes.gunCharge.w;
@@ -558,12 +560,13 @@ function createGun(sizes){
     color: heroColors.darkGrey,
     map: chargerText,
   });
-  const charger = new THREE.Mesh(chargerGeo, chargerMat);
+  // const charger = new THREE.Mesh(chargerGeo, chargerMat);
+  const charger = new Physijs.BoxMesh(chargerGeo, chargerMat);
   charger.castShadow = true;
   charger.receiveShadow = true;
   charger.position.set(gunPosX - 1.4, gunPosY - 0.1, gunPosZ + 1);
   charger.name = "gunCharger";
-  gunObj.add(charger);
+  mesh.add(charger);
 
   // Gun handle
   // Sizes
@@ -579,12 +582,13 @@ function createGun(sizes){
     color: heroColors.brown,
     map: handleTexture,
   });
-  const handleMesh = new THREE.Mesh(handleGeo, handleMat);
+  // const handleMesh = new THREE.Mesh(handleGeo, handleMat);
+  const handleMesh = new Physijs.Mesh(handleGeo, handleMat);
   handleMesh.castShadow = true;
   handleMesh.receiveShadow = true;
   handleMesh.position.set(gunPosX, gunPosY - 1, gunPosZ - 0.775);
   handleMesh.name = "gunHandle";
-  gunObj.add(handleMesh);
+  mesh.add(handleMesh);
 
   // Gun shooter part
   const shooterWidth = sizes.gunShooter.w;
@@ -596,12 +600,13 @@ function createGun(sizes){
 
   // We use the same material of the gun body
   const shooterGeo = new THREE.BoxGeometry(shooterWidth, shooterHeight, shooterDepth);
-  const shooterMesh = new THREE.Mesh(shooterGeo, cubeMat);
+  // const shooterMesh = new THREE.Mesh(shooterGeo, cubeMat);
+  const shooterMesh = new Physijs.BoxMesh(shooterGeo, cubeMat);
   shooterMesh.castShadow = true;
   shooterMesh.receiveShadow = true;
   shooterMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ + 3.7);
   shooterMesh.name = "gunShooter";
-  gunObj.add(shooterMesh);
+  mesh.add(shooterMesh);
 
   // The shooting element of the gun
   // No shadows for these two parts of the gun
@@ -614,11 +619,12 @@ function createGun(sizes){
     color: heroColors.brownGrey,
     map: bodyTexture,
   });
-  const shootMesh = new THREE.Mesh(shootLastGeo, shootLastMat);
+  // const shootMesh = new THREE.Mesh(shootLastGeo, shootLastMat);
+  const shootMesh = new Physijs.CylinderMesh(shootLastGeo, shootLastMat);
   shootMesh.position.set(gunPosX, gunPosY + 0.25, gunPosZ + 4);
   shootMesh.rotation.x = 90 * Math.PI/180;
   shootMesh.name = "gunShooterLast";
-  gunObj.add(shootMesh);
+  mesh.add(shootMesh);
 
   // This last part of the gun should give the idea of laser beam
   const rTf = sizes.gunFire.rTop;
@@ -632,11 +638,12 @@ function createGun(sizes){
     emissive: heroColors.shinyRed,
     specular: heroColors.shinyRed
   });
-  const fireMesh = new THREE.Mesh(fireLastGeo, fireLastMat);
+  // const fireMesh = new THREE.Mesh(fireLastGeo, fireLastMat);
+  const fireMesh = new Physijs.CylinderMesh(fireLastGeo, fireLastMat);
   fireMesh.position.set(gunPosX, gunPosY + 0.25, gunPosZ + 5.2);
   fireMesh.rotation.x = 90 * Math.PI/180;
   fireMesh.name = "gunFireLast";
-  gunObj.add(fireMesh);
+  mesh.add(fireMesh);
 
 
   // In this part we add some custom details to the gun, some shiny red
@@ -652,21 +659,23 @@ function createGun(sizes){
     emissive: heroColors.shinyRed,
     specular: heroColors.shinyRed
   });
-  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  // detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh = new Physijs.BoxMesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
   detailMesh.position.set(gunPosX, gunPosY + 0.4, gunPosZ);
   detailMesh.name = "shiningUpperDetailGun";
-  gunObj.add(detailMesh);
+  mesh.add(detailMesh);
 
   // Another shining detail
   detailGeo = new THREE.BoxGeometry(width + 0.1, 0.1, dept - 1.5);
-  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  // detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh = new Physijs.BoxMesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
   detailMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ - 0.7);
   detailMesh.name = "shiningLowerDetailGun";
-  gunObj.add(detailMesh);
+  mesh.add(detailMesh);
 
   // This is another detail and is in the lower part of gun's body
   detailGeo = new THREE.BoxGeometry(width + 0.1, 0.4, dept - 2.7);
@@ -676,12 +685,13 @@ function createGun(sizes){
     shininess: 0.0,
     map: detailTexture,
   });
-  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  // detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh = new Physijs.BoxMesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
   detailMesh.position.set(gunPosX, gunPosY - 0.6, gunPosZ + 1.25);
   detailMesh.name = "brownDetailGun";
-  gunObj.add(detailMesh);
+  mesh.add(detailMesh);
 
   // Other shining details to add to the shooter part of the gun
   detailGeo = new THREE.BoxGeometry(width - 0.1, 0.1, dept + 0.2);
@@ -691,12 +701,13 @@ function createGun(sizes){
     emissive: heroColors.shinyRed,
     specular: heroColors.shinyRed
   });
-  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  // detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh = new Physijs.BoxMesh(detailGeo, detailMat);
   detailMesh.castShadow = true;
   detailMesh.receiveShadow = true;
   detailMesh.position.set(gunPosX, gunPosY + 0.185, gunPosZ + 1.7);
   detailMesh.name = "shiningShooterDetailGun";
-  gunObj.add(detailMesh);
+  mesh.add(detailMesh);
 
   // Create the target of the gun, that is made up of two parts
   // Support of the target
@@ -721,12 +732,13 @@ function createGun(sizes){
     map: bodyTexture,
     shininess: 0.0,
   });
-  const target = new THREE.Mesh(targetGeoSupport, targetSupMap);
+  // const target = new THREE.Mesh(targetGeoSupport, targetSupMap);
+  const target = new Physijs.BoxMesh(targetGeoSupport, targetSupMap);
   target.castShadow = true;
   target.receiveShadow = true;
   target.position.set(gunPosX, gunPosY + 0.65, gunPosZ);
   target.name = "gunTargetSupport";
-  gunObj.add(target);
+  mesh.add(target);
 
   // Building and adding the window
   const targetGeoWindow = new THREE.BoxGeometry(targetW, targetH, targetD);
@@ -736,23 +748,26 @@ function createGun(sizes){
     opacity: 0.5,
     transparent: true,
   });
-  const targetWindow = new THREE.Mesh(targetGeoWindow, targetWindowMap);
+  // const targetWindow = new THREE.Mesh(targetGeoWindow, targetWindowMap);
+  const targetWindow = new Physijs.BoxMesh(targetGeoWindow, targetWindowMap);
   targetWindow.castShadow = true;
   targetWindow.receiveShadow = true;
   targetWindow.position.set(gunPosX, gunPosY + 0.65, gunPosZ);
   targetWindow.name = "gunTargetWindow";
-  gunObj.add(targetWindow);
+  mesh.add(targetWindow);
 
   // Building the last part of the target
   const targetGeoLast = new THREE.BoxGeometry(targetLastW, targetLastH, targetLastD);
-  const targetLast = new THREE.Mesh(targetGeoLast, targetSupMap);
+  // const targetLast = new THREE.Mesh(targetGeoLast, targetSupMap);
+  const targetLast = new Physijs.BoxMesh(targetGeoLast, targetSupMap);
+
   targetLast.castShadow = true;
   targetLast.receiveShadow = true;
   targetLast.position.set(gunPosX, gunPosY + 0.5, gunPosZ + 5);
   targetLast.name = "gunTargetLast";
-  gunObj.add(targetLast);
+  mesh.add(targetLast);
 
-  return gunObj;
+  return mesh;
 }
 
 export {Hero}
