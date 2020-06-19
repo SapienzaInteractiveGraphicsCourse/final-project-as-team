@@ -501,65 +501,15 @@ function init() {
 }
 
 // load models and set position/size
-function loadLandscapeModels() {  
-
-  var mtlLoader;
-  var objLoader;
-    for (var key in models) {  
-    //console.log(key);    
-    //console.log(models[key].mtl);
-    mtlLoader  = new MTLLoader();
-    objLoader  = new OBJLoader2();
-    console.log(key);
-    console.log("prima del load: " + models[key].nameMesh);
-    
-    
-            
-          
-          mtlLoader.load(models[key].mtl, (mtlParseResult) => {
-            console.log("processato " + models[key].nameMesh);
-            
-            
-          var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-          for (var material of Object.values(materials)) {
-            material.side = THREE.DoubleSide;
-          }
-          
-          objLoader.addMaterials(materials);
-          objLoader.load(models[key].obj, (root) => {
-            root.position.set(models[key].x, models[key].y, models[key].z);
-            root.scale.set(models[key].size1, models[key].size2, models[key].size3);
-            root.rotation.x = models[key].rotation1;
-            root.rotation.y = models[key].rotation2;
-            root.rotation.z = models[key].rotation3;
-            console.log(root);
-            
-            scene.add(root);
-            console.log("mandato " + models[key].nameMesh);
-          });
-        });
-  }
-}
-
 function loadModels() {
 
   var mtlLoader;
   var objLoader;
   for (var _key in models) {
       (function (key) {
-          //console.log(key);    
-          //console.log(models[key].mtl);
           mtlLoader  = new MTLLoader();
-          console.log(key);
-          console.log("prima del load: " + models[key].nameMesh);
-          
-          
-                  
-                
                 mtlLoader.load(models[key].mtl, (mtlParseResult) => {
-                  console.log("processato " + models[key].nameMesh);
-                  
-                  
+    
                 var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
                 for (var material of Object.values(materials)) {
                   material.side = THREE.DoubleSide;
@@ -573,10 +523,9 @@ function loadModels() {
                   root.rotation.x = models[key].rotation1;
                   root.rotation.y = models[key].rotation2;
                   root.rotation.z = models[key].rotation3;
-                  console.log(root);
                   
                   scene.add(root);
-                  console.log("mandato " + models[key].nameMesh);
+
                 });
               });
       })(_key);
