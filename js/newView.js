@@ -15,8 +15,8 @@ var controls;
 var objects = [];
 var composer;
 var params = {
-				exposure: 0.7,
-				bloomStrength: 0.3,
+				exposure: 0.0, // 0.7,
+				bloomStrength: 0.0, //0.3,
 				bloomThreshold: 0,
 				bloomRadius: 3
 			};
@@ -154,6 +154,43 @@ function init() {
       }
     }
   });
+
+	// Adding the mountain
+	const groundMat = Physijs.createMaterial(
+		new THREE.MeshToonMaterial({
+			color: "#C56A50"
+		}),
+		0.1,
+		10
+	);
+	var groundGeo = new THREE.PlaneGeometry(1000, 1000, 100, 100);
+	var edges = new THREE.EdgesGeometry(groundGeo);
+	// noise.seed(Math.random());
+
+	for (var i = 0; i < groundGeo.vertices.length; i++){
+		var vertex = groundGeo.vertices[i];
+		// noise.simplex2 and noise.perlin2 for 2d noise
+    var value = noise.simplex2(vertex.x / 1000, vertex.y / 1000);
+		if((vertex.x != 220 || vertex.x != 0) && (vertex.y != 100 || vertex.y != 0) ){
+				groundGeo.vertices[i].z = Math.abs(value) * 100;
+		}
+	}
+
+	groundGeo.computeFaceNormals();
+	groundGeo.computeVertexNormals();
+
+	let ground = new Physijs.HeightfieldMesh(
+		groundGeo,
+		groundMat,
+		0,
+		100,
+		100
+	);
+
+	ground.rotation.x = - Math.PI/2;
+	ground.position.y = -5;
+
+	scene.add(ground);
 
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 20, 0.75 );
