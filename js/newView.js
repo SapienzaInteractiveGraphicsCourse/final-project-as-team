@@ -1,6 +1,6 @@
 import * as THREE from './three.js-master/build/three.module.js';
 import {PointerLockControls} from './three.js-master/examples/jsm/controls/PointerLockControls.js';
-import {Hero} from './main-char-physi.js';
+import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 import {SoundManager} from './sound-manager.js'
