@@ -184,6 +184,16 @@ function createTorso(sizes){
   mesh.name = "heroTorso";
   torsoObj.add(mesh);
 
+  // Create outline object
+  const outlineW = width * 0.05;
+  const outlineH = height * 0.05;
+  const outlineD = dept * 0.05;
+
+  const outline_geo = new THREE.BoxGeometry(width + outlineW, height + outlineH, dept + outlineD);
+  const outline_mat = new THREE.MeshBasicMaterial({ color : 0x0000000, side: THREE.BackSide });
+  const outline = new THREE.Mesh( outline_geo, outline_mat );
+  mesh.add(outline);
+
   return torsoObj;
 }
 /**
@@ -231,6 +241,21 @@ function createArm(sizes, position){
   }
   armObj.add(cyl);
 
+  // Create outline object
+  const outlineRtop = radiusTop * 0.05;
+  const outlineRbot = radiusBottom * 0.05;
+  const outlineH = height * 0.05;
+
+  const outline_geo = new THREE.CylinderGeometry(
+    radiusTop + outlineRtop,
+    radiusBottom + outlineRbot,
+    height + outlineH,
+    radialSegments
+  );
+  const outline_mat = new THREE.MeshBasicMaterial({ color : 0x0000000, side: THREE.BackSide });
+  const outline = new THREE.Mesh( outline_geo, outline_mat );
+  cyl.add(outline);
+
   return armObj;
 }
 
@@ -266,6 +291,21 @@ function createLowerArm(sizes, position){
   const cyl = new THREE.Mesh(cylGeo, cylMat);
   cyl.castShadow = true;
   cyl.receiveShadow = true;
+
+  // Create outline object
+  const outlineRtop = radiusTop * 0.05;
+  const outlineRbot = radiusBottom * 0.05;
+  const outlineH = height * 0.05;
+
+  const outline_geo = new THREE.CylinderGeometry(
+    radiusTop + outlineRtop,
+    radiusBottom + outlineRbot,
+    height + outlineH,
+    radialSegments
+  );
+  const outline_mat = new THREE.MeshBasicMaterial({ color : 0x0000000, side: THREE.BackSide });
+  const outline = new THREE.Mesh( outline_geo, outline_mat );
+  cyl.add(outline);
 
   // Depending on the value of the position, meaning if we want to build the
   // right arm or the lower one we change the position of the geometry
@@ -317,6 +357,16 @@ function createHand(sizes, position){
   cube.castShadow = true;
   cube.receiveShadow = true;
 
+  // Create outline object
+  const outlineW = width * 0.05;
+  const outlineH = height * 0.05;
+  const outlineD = depth * 0.05;
+
+  const outline_geo = new THREE.BoxGeometry(width + outlineW, height + outlineH, depth + outlineD);
+  const outline_mat = new THREE.MeshBasicMaterial({ color : 0x0000000, side: THREE.BackSide });
+  const outline = new THREE.Mesh( outline_geo, outline_mat );
+  cube.add(outline);
+
   if(position == "left"){
     cube.position.set(torsoWidth - 7.5, torsoHeight - 0.7, 5.0);
     cube.name = "heroLeftHand";
@@ -349,6 +399,7 @@ function createHand(sizes, position){
 function createFinger(sizes, type, position){
   const fingerObj = new THREE.Object3D();
   let fingerLowerGeo, fingerUpperGeo;
+  let outlineLower, outlineUpper;
 
   // Texture loader
   const loadManager = new THREE.LoadingManager();
@@ -381,6 +432,34 @@ function createFinger(sizes, type, position){
 
     fingerLowerGeo = new THREE.CylinderGeometry(lowerFingerRtop, lowerFingerRbot, lowerFingerHeight, lowerFingerRadSeg);
     fingerUpperGeo = new THREE.CylinderGeometry(upperFingerRtop, upperFingerRbot, upperFingerHeight, upperFingerRadSeg);
+
+    // Create lower outline object
+    let outlineRtop = lowerFingerRtop * 0.05;
+    let outlineRbot = lowerFingerRbot * 0.05;
+    let outlineH = lowerFingerHeight * 0.05;
+
+    let outline_geo = new THREE.CylinderGeometry(
+      lowerFingerRtop + outlineRtop,
+      lowerFingerRbot + outlineRbot,
+      lowerFingerHeight + outlineH,
+      lowerFingerRadSeg
+    );
+    const outline_mat = new THREE.MeshBasicMaterial({ color : 0x0000000, side: THREE.BackSide });
+    outlineLower = new THREE.Mesh( outline_geo, outline_mat );
+
+    // Create upper outline object
+    outlineRtop = upperFingerRtop * 0.05;
+    outlineRbot = upperFingerRbot * 0.05;
+    outlineH = upperFingerHeight * 0.05;
+
+    outline_geo = new THREE.CylinderGeometry(
+      upperFingerRtop + outlineRtop,
+      upperFingerRbot + outlineRbot,
+      upperFingerHeight + outlineH,
+      upperFingerRadSeg
+    );
+    outlineUpper = new THREE.Mesh( outline_geo, outline_mat );
+
   }
   else{
     // Each type of finger has an upper part and a lower part
@@ -394,10 +473,30 @@ function createFinger(sizes, type, position){
 
     fingerLowerGeo = new THREE.BoxGeometry(lowerWidth, lowerHeight, lowerDepth);
     fingerUpperGeo = new THREE.BoxGeometry(upperWidth, upperHeight, upperDepth);
+
+    // Create outline object
+    let outlineW = lowerWidth * 0.05;
+    let outlineH = lowerHeight * 0.05;
+    let outlineD = lowerDepth * 0.05;
+
+    let outline_geo = new THREE.BoxGeometry(lowerWidth + outlineW, lowerHeight + outlineH, lowerDepth + outlineD);
+    const outline_mat = new THREE.MeshBasicMaterial({ color : 0x0000000, side: THREE.BackSide });
+    outlineLower = new THREE.Mesh( outline_geo, outline_mat );
+
+    // Create outline object
+    outlineW = upperWidth * 0.05;
+    outlineH = upperHeight * 0.05;
+    outlineD = upperDepth * 0.05;
+
+    outline_geo = new THREE.BoxGeometry(lowerWidth + outlineW, lowerHeight + outlineH, lowerDepth + outlineD);
+    outlineUpper = new THREE.Mesh( outline_geo, outline_mat );
+
   }
 
   let fingerLower = new THREE.Mesh(fingerLowerGeo, cubeMat);
+  fingerLower.add(outlineLower);
   let fingerUpper = new THREE.Mesh(fingerUpperGeo, cubeMat);
+  fingerUpper.add(outlineUpper);
 
   // Set shadows
   fingerLower.castShadow = true;
@@ -405,6 +504,7 @@ function createFinger(sizes, type, position){
   fingerUpper.castShadow = true;
   fingerUpper.receiveShadow = true;
 
+  // Defining poisitions of the fingers
   // If we have to add the finger to the left hand
   if (position == "left") {
     if(type == "thumb"){
@@ -544,6 +644,16 @@ function createGun(sizes){
   mesh.name = "gunBody";
   gunObj.add(mesh);
 
+  // Create outline object
+  let outlineW = width * 0.02;
+  let outlineH = height * 0.02;
+  let outlineD = dept * 0.02;
+
+  let outline_geo = new THREE.BoxGeometry(width + outlineW, height + outlineH, dept + outlineD);
+  const outline_mat = new THREE.MeshBasicMaterial({ color : 0x0000000, side: THREE.BackSide });
+  const outline = new THREE.Mesh( outline_geo, outline_mat );
+  mesh.add(outline);
+
   // Charger of the gun
   const wChar = sizes.gunCharge.w;
   const hChar = sizes.gunCharge.h;
@@ -560,6 +670,15 @@ function createGun(sizes){
   charger.position.set(gunPosX - 1.4, gunPosY - 0.1, gunPosZ + 1);
   charger.name = "gunCharger";
   gunObj.add(charger);
+
+  // Create outline object
+  outlineW = wChar * 0.05;
+  outlineH = hChar * 0.05;
+  outlineD = dChar * 0.05;
+
+  outline_geo = new THREE.BoxGeometry(wChar + outlineW, hChar + outlineH, dChar + outlineD);
+  const outlineCharger = new THREE.Mesh( outline_geo, outline_mat );
+  charger.add(outlineCharger);
 
   // Gun handle
   // Sizes
@@ -582,6 +701,15 @@ function createGun(sizes){
   handleMesh.name = "gunHandle";
   gunObj.add(handleMesh);
 
+  // Create outline object
+  outlineW = handleWidth * 0.05;
+  outlineH = handleHeight * 0.05;
+  outlineD = handleDepth * 0.05;
+
+  outline_geo = new THREE.BoxGeometry(handleWidth + outlineW, handleHeight + outlineH, handleDepth + outlineD);
+  const outlineHandle = new THREE.Mesh( outline_geo, outline_mat );
+  handleMesh.add(outlineHandle);
+
   // Gun shooter part
   const shooterWidth = sizes.gunShooter.w;
   const shooterHeight = sizes.gunShooter.h;
@@ -598,6 +726,15 @@ function createGun(sizes){
   shooterMesh.position.set(gunPosX, gunPosY + 0.2, gunPosZ + 3.7);
   shooterMesh.name = "gunShooter";
   gunObj.add(shooterMesh);
+
+  // Create outline object
+  outlineW = shooterWidth * 0.05;
+  outlineH = shooterHeight * 0.05;
+  outlineD = shooterDepth * 0.05;
+
+  outline_geo = new THREE.BoxGeometry(shooterWidth + outlineW, shooterHeight + outlineH, shooterDepth + outlineD);
+  const outlineShooter = new THREE.Mesh( outline_geo, outline_mat );
+  shooterMesh.add(outlineShooter);
 
   // The shooting element of the gun
   // No shadows for these two parts of the gun
