@@ -93,10 +93,18 @@ if ( havePointerLock ) {
     instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
-const manager = new THREE.LoadingManager();
-manager.onLoad = init;
-
 const progressbarElem = document.querySelector('#progressbar');
+const manager = new THREE.LoadingManager();
+
+manager.onStart = function() {
+  instructions.style.display = 'none';
+}
+manager.onLoad = function() {
+  init();
+  instructions.style.display = '';
+}
+
+
 manager.onProgress = (url, itemsLoaded, itemsTotal) => {
   progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
 };
@@ -322,27 +330,7 @@ var models = {
   },*/
 }
 
-init();
-
-var controlsEnabled = false;
-var moveForward = false;
-var moveBackward = false;
-var moveLeft = false;
-var moveRight = false;
-var prevTime = performance.now();
-var velocity = new THREE.Vector3();
-var rotation = new THREE.Vector3();
-var isWalking = false;
-
-var cam;
-
-function init() {
-
-  // hide the loading bar
-  const loadingElem = document.querySelector('#loading');
-  loadingElem.style.display = 'none';
-
-  scene = new Physijs.Scene();
+scene = new Physijs.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add(light);
@@ -392,7 +380,7 @@ function init() {
   side: THREE.DoubleSide,
   shininess: 0,
   });
-  const mesh = new THREE.Mesh(planeGeo, planeMat);
+  mesh = new THREE.Mesh(planeGeo, planeMat);
   mesh.rotation.x = Math.PI * -.5;
   mesh.receiveShadow = true;
   scene.add(mesh);
@@ -417,6 +405,54 @@ function init() {
 
   }
 
+var mtlLoader;
+  var objLoader;
+  for (var _key in models) {
+      (function (key) {
+          mtlLoader  = new MTLLoader(manager);
+                mtlLoader.load(models[key].mtl, (mtlParseResult) => {
+    
+                var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+                for (var material of Object.values(materials)) {
+                  material.side = THREE.DoubleSide;
+                }
+                
+                objLoader  = new OBJLoader2(manager);
+                objLoader.addMaterials(materials);
+                objLoader.load(models[key].obj, (root) => {
+                  root.position.set(models[key].x, models[key].y, models[key].z);
+                  root.scale.set(models[key].size1, models[key].size2, models[key].size3);
+                  root.rotation.x = models[key].rotation1;
+                  root.rotation.y = models[key].rotation2;
+                  root.rotation.z = models[key].rotation3;
+                  
+                  scene.add(root);
+
+                });
+              });
+      })(_key);
+  }
+
+var controlsEnabled = false;
+var moveForward = false;
+var moveBackward = false;
+var moveLeft = false;
+var moveRight = false;
+var prevTime = performance.now();
+var velocity = new THREE.Vector3();
+var rotation = new THREE.Vector3();
+var isWalking = false;
+
+var cam;
+
+function init() {
+
+  // hide the loading bar
+  const loadingElem = document.querySelector('#loading');
+  loadingElem.style.display = 'none';
+
+  
+
   renderer = new THREE.WebGLRenderer();
   renderer.setClearColor( 0xffffff );
   renderer.setPixelRatio( window.devicePixelRatio );
@@ -428,71 +464,7 @@ function init() {
   document.body.appendChild( renderer.domElement );
 
   //loadLandscapeModels();
-  loadModels();
-
-  /*{
-    const mtlLoader = new MTLLoader();
-    mtlLoader.load(models[3].mtl, (mtlParseResult) => {
-    const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-    for (const material of Object.values(materials)) {
-      material.side = THREE.DoubleSide;
-    }
-    const objLoader = new OBJLoader2();
-    objLoader.addMaterials(materials);
-    objLoader.load(models[3].obj, (root) => {
-      root.position.set(models[3].x, models[3].y, models[3].z);
-      root.scale.set(models[3].size1, models[3].size2, models[3].size3);
-      root.rotation.x = models[3].rotation1;
-      root.rotation.y = models[3].rotation2;
-      root.rotation.z = models[3].rotation3;
-      scene.add(root);
-    });
-  });
-  }
-
-  {
-    const mtlLoader = new MTLLoader();
-    mtlLoader.load(models[2].mtl, (mtlParseResult) => {
-    const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-    for (const material of Object.values(materials)) {
-      material.side = THREE.DoubleSide;
-    }
-    const objLoader = new OBJLoader2();
-    objLoader.addMaterials(materials);
-    objLoader.load(models[2].obj, (root) => {
-      root.position.set(models[2].x, models[2].y, models[2].z);
-      root.scale.set(models[2].size1, models[2].size2, models[2].size3);
-      root.rotation.x = models[2].rotation1;
-      root.rotation.y = models[2].rotation2;
-      root.rotation.z = models[2].rotation3;
-      scene.add(root);
-    });
-  });
-  }
-
-  {
-    const mtlLoader = new MTLLoader();
-    mtlLoader.load(models[1].mtl, (mtlParseResult) => {
-    const materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-    for (const material of Object.values(materials)) {
-      material.side = THREE.DoubleSide;
-    }
-    const objLoader = new OBJLoader2();
-    objLoader.addMaterials(materials);
-    objLoader.load(models[1].obj, (root) => {
-      root.position.set(models[1].x, models[1].y, models[1].z);
-      root.scale.set(models[1].size1, models[1].size2, models[1].size3);
-      root.rotation.x = models[1].rotation1;
-      root.rotation.y = models[1].rotation2;
-      root.rotation.z = models[1].rotation3;
-      scene.add(root);
-    });
-  });
-  }*/
-
-  
-
-  
+  //loadModels();
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
