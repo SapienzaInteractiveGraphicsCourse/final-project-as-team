@@ -1,22 +1,43 @@
 @font-face {
-    font-family: 'Kid Games';
-    src: url('../js/fonts/Kid\ Games.ttf') format('ttf'),
-    url('../js/fonts/Kid\ Games.ttf') format('ttf');
-    font-weight: normal;
-    font-style: normal;
+    font-family: 'game';
+    src: url('../js/fonts/Kid\ Games.ttf');
 }
 
 #mainBox {
     position: absolute;
     background-image: url(../js/images/background.jpg);
     background-size: cover;
-    border: 1px solid;
     height: 100%;
     width: 100%;
     overflow: hidden;
 }
 
-#level {
-    font-family: 'Kid Games';
+#level_easy {
+    font-family: game;
     color: white;
+    position: absolute;
+    font-weight: 200;
+    font-size: xx-large;
+    left: 30vw;
+    top: 70vh;
+}
+
+#level_medium {
+    font-family: game;
+    color: white;
+    position: absolute;
+    font-weight: 200;
+    font-size: xx-large;
+    left: 50vw;
+    top: 70vh;
+}
+
+#level_hard {
+    font-family: game;
+    color: white;
+    position: absolute;
+    font-weight: 200;
+    font-size: xx-large;
+    left: 70vw;
+    top: 70vh;
 }
