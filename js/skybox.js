@@ -12,6 +12,15 @@ import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 
+const queryString = window.location.search;
+
+const urlParams = new URLSearchParams(queryString);
+
+const level = urlParams.get('lvl')
+console.log(level);
+
+
+
 var camera, scene, renderer;
 var geometry, material, mesh;
 let mainChar, mainCharCamera, heroAnimation;

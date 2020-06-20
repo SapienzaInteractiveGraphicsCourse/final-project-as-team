@@ -1,0 +1,22 @@
+@font-face {
+    font-family: 'Kid Games';
+    src: url('../js/fonts/Kid\ Games.ttf') format('ttf'),
+    url('../js/fonts/Kid\ Games.ttf') format('ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#mainBox {
+    position: absolute;
+    background-image: url(../js/images/background.jpg);
+    background-size: cover;
+    border: 1px solid;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+#level {
+    font-family: 'Kid Games';
+    color: white;
+}
