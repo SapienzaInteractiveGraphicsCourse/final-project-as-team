@@ -5,7 +5,7 @@
 
 #mainBox {
     position: absolute;
-    background-image: url(../js/images/background.jpg);
+    background-image: url(../js/images/946424.jpg);
     background-size: cover;
     height: 100%;
     width: 100%;
@@ -14,30 +14,65 @@
 
 #level_easy {
     font-family: game;
-    color: white;
+    color: rgb(24, 94, 245);
     position: absolute;
     font-weight: 200;
-    font-size: xx-large;
-    left: 30vw;
+    font-size: 250%;
+    left: 27vw;
     top: 70vh;
 }
 
 #level_medium {
     font-family: game;
-    color: white;
+    color: rgb(24, 94, 245);
     position: absolute;
     font-weight: 200;
-    font-size: xx-large;
-    left: 50vw;
+    font-size: 250%;
+    left: 47vw;
     top: 70vh;
 }
 
 #level_hard {
     font-family: game;
-    color: white;
+    color: rgb(24, 94, 245);
     position: absolute;
     font-weight: 200;
-    font-size: xx-large;
-    left: 70vw;
+    font-size: 250%;
+    left: 68vw;
     top: 70vh;
+}
+
+#startGame {
+    font-family: game;
+    background-image: url(../js/images/playnow.png);
+    background-size: cover;
+    color: rgb(24, 94, 245);
+    position: absolute;
+    font-weight: 200;
+    font-size: 300%;
+    left: 45.5vw;
+    top: 80vh;
+    height: 8%;
+    width: 10%;
+}
+
+#box {
+    position: absolute;
+    width: 60vw;
+    height: 10vh;
+    left: 20vw;
+    top: 69vh;
+    border-radius: 15px;
+    opacity: 0.7;
+    background-color: greenyellow;
+}
+
+#logo {
+    position: absolute;
+    background-image: url(../js/images/logo.png);
+    background-size: cover;
+    width: 350px;
+    height: 350px;
+    left: 50vw;
+    top: 10vh;
 }
