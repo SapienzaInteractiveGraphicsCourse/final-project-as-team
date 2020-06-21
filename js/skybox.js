@@ -5,20 +5,19 @@ import {MTLLoader} from './three.js-master/examples/jsm/loaders/MTLLoader.js';
 import {OBJLoader} from './three.js-master/examples/jsm/loaders/OBJLoader.js';
 import {OBJLoader2} from './three.js-master/examples/jsm/loaders/OBJLoader2.js';
 import {MtlObjBridge} from './three.js-master/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
-//import {AnimateRobot} from './robot-animations.js';
-//import {KillingRobot} from './robot.js';
+import {AnimateRobot} from './robot-animations.js';
+import {KillingRobot} from './robot.js';
 import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 
+//retrieve difficulty level choosen in the menu page
 const queryString = window.location.search;
 
 const urlParams = new URLSearchParams(queryString);
 
 const level = urlParams.get('lvl')
-console.log(level);
-
 
 
 var camera, scene, renderer;
@@ -110,6 +109,7 @@ manager.onStart = function() {
 }
 manager.onLoad = function() {
   init();
+  spawnRobots(level);
   instructions.style.display = '';
 }
 
@@ -119,20 +119,6 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
 };
 
 var models = {
-  /*1: {
-      obj: "./js/models/platform/tech_pedestal.obj",
-      mtl: "./js/models/platform/tech_pedestal.mtl",
-      x: -10,
-      y: 0,
-      z: -10,
-      size1: 1,
-      size2: 1,
-      size3: 1,
-      mesh: null,
-      nameMesh: "scene",
-      internal: false
-  },*/
-
   1: {
       obj: "./js/models/Kameri lunar colony/Kameri lunar colony.obj",
       mtl: "./js/models/Kameri lunar colony/Kameri_lunar_colony.mtl",
@@ -182,164 +168,9 @@ var models = {
     nameMesh: "floating_city",
     internal: false
   },
-
-  /*4: {
-    obj: "./js/models/tunnel/tunnel-obj.obj",
-    mtl: "./js/models/tunnel/tunnel-obj.mtl",
-    x: -40,
-    y: 0,
-    z: -50,
-    size1: 3,
-    size2: 3,
-    size3: 3,
-    mesh: null,
-    nameMesh: "itemWeapon",
-    internal: false
-  },
-
-  5: {
-    obj: "./js/models/space-kit/stairsLong.obj",
-    mtl: "./js/models/space-kit/stairsLong.mtl",
-    mesh: null,
-    x: -50,
-    y: 0,
-    z: -60,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    nameMesh: "stairsLong",
-    internal: false
-  },
-
-  6: {
-    obj: "./js/models/space-kit/pipeStand.obj",
-    mtl: "./js/models/space-kit/pipeStand.mtl",
-    x: -60,
-    y: 0,
-    z: -70,
-    size1: 2,
-    size2: 2,
-    size3: 2,
-    mesh: null,
-    nameMesh: "pipeStand",
-    internal: false
-  },
-
-  7: {
-    obj: "./js/models/marsCapsule/Mars Lander Space Capsule.obj",
-    mtl: "./js/models/marsCapsule/Mars_Lander_Space_Capsule.mtl",
-    x: -70,
-    y: 0,
-    z: -80,
-    size1: 1,
-    size2: 1,
-    size3: 1,
-    mesh: null,
-    nameMesh: "Mars_Lander_Space_Capsule",
-    internal: false
-  },
-
-  8: {
-    obj: "./js/models/vot/VoT_PatrikRoy_b03_sketchfab.obj",
-    mtl: "./js/models/vot/VoT_PatrikRoy_b03_sketchfab.mtl",
-    x: 10,
-    y: -64,
-    z: 10,
-    size1: 10,
-    size2: 10,
-    size3: 10,
-    mesh: null,
-    nameMesh: "VoT_PatrikRoy_b03_sketchfab",
-    internal: false
-  },
-
-  9: {
-    obj: "./js/models/relay/source/VoT_PatrikRoy_b02_sketchfab.obj",
-    mtl: "./js/models/relay/source/VoT_PatrikRoy_b02_sketchfab.mtl",
-    x: 6000,
-    y: 0,
-    z: 1000,
-    size1: 100,
-    size2: 100,
-    size3: 100,
-    mesh: null,
-    nameMesh: "relay",
-    internal: false
-  },
-
-  10: {
-    obj: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.obj",
-    mtl: "./js/models/bigPharma/source/VoT_PatrikRoy_b04_sketchfab.mtl",
-    x: -200,
-    y: 0,
-    z: 200,
-    size1: 10,
-    size2: 10,
-    size3: 10,
-    mesh: null,
-    nameMesh: "bigPharma",
-    internal: false
-  },
-
-
-  11: {
-    obj: "./js/models/space-kit/spaceCraft1.obj",
-    mtl: "./js/models/space-kit/spaceCraft1.mtl",
-    x: 140,
-    y: 0,
-    z: 160,
-    size1: 10,
-    size2: 10,
-    size3: 10,
-    mesh: null,
-    nameMesh: "spaceCraft1",
-    internal: false
-  },
-
-  12: {
-    obj: "./js/models/martian/city colony.obj",
-    mtl: "./js/models/martian/city_colony.mtl",
-    x: 500,
-    y: 0,
-    z: 500,
-    size1: 2,
-    size2: 2,
-    size3: 2,
-    mesh: null,
-    nameMesh: "city_colon",
-    internal: false
-  },
-
-  13: {
-    obj: "./js/models/space-kit/stationLarge.obj",
-    mtl: "./js/models/space-kit/stationLarge.mtl",
-    x: -400,
-    y: 0,
-    z: -400,
-    size1: 50,
-    size2: 50,
-    size3: 50,
-    mesh: null,
-    nameMesh: "stationLarge",
-    internal: false
-  },
-
-  14: {
-    obj: "./js/models/space-kit/portal.obj",
-    mtl: "./js/models/space-kit/portal.mtl",
-    x: -400,
-    y: 0,
-    z: 400,
-    size1: 20,
-    size2: 20,
-    size3: 20,
-    mesh: null,
-    nameMesh: "portal",
-    internal: false
-  },*/
 }
 
-scene = new Physijs.Scene();
+  scene = new Physijs.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add(light);
@@ -453,6 +284,9 @@ var rotation = new THREE.Vector3();
 var isWalking = false;
 
 var cam;
+var robot;
+
+
 
 function init() {
 
@@ -479,6 +313,34 @@ function init() {
   window.addEventListener( 'resize', onWindowResize, false );
 
   animate();
+}
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function spawnRobots(lvl, manager) {
+  switch (lvl) {
+    case 'easy':
+      for (var i=0; i<25; i++) {
+        // Init the robot and then add it to the scene
+        robot = new KillingRobot(manager);
+        robot.castShadow = true;
+        robot.receiveShadow = true;
+        robot.position.set(getRandomInt(30, 2000), 0, getRandomInt(0, 1000));
+        robot.scale.set(3, 3, 3);
+        scene.add(robot);
+      }
+      break;
+    case 'medium':
+      console.log("medium");
+      break;
+    case 'hard':
+      console.log("hard");
+      break;      
+  }
 }
 
 // load models and set position/size
@@ -679,6 +541,8 @@ function animate() {
 
   renderer.render(scene, mainCharCamera);
 
+  // Calling the function to animate the robot
+  //AnimateRobot(robot);
   requestAnimationFrame(animate);
 
 	TWEEN.update();
