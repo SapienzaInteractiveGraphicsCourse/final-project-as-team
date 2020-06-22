@@ -170,6 +170,10 @@ var models = {
   },
 }
 
+const gltf_models = {
+  bb8:    { url: './js/models/bb8_gltf/scene.gltf' },
+};
+
   scene = new Physijs.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
@@ -193,6 +197,7 @@ var models = {
   mainChar.receiveShadow = true;
   mainCharCamera = mainChar.getObjectByName("heroCamera");
   
+  mainChar.rotation.y = Math.PI;
   scene.add(mainChar);
 
 
@@ -273,6 +278,25 @@ var mtlLoader;
       })(_key);
   }
 
+  const gltfLoader = new GLTFLoader(manager);
+  for (const model of Object.values(gltf_models)) {
+    gltfLoader.load(model.url, (gltf) => {
+      model.gltf = gltf;
+    });
+  }
+
+  console.log(gltf_models);
+  
+
+  /*Object.values(gltf_models).forEach((model, ndx) => {
+    const clonedScene = SkeletonUtils.clone(model.gltf.scene);
+    const root = new THREE.Object3D();
+    root.add(clonedScene);
+    scene.add(root);
+    root.scale.set(0.1, 0.1, 0.1);
+    root.position.set(getRandomInt(50, 1000), 12, getRandomInt(0, 1000));
+  });*/
+
 var controlsEnabled = false;
 var moveForward = false;
 var moveBackward = false;
@@ -293,7 +317,6 @@ function init() {
   // hide the loading bar
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
-
   
 
   renderer = new THREE.WebGLRenderer();
@@ -321,18 +344,19 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function spawnRobots(lvl, manager) {
+function spawnRobots(lvl) {
   switch (lvl) {
     case 'easy':
-      for (var i=0; i<25; i++) {
-        // Init the robot and then add it to the scene
-        robot = new KillingRobot(manager);
-        robot.castShadow = true;
-        robot.receiveShadow = true;
-        robot.position.set(getRandomInt(30, 2000), 0, getRandomInt(0, 1000));
-        robot.scale.set(3, 3, 3);
-        scene.add(robot);
-      }
+      window.setInterval(function () {
+        for (var i=0; i<10; i++) {
+          const clonedScene = SkeletonUtils.clone(gltf_models['bb8'].gltf.scene);
+          const root = new THREE.Object3D();
+          root.add(clonedScene);
+          scene.add(root);
+          root.scale.set(0.1, 0.1, 0.1);
+          root.position.set(getRandomInt(50, 1000), 12, getRandomInt(0, 1000));
+        };
+      }, 5000);    
       break;
     case 'medium':
       console.log("medium");
@@ -342,6 +366,7 @@ function spawnRobots(lvl, manager) {
       break;      
   }
 }
+
 
 // load models and set position/size
 function loadModels() {
