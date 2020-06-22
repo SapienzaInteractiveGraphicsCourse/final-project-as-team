@@ -285,8 +285,7 @@ var mtlLoader;
     });
   }
 
-  console.log(gltf_models);
-  
+  const robot = new KillingRobot();
 
   /*Object.values(gltf_models).forEach((model, ndx) => {
     const clonedScene = SkeletonUtils.clone(model.gltf.scene);
@@ -307,8 +306,7 @@ var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 var isWalking = false;
 
-var cam;
-var robot;
+var robotsAlive = 0;
 
 
 
@@ -347,19 +345,25 @@ function getRandomInt(min, max) {
 function spawnRobots(lvl) {
   switch (lvl) {
     case 'easy':
-      window.setInterval(function () {
-        for (var i=0; i<10; i++) {
-          const clonedScene = SkeletonUtils.clone(gltf_models['bb8'].gltf.scene);
-          const root = new THREE.Object3D();
-          root.add(clonedScene);
-          scene.add(root);
-          root.scale.set(0.1, 0.1, 0.1);
-          root.position.set(getRandomInt(50, 1000), 12, getRandomInt(0, 1000));
-        };
-      }, 5000);    
+      
       break;
     case 'medium':
-      console.log("medium");
+      window.setInterval(function () {
+        for (var i=0; i<3; i++) {
+          const clonedScene = SkeletonUtils.clone(robot);
+          const root = new THREE.Object3D();
+          root.add(clonedScene);
+          robot.castShadow = true;
+          robot.receiveShadow = true;
+          scene.add(root);
+          root.scale.set(3, 3, 3);
+          root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
+          robotsAlive += i;
+          console.log(robotsAlive);
+          
+          
+        };
+      }, 5000);
       break;
     case 'hard':
       console.log("hard");
