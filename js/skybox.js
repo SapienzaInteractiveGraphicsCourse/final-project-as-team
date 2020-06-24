@@ -536,14 +536,23 @@ function animate() {
     // Create the final object to add to the scene
     var curveObject = new THREE.Line( geometry, material );
 
-    //console.log(points[0].x);
+    //console.log("robot " + robot.position.x);
     
-    if (robot.position.x < points[0].x) robot.position.x += 2;
-    if (robot.position.x > points[0].x) robot.position.x -= 2;
-    if (robot.position.z < points[0].z) robot.position.z += 2;
-    if (robot.position.z < points[0].z) robot.position.z += 2;
+    //console.log(points[50].x);
     
-    //robot.position.set(points[0].x * 50, 0, points[0].z * 50);
+    new TWEEN.Tween(robot)
+					.to({x: points[50].x, z: points[50].z}, 3000)
+					.onUpdate(function (object) {
+            //robot.position.set(points[50].x, 0, points[50].z);
+            if (Math.abs(points[50].x - robot.position.x) < 20 && Math.abs(points[50].z - robot.position.z) < 20) {
+              console.log("vicini");              
+            } else {
+              //console.log("lontani");
+              
+            }
+					})
+					.start()
+    //robot.position.set(points[0].x * 2, 0, points[0].z * 2);
     //robot.translate.z = points[0].z;
 
     //console.log(points);
