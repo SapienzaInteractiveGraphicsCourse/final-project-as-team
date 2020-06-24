@@ -109,7 +109,6 @@ manager.onStart = function() {
 }
 manager.onLoad = function() {
   init();
-  spawnRobots(level);
   instructions.style.display = '';
 }
 
@@ -285,7 +284,7 @@ var mtlLoader;
     });
   }
 
-  const robot = new KillingRobot();
+  //var robot = new KillingRobot();
 
   /*Object.values(gltf_models).forEach((model, ndx) => {
     const clonedScene = SkeletonUtils.clone(model.gltf.scene);
@@ -309,6 +308,11 @@ var isWalking = false;
 var robotsAlive = 0;
 
 
+//spawnRobots(level);
+
+var tweenStart;
+var cubeTween;
+
 
 function init() {
 
@@ -330,46 +334,84 @@ function init() {
   //loadLandscapeModels();
   //loadModels();
 
+  //add a single robot to test animation with tween
+  robot = new KillingRobot();
+    
+
+  robot.scale.set(3, 3, 3);
+  var positionX = getRandomInt(50, 1000);
+  var positionZ = getRandomInt(0, 1000);
+  robot.position.set(positionX, 0, positionZ);
+  robotsAlive += 1;
+  scene.add(robot);
+
+  tweenStart = { value: 0 };
+  var finish = { value: Math.PI };
+
+  cubeTween = new TWEEN.Tween(tweenStart);
+  cubeTween.to(finish, 3000)
+  
+  cubeTween.onUpdate(function() {
+      robot.position.set(0.0, 0.0, 0.0);
+      robot.rotation.y = tweenStart.value;
+      robot.translateZ( 2.0 );
+  });
+  
+  cubeTween.onComplete( function() {
+      tweenStart.value = 0;
+      requestAnimationFrame(function() {
+          cubeTween.start();
+      });
+  });
+  cubeTween.start();
+
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
 
   animate();
 }
 
+//get random int number between min and max
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+//genereta robots depending on the selected level
 function spawnRobots(lvl) {
+  var res = new THREE.Object3D();
   switch (lvl) {
     case 'easy':
       
       break;
     case 'medium':
-      window.setInterval(function () {
-        for (var i=0; i<3; i++) {
-          const clonedScene = SkeletonUtils.clone(robot);
-          const root = new THREE.Object3D();
-          root.add(clonedScene);
-          robot.castShadow = true;
-          robot.receiveShadow = true;
-          scene.add(root);
-          root.scale.set(3, 3, 3);
-          root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
-          robotsAlive += i;
-          console.log(robotsAlive);
-          
-          
-        };
-      }, 5000);
+        const interval = window.setInterval(function () {
+          for (var i=0; i<3; i++) {
+            const clonedScene = SkeletonUtils.clone(robot);
+            console.log("---" + clonedScene);
+            
+            const root = new THREE.Object3D();
+            root.add(clonedScene);
+            robot.castShadow = true;
+            robot.receiveShadow = true;
+            scene.add(root);
+            root.scale.set(3, 3, 3);
+            root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
+            robotsAlive += i;
+            console.log(robotsAlive); 
+            if (robotsAlive > 5) clearInterval(interval);
+          };
+        }, 5000);
       break;
     case 'hard':
       console.log("hard");
       break;      
   }
+
+  
 }
+
 
 
 // load models and set position/size
@@ -456,6 +498,8 @@ function keyUp(event){
 // Listeners
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
+
+var robot;
 
 function animate() {
     // Start with the reload animation, initially this is done once.
@@ -568,10 +612,40 @@ function animate() {
       bulletsArray[index].position.add(bulletsArray[index].velocity);
   }
 
+  /*if (robotsAlive < 1) {
+    robot = new KillingRobot();
+    
+
+    robot.scale.set(3, 3, 3);
+    robot.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
+    robotsAlive += 1;
+    
+    scene.add(robot);
+    /*const clonedScene = SkeletonUtils.clone(robot);
+    //AnimateRobot(robot);
+    console.log("---" + clonedScene);
+    
+    const root = new THREE.Object3D();
+    root.add(clonedScene);
+    robot.castShadow = true;
+    robot.receiveShadow = true;
+    scene.add(root);
+    root.scale.set(3, 3, 3);
+    root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
+    robotsAlive += 1;
+    console.log(robotsAlive); 
+  }*/
+
   renderer.render(scene, mainCharCamera);
 
   // Calling the function to animate the robot
+  //AnimateRobot(robotTest);
+  //console.log(robotArray);
+  //console.log(robotsAlive + "--" + robot);
+
+  
   //AnimateRobot(robot);
+  
   requestAnimationFrame(animate);
 
 	TWEEN.update();

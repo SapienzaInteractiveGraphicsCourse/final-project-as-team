@@ -37,6 +37,8 @@ tweenTwo.chain(tween);
  * @return {void}         Not return anything, just build the animations
  */
 let AnimateRobot = function(root){
+  console.log("entro " + root);
+  
   root.traverse(function(child){
     movingCannon(true, child);
     rotatingWheel(true, child);
