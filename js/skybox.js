@@ -345,7 +345,7 @@ function init() {
   robotsAlive += 1;
   scene.add(robot);
 
-  tweenStart = { value: 0 };
+  /*tweenStart = { value: 0 };
   var finish = { value: Math.PI };
 
   cubeTween = new TWEEN.Tween(tweenStart);
@@ -363,7 +363,9 @@ function init() {
           cubeTween.start();
       });
   });
-  cubeTween.start();
+  cubeTween.start();*/
+
+  
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
@@ -502,6 +504,52 @@ window.addEventListener('keyup', keyUp);
 var robot;
 
 function animate() {
+
+    /*var path = new THREE.Path();
+
+    //path.lineTo( 1000.0, 0.0 , 1000.0);
+    //path.quadraticCurveTo(mainChar.position.x, 0.0 , mainChar.position.z);
+
+    //path.lineTo(mainChar.position.x, 0.0 , mainChar.position.z);
+    path.bezierCurveTo(mainChar.position.x/3, mainChar.position.z/3, mainChar.position.x/2, mainChar.position.z/2, mainChar.position.x, mainChar.position.z);
+
+    var points = path.getPoints();
+
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    var material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+
+    var line = new THREE.Line( geometry, material );
+    scene.add( line );*/
+
+    var curve = new THREE.CubicBezierCurve3(
+      new THREE.Vector3( mainChar.position.x/4, 0, mainChar.position.z/4 ),
+      new THREE.Vector3( mainChar.position.x/3, 0, mainChar.position.z/3 ),
+      new THREE.Vector3( mainChar.position.x/2, 0, mainChar.position.z/2 ),
+      new THREE.Vector3( mainChar.position.x, 0, mainChar.position.z )
+    );
+    
+    var points = curve.getPoints( 50 );
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    
+    var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+    
+    // Create the final object to add to the scene
+    var curveObject = new THREE.Line( geometry, material );
+
+    //console.log(points[0].x);
+    
+    if (robot.position.x < points[0].x) robot.position.x += 2;
+    if (robot.position.x > points[0].x) robot.position.x -= 2;
+    if (robot.position.z < points[0].z) robot.position.z += 2;
+    if (robot.position.z < points[0].z) robot.position.z += 2;
+    
+    //robot.position.set(points[0].x * 50, 0, points[0].z * 50);
+    //robot.translate.z = points[0].z;
+
+    //console.log(points);
+    
+    //scene.add(curveObject);
+
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
 
