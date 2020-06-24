@@ -543,10 +543,12 @@ function animate() {
     new TWEEN.Tween(robot)
 					.to({x: points[50].x, z: points[50].z}, 3000)
 					.onUpdate(function (object) {
+            robot.lookAt(points[50].x, 0, points[50].z);
             //robot.position.set(points[50].x, 0, points[50].z);
             if (Math.abs(points[50].x - robot.position.x) < 20 && Math.abs(points[50].z - robot.position.z) < 20) {
               console.log("vicini");              
             } else {
+              //robot.position.x -= 0.001;
               //console.log("lontani");
               
             }
