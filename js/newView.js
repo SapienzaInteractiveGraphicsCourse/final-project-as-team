@@ -25,7 +25,6 @@ var params = {
 let keyboard = {};
 // Object of mouse key codes
 let mouse = {};
-
 // Add bullet array
 let bulletsArray = [];
 // Shooting interval (interval between one shot and the next)
@@ -34,10 +33,10 @@ let shootingInterval = 0;
 const soundManager = new SoundManager();
 // Create the audio Listener
 const listener = new THREE.AudioListener();
-
 // Configure the Physijs physic engine scripts
-Physijs.scripts.worker = './js/physijs/physijs_worker.js';
-Physijs.scripts.ammo = './ammo.js';
+// Physijs.scripts.worker = './js/physijs/physijs_worker.js';
+// Physijs.scripts.ammo = './ammo.js';
+var collidableMeshList = [];
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
@@ -104,59 +103,13 @@ var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 
 function init() {
-  scene = new Physijs.Scene();
-  scene.setGravity(new THREE.Vector3( 0, -9.8, 0 ));
+  scene = new THREE.Scene();
 
-  // Box
-	let box = new Physijs.BoxMesh(
-			new THREE.CubeGeometry( 20, 20, 20 ),
-			new THREE.MeshPhongMaterial({ color: 0x888888 }),
-      300
-		);
-  box.castShadow = true;
-  box.receiveShadow = true;
-  box.position.set(0, 50, -60);
-  scene.add(box);
-
-  // Box
-	let box2 = new Physijs.BoxMesh(
-			new THREE.CubeGeometry( 20, 20, 20 ),
-      Physijs.createMaterial(
-        new THREE.MeshPhongMaterial({
-          color: "#00FF00",
-          shininess: 100,
-        }),
-        1,  // Friction
-        0.3   // Bounciness - restitution
-      ),
-      290
-		);
-  box2.position.set(0, 10, -60);
-  box2.castShadow = true;
-  box2.receiveShadow = true;
-  scene.add(box2);
-  box2.collisions = 0;
-  box2.addEventListener('collision', function(other_object, relative_velocity, relative_rotation, contact_normal) {
-    // `this` has collided with `other_object` with an impact speed of `relative_velocity` and a rotational force of `relative_rotation` and at normal `contact_normal`
-    if(other_object.name == "laserBeam"){
-      box2.collisions++;
-      if(box2.collisions == 1){
-        box2.material.color.set("#ECA348");
-      }
-      if(box2.collisions == 2){
-        box2.material.color.set("#E56947");
-      }
-      if(box2.collisions == 3){
-        box2.material.color.set("#F93600");
-      }
-      if(box2.collisions == 4){
-        scene.remove(box2);
-      }
-    }
-  });
+	// Add fog to the scene
+	scene.fog = new THREE.Fog( 0xccddff, 500, 1000 );
 
 	// Adding the mountain
-	const groundMat = Physijs.createMaterial(
+	/*const groundMat = Physijs.createMaterial(
 		new THREE.MeshToonMaterial({
 			color: "#C56A50"
 		}),
@@ -190,7 +143,8 @@ function init() {
 	ground.rotation.x = - Math.PI/2;
 	ground.position.y = -5;
 
-	scene.add(ground);
+	scene.add(ground);*/
+
 
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 20, 0.75 );
@@ -239,19 +193,15 @@ function init() {
   texture.repeat.set(repeats, repeats);
 
   const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-  // Material with friction
-  const planeMat = Physijs.createMaterial(
-    new THREE.MeshPhongMaterial({
+  // Material
+  const planeMat = new THREE.MeshPhongMaterial({
       map: texture,
       side: THREE.DoubleSide,
       shininess: 0,
-    }),
-    0.8,  // Friction
-    0.3   // Bounciness - restitution
-  );
+    });
 
-  // Define the ground
-  const mesh = new Physijs.PlaneMesh(
+	// Define the ground
+  const mesh = new THREE.Mesh(
     planeGeo,
     planeMat,
     0
@@ -259,6 +209,29 @@ function init() {
   mesh.rotation.x = Math.PI * -.5;
   mesh.receiveShadow = true;
   scene.add(mesh);
+
+	var wallGeometry = new THREE.CubeGeometry(100, 100, 20, 1, 1, 1 );
+	var wallMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
+	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
+
+	var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+	wall.position.set(100, 50, -100);
+	scene.add(wall);
+	collidableMeshList.push(wall);
+	var wall = new THREE.Mesh(wallGeometry, wireMaterial);
+	wall.position.set(100, 50, -100);
+	scene.add(wall);
+
+	var wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
+	wall2.position.set(-150, 50, 0);
+	wall2.rotation.y = 3.14159 / 2;
+	scene.add(wall2);
+	collidableMeshList.push(wall2);
+	var wall2 = new THREE.Mesh(wallGeometry, wireMaterial);
+	wall2.position.set(-150, 50, 0);
+	wall2.rotation.y = 3.14159 / 2;
+	scene.add(wall2);
+	wall2.name = "wall2";
 
   // Create skybox effect with cube
   {
@@ -371,7 +344,7 @@ window.addEventListener('keyup', keyUp);
 
 function animate() {
   // Run Physics
-  scene.simulate();
+  // scene.simulate();
   // Start with the reload animation, initially this is done once.
   heroAnimation.reload();
 
@@ -422,6 +395,44 @@ function animate() {
     }
     prevTime = time;
   }
+
+	// collision detection:
+	//   determines if any of the rays from the cube's origin to each vertex
+	//		intersects any face of a mesh in the array of target meshes
+	//   for increased collision accuracy, add more vertices to the cube;
+	//		for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
+	//   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+	var originPoint = mainChar.position.clone();
+	var cube = mainChar.getObjectByName("transparentBox");
+
+	for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++){
+		var localVertex = cube.geometry.vertices[vertexIndex].clone();
+		var globalVertex = localVertex.applyMatrix4(cube.matrix );
+		var directionVector = globalVertex.sub(cube.position);
+		// console.log(originPoint);
+		var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+		var collisionResults = ray.intersectObjects(collidableMeshList);
+
+		if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ){
+			// If W or Up are pressed
+			if(keyboard[87] || keyboard[38]){
+				velocity.z = 0.0;
+			}
+			// If S or Down are pressed
+			if(keyboard[83] || keyboard[40]){
+				velocity.z += 0.0;
+			}
+			// If A or Left are pressed
+			if(keyboard[65] || keyboard[37]){
+				velocity.x -= 0.0;
+			}
+			// If D or Right are pressed
+			if(keyboard[68] || keyboard[39]){
+				 velocity.x +=0.0;
+			}
+		}
+
+	}
 
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){

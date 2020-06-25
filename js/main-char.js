@@ -104,6 +104,15 @@ var Hero = function(){
 
   // Attach the camera to the torso
   hero.add(createCamera(heroSizes));
+  var cubeGeometry = new THREE.CubeGeometry(20,20,10,1,1,1);
+	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+  let box = new THREE.Mesh(
+			cubeGeometry,
+			wireMaterial
+		);
+  box.position.set(-5,2, 20);
+  box.name = "transparentBox";
+  heroTorso.add(box)
 
   return hero;
 }

@@ -25,8 +25,6 @@ class AnimateHero {
       y: this.root.getObjectByName("heroCamera").position.y,
       z: this.root.getObjectByName("heroCamera").position.z
     };
-
-    console.log(this.cameraOriginalPos);
   }
   // This variables are used for the animations (for sinusoids)
   verticalPosition = 0;
