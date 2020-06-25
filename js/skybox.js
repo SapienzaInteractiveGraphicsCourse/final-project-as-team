@@ -540,18 +540,12 @@ function animate() {
     
     //console.log(points[50].x);
     
-    new TWEEN.Tween(robot)
-					.to({x: points[50].x, z: points[50].z}, 3000)
+    new TWEEN.Tween(robot.position)
+					.to({x: points[50].x - 20, z: points[50].z - 20}, 1000)
 					.onUpdate(function (object) {
             robot.lookAt(points[50].x, 0, points[50].z);
             //robot.position.set(points[50].x, 0, points[50].z);
-            if (Math.abs(points[50].x - robot.position.x) < 20 && Math.abs(points[50].z - robot.position.z) < 20) {
-              console.log("vicini");              
-            } else {
-              //robot.position.x -= 0.001;
-              //console.log("lontani");
-              
-            }
+            
 					})
 					.start()
     //robot.position.set(points[0].x * 2, 0, points[0].z * 2);
