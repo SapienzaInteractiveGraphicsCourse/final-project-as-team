@@ -134,7 +134,7 @@ var models = {
       nameMesh: "Kameri_lunar_colony",
       internal: false
   },
-  
+
   2: {
     obj: "./js/models/Organodron City/Organodron City.obj",
     mtl: "./js/models/Organodron City/Organodron_City.mtl",
@@ -195,7 +195,7 @@ const gltf_models = {
   mainChar.castShadow = true;
   mainChar.receiveShadow = true;
   mainCharCamera = mainChar.getObjectByName("heroCamera");
-  
+
   mainChar.rotation.y = Math.PI;
   scene.add(mainChar);
 
@@ -255,12 +255,12 @@ var mtlLoader;
       (function (key) {
           mtlLoader  = new MTLLoader(manager);
                 mtlLoader.load(models[key].mtl, (mtlParseResult) => {
-    
+
                 var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
                 for (var material of Object.values(materials)) {
                   material.side = THREE.DoubleSide;
                 }
-                
+
                 objLoader  = new OBJLoader2(manager);
                 objLoader.addMaterials(materials);
                 objLoader.load(models[key].obj, (root) => {
@@ -269,7 +269,7 @@ var mtlLoader;
                   root.rotation.x = models[key].rotation1;
                   root.rotation.y = models[key].rotation2;
                   root.rotation.z = models[key].rotation3;
-                  
+
                   scene.add(root);
 
                 });
@@ -306,6 +306,7 @@ var rotation = new THREE.Vector3();
 var isWalking = false;
 
 var robotsAlive = 0;
+var robotsArray = [];
 
 
 //spawnRobots(level);
@@ -319,7 +320,7 @@ function init() {
   // hide the loading bar
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
-  
+
 
   renderer = new THREE.WebGLRenderer();
   renderer.setClearColor( 0xffffff );
@@ -335,28 +336,29 @@ function init() {
   //loadModels();
 
   //add a single robot to test animation with tween
-  robot = new KillingRobot();
-    
-
-  robot.scale.set(3, 3, 3);
-  var positionX = getRandomInt(50, 1000);
-  var positionZ = getRandomInt(0, 1000);
-  robot.position.set(positionX, 0, positionZ);
-  robotsAlive += 1;
-  scene.add(robot);
+  for (var i=0; i<15; i++) {
+    robot = new KillingRobot(manager);
+    robot.scale.set(3, 3, 3);
+    var positionX = getRandomInt(50, 1000);
+    var positionZ = getRandomInt(0, 1000);
+    robot.position.set(positionX, 0, positionZ);
+    robotsAlive += 1;
+    robotsArray.push(robot);
+    scene.add(robot);
+  }
 
   /*tweenStart = { value: 0 };
   var finish = { value: Math.PI };
 
   cubeTween = new TWEEN.Tween(tweenStart);
   cubeTween.to(finish, 3000)
-  
+
   cubeTween.onUpdate(function() {
       robot.position.set(0.0, 0.0, 0.0);
       robot.rotation.y = tweenStart.value;
       robot.translateZ( 2.0 );
   });
-  
+
   cubeTween.onComplete( function() {
       tweenStart.value = 0;
       requestAnimationFrame(function() {
@@ -365,7 +367,7 @@ function init() {
   });
   cubeTween.start();*/
 
-  
+
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
@@ -385,14 +387,14 @@ function spawnRobots(lvl) {
   var res = new THREE.Object3D();
   switch (lvl) {
     case 'easy':
-      
+
       break;
     case 'medium':
         const interval = window.setInterval(function () {
           for (var i=0; i<3; i++) {
             const clonedScene = SkeletonUtils.clone(robot);
             console.log("---" + clonedScene);
-            
+
             const root = new THREE.Object3D();
             root.add(clonedScene);
             robot.castShadow = true;
@@ -401,17 +403,17 @@ function spawnRobots(lvl) {
             root.scale.set(3, 3, 3);
             root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
             robotsAlive += i;
-            console.log(robotsAlive); 
+            console.log(robotsAlive);
             if (robotsAlive > 5) clearInterval(interval);
           };
         }, 5000);
       break;
     case 'hard':
       console.log("hard");
-      break;      
+      break;
   }
 
-  
+
 }
 
 
@@ -425,12 +427,12 @@ function loadModels() {
       (function (key) {
           mtlLoader  = new MTLLoader();
                 mtlLoader.load(models[key].mtl, (mtlParseResult) => {
-    
+
                 var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
                 for (var material of Object.values(materials)) {
                   material.side = THREE.DoubleSide;
                 }
-                
+
                 objLoader  = new OBJLoader2();
                 objLoader.addMaterials(materials);
                 objLoader.load(models[key].obj, (root) => {
@@ -439,7 +441,7 @@ function loadModels() {
                   root.rotation.x = models[key].rotation1;
                   root.rotation.y = models[key].rotation2;
                   root.rotation.z = models[key].rotation3;
-                  
+
                   scene.add(root);
 
                 });
@@ -504,21 +506,23 @@ window.addEventListener('keyup', keyUp);
 var robot;
 
 function animate() {
-    
-    new TWEEN.Tween(robot.position)
-					.to({x: mainChar.position.x - 20, z: mainChar.position.z - 20}, 1000)
-					.onUpdate(function (object) {
-            robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
-            AnimateRobot(robot);
-            //robot.position.set(points[50].x, 0, points[50].z);
-            
-					})
-					.start()
+    robotsArray.forEach((singleRobot, i) => {
+        new TWEEN.Tween(singleRobot.position)
+  				.to({x: mainChar.position.x - 20, z: mainChar.position.z - 20}, 2000)
+  				.onUpdate(function (object) {
+          singleRobot.lookAt(mainChar.position.x, 0, mainChar.position.z);
+          AnimateRobot(singleRobot);
+          //robot.position.set(points[50].x, 0, points[50].z);
+
+  				})
+  				.start()
+    });
+
     //robot.position.set(points[0].x * 2, 0, points[0].z * 2);
     //robot.translate.z = points[0].z;
 
     //console.log(points);
-    
+
     //scene.add(curveObject);
 
     // Start with the reload animation, initially this is done once.
@@ -571,11 +575,11 @@ function animate() {
   }
 
   if (isWalking) mainChar.position.y = 10;
-  
+
 
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
-    heroAnimation.walking();  
+    heroAnimation.walking();
   }
   // If UpDownLeftRight is pressed, the walking animation is triggered
   if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
@@ -633,17 +637,17 @@ function animate() {
 
   /*if (robotsAlive < 1) {
     robot = new KillingRobot();
-    
+
 
     robot.scale.set(3, 3, 3);
     robot.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
     robotsAlive += 1;
-    
+
     scene.add(robot);
     /*const clonedScene = SkeletonUtils.clone(robot);
     //AnimateRobot(robot);
     console.log("---" + clonedScene);
-    
+
     const root = new THREE.Object3D();
     root.add(clonedScene);
     robot.castShadow = true;
@@ -652,7 +656,7 @@ function animate() {
     root.scale.set(3, 3, 3);
     root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
     robotsAlive += 1;
-    console.log(robotsAlive); 
+    console.log(robotsAlive);
   }*/
 
   renderer.render(scene, mainCharCamera);
@@ -662,9 +666,9 @@ function animate() {
   //console.log(robotArray);
   //console.log(robotsAlive + "--" + robot);
 
-  
+
   //AnimateRobot(robot);
-  
+
   requestAnimationFrame(animate);
 
 	TWEEN.update();
