@@ -305,6 +305,7 @@ var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 var isWalking = false;
 
+//var robot = new KillingRobot();
 var robotsAlive = 0;
 var robotsArray = [];
 
@@ -336,7 +337,7 @@ function init() {
   //loadModels();
 
   //add a single robot to test animation with tween
-  for (var i=0; i<15; i++) {
+  /*for (var i=0; i<15; i++) {
     robot = new KillingRobot(manager);
     robot.scale.set(3, 3, 3);
     var positionX = getRandomInt(50, 1000);
@@ -345,28 +346,9 @@ function init() {
     robotsAlive += 1;
     robotsArray.push(robot);
     scene.add(robot);
-  }
+  }*/
 
-  /*tweenStart = { value: 0 };
-  var finish = { value: Math.PI };
-
-  cubeTween = new TWEEN.Tween(tweenStart);
-  cubeTween.to(finish, 3000)
-
-  cubeTween.onUpdate(function() {
-      robot.position.set(0.0, 0.0, 0.0);
-      robot.rotation.y = tweenStart.value;
-      robot.translateZ( 2.0 );
-  });
-
-  cubeTween.onComplete( function() {
-      tweenStart.value = 0;
-      requestAnimationFrame(function() {
-          cubeTween.start();
-      });
-  });
-  cubeTween.start();*/
-
+  //spawnRobots(level);
 
 
   // Listener for resize
@@ -384,36 +366,14 @@ function getRandomInt(min, max) {
 
 //genereta robots depending on the selected level
 function spawnRobots(lvl) {
-  var res = new THREE.Object3D();
-  switch (lvl) {
-    case 'easy':
-
-      break;
-    case 'medium':
-        const interval = window.setInterval(function () {
-          for (var i=0; i<3; i++) {
-            const clonedScene = SkeletonUtils.clone(robot);
-            console.log("---" + clonedScene);
-
-            const root = new THREE.Object3D();
-            root.add(clonedScene);
-            robot.castShadow = true;
-            robot.receiveShadow = true;
-            scene.add(root);
-            root.scale.set(3, 3, 3);
-            root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
-            robotsAlive += i;
-            console.log(robotsAlive);
-            if (robotsAlive > 5) clearInterval(interval);
-          };
-        }, 5000);
-      break;
-    case 'hard':
-      console.log("hard");
-      break;
-  }
-
-
+      robot = new KillingRobot();
+      robot.scale.set(3, 3, 3);
+      var positionX = getRandomInt(50, 1000);
+      var positionZ = getRandomInt(0, 1000);
+      robot.position.set(positionX, 0, positionZ);
+      robotsAlive += 1;
+      robotsArray.push(robot);
+      scene.add(robot);
 }
 
 
@@ -503,27 +463,39 @@ function keyUp(event){
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
-var robot;
 
 function animate() {
-    robotsArray.forEach((singleRobot, i) => {
-        new TWEEN.Tween(singleRobot.position)
-  				.to({x: mainChar.position.x - 20, z: mainChar.position.z - 20}, 2000)
-  				.onUpdate(function (object) {
-          singleRobot.lookAt(mainChar.position.x, 0, mainChar.position.z);
-          AnimateRobot(singleRobot);
+
+    if(robotsArray.length == 0) {
+      for (var i=0; i<6; i++) {
+
+        var robot = new KillingRobot();
+        robot.scale.set(3, 3, 3);
+        var positionX = getRandomInt(50, 1000);
+        var positionZ = getRandomInt(0, 1000);
+        robot.position.set(positionX, 0, positionZ);
+        robotsAlive += 1;
+        robotsArray.push(robot);
+        scene.add(robot);
+          //console.log(singleRobot);
+
+        }
+    }
+
+    robotsArray.forEach((robot, i) => {
+        new TWEEN.Tween(robot.position)
+          .to({x: mainChar.position.x, z: mainChar.position.z}, 2000)
+          .onUpdate(function (object) {
+          robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
+          AnimateRobot(robot);
           //robot.position.set(points[50].x, 0, points[50].z);
 
-  				})
-  				.start()
+          })
+          .start()
     });
 
-    //robot.position.set(points[0].x * 2, 0, points[0].z * 2);
-    //robot.translate.z = points[0].z;
 
-    //console.log(points);
 
-    //scene.add(curveObject);
 
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
@@ -551,6 +523,10 @@ function animate() {
       if(keyboard[83] || keyboard[40]){
         velocity.z += 400.0 * delta;
         isWalking = true;
+        console.log("levo un elemento");
+        var elem = robotsArray.pop();
+        scene.remove(elem);
+        console.log(robotsArray.length);
       }
       // If A or Left are pressed
       if(keyboard[65] || keyboard[37]){
@@ -561,6 +537,11 @@ function animate() {
       if(keyboard[68] || keyboard[39]){
          velocity.x += 400.0 * delta;
          isWalking = true;
+      }
+
+      if(keyboard[103]) {
+        console.log("levo un elemento");
+        robotsArray.pop();
       }
       velocity.y = Math.max( 0, velocity.y );
       controls.getObject().translateX( velocity.x * delta );
@@ -668,8 +649,8 @@ function animate() {
 
 
   //AnimateRobot(robot);
-
+  TWEEN.update();
   requestAnimationFrame(animate);
 
-	TWEEN.update();
+
 }

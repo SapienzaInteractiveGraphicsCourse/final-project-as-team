@@ -3,6 +3,7 @@
 
 // Position is the object with the variables to update in order to animate
 // the various parts of the robot
+
 let position = {
   cannonRot : 0,
   headRot   : 0,
@@ -26,6 +27,7 @@ var tweenTwo = new TWEEN.Tween(position)
       legsRot  : -5 * Math.PI/180
     }, 2000);
 
+
 // Chanining the tweens
 tween.chain(tweenTwo);
 tweenTwo.chain(tween);
@@ -37,6 +39,7 @@ tweenTwo.chain(tween);
  * @return {void}         Not return anything, just build the animations
  */
 let AnimateRobot = function(root){
+
 
   root.traverse(function(child){
     movingCannon(true, child);
