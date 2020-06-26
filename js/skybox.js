@@ -457,7 +457,7 @@ function animate() {
     }
 
     //spawn the robots models
-    if(newSpawn == true && nToSpawn <= 6) {
+    if(newSpawn == true && nToSpawn <= 0) {
           var robot = new KillingRobot();
           robot.scale.set(3, 3, 3);
           var positionX = getRandomInt(50, 1000);
@@ -472,7 +472,7 @@ function animate() {
     //animate the robot (wheel, weapon and walking towards the mainChar)
     robotsArray.forEach((robot, i) => {
         new TWEEN.Tween(robot.position)
-          .to({x: mainChar.position.x, z: mainChar.position.z}, 500)
+          .to({x: mainChar.position.x, z: mainChar.position.z}, 1500)
           .onUpdate(function (object) {
           robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
           AnimateRobot(robot);
@@ -483,6 +483,22 @@ function animate() {
 
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
+
+    var robotCube = robotsArray[0].getObjectByName("robotBox");
+    var originPoint = new THREE.Vector3();
+    originPoint.setFromMatrixPosition(robotCube.matrixWorld);
+
+    for (var vertexIndex = 0; vertexIndex < robotCube.geometry.vertices.length; vertexIndex++){
+      var localVertex = robotCube.geometry.vertices[vertexIndex].clone();
+      var globalVertex = localVertex.applyMatrix4(robotCube.matrix);
+      var directionVector = globalVertex.sub(robotCube.position);
+
+      var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
+      var collisionResults = ray.intersectObjects(collidableMeshList);
+      if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+        console.log(collisionResults);
+      } // End if collision detected
+    } // End for loop
 
     if(controlsEnabled){
       var time = performance.now();
@@ -519,7 +535,7 @@ function animate() {
   			var globalVertex = localVertex.applyMatrix4(cube.matrix);
   			var directionVector = globalVertex.sub(cube.position);
 
-  			var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
+  			var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
   			var collisionResults = ray.intersectObjects(collidableMeshList);
   			if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
   				// We get the max of the directions both W/S direction and left/right direction
@@ -620,6 +636,7 @@ function animate() {
     // Create the bullet
     let bullet = new Bullet(controls);
     bullet.alive = true;
+    collidableMeshList.push(bullet);
 
     // If the bullet is not disappear we play the sound
     if(bullet.alive){
@@ -630,6 +647,7 @@ function animate() {
 
     setTimeout(function () {
       bullet.alive = false;
+      //collidableMeshList.remove(bullet);
       scene.remove(bullet);
     }, 1000);
 
