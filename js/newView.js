@@ -33,11 +33,12 @@ let shootingInterval = 0;
 const soundManager = new SoundManager();
 // Create the audio Listener
 const listener = new THREE.AudioListener();
-// Configure the Physijs physic engine scripts
-// Physijs.scripts.worker = './js/physijs/physijs_worker.js';
-// Physijs.scripts.ammo = './ammo.js';
 var collidableMeshList = [];
-
+// This object is used to understand in which direction the main char is going
+var directionOfMovement = {w: 0, s: 0, r:0, l:0};
+// These are flags to stop the movement of the main char
+var stopW, stopS, stopR, stopL;
+stopL = stopR = stopW = stopS = false;
 
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
@@ -109,44 +110,7 @@ function init() {
 	// Add fog to the scene
 	scene.fog = new THREE.Fog( 0xccddff, 500, 1000 );
 
-	// Adding the mountain
-	/*const groundMat = Physijs.createMaterial(
-		new THREE.MeshToonMaterial({
-			color: "#C56A50"
-		}),
-		0.1,
-		10
-	);
-	var groundGeo = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-	var edges = new THREE.EdgesGeometry(groundGeo);
-	// noise.seed(Math.random());
-
-	for (var i = 0; i < groundGeo.vertices.length; i++){
-		var vertex = groundGeo.vertices[i];
-		// noise.simplex2 and noise.perlin2 for 2d noise
-    var value = noise.simplex2(vertex.x / 1000, vertex.y / 1000);
-		if((vertex.x != 220 || vertex.x != 0) && (vertex.y != 100 || vertex.y != 0) ){
-				groundGeo.vertices[i].z = Math.abs(value) * 100;
-		}
-	}
-
-	groundGeo.computeFaceNormals();
-	groundGeo.computeVertexNormals();
-
-	let ground = new Physijs.HeightfieldMesh(
-		groundGeo,
-		groundMat,
-		0,
-		100,
-		100
-	);
-
-	ground.rotation.x = - Math.PI/2;
-	ground.position.y = -5;
-
-	scene.add(ground);*/
-
-
+	// Light
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 20, 0.75 );
   scene.add(light);
@@ -367,7 +331,6 @@ function animate() {
         });
       }
     }
-
 		// 	collision detection:
 		//  determines if any of the rays from the cube's origin to each vertex
 		//	intersects any face of a mesh in the array of target meshes
@@ -385,73 +348,54 @@ function animate() {
 			var directionVector = globalVertex.sub(cube.position);
 
 			var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
-			let material = new THREE.LineBasicMaterial({
-				color: 0xff0000,
-				linewidth: 10
-			});
-			let geometry = new THREE.Geometry();
-			let startVec = new THREE.Vector3(
-				ray.ray.origin.x,
-				ray.ray.origin.y,
-				ray.ray.origin.z);
-
-			let endVec = new THREE.Vector3(
-				ray.ray.direction.x,
-				ray.ray.direction.y,
-				ray.ray.direction.z);
-
-			// could be any number
-			endVec.multiplyScalar(5000);
-
-			// get the point in the middle
-			let midVec = new THREE.Vector3();
-			midVec.lerpVectors(startVec, endVec, 0.5);
-
-			geometry.vertices.push(startVec);
-			geometry.vertices.push(midVec);
-			geometry.vertices.push(endVec);
-
-			let line = new THREE.Line(geometry, material);
-			// scene.add(line);
 			var collisionResults = ray.intersectObjects(collidableMeshList);
 			if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
-				
-				// If W or Up are pressed
-				if(keyboard[87] || keyboard[38]){
-					velocity.z = 0.0 * delta;
+				// We get the max of the directions both W/S direction and left/right direction
+				var maxUpDown = Math.max(directionOfMovement.w, directionOfMovement.s);
+				var maxRightLeft = Math.max(directionOfMovement.r, directionOfMovement.l);
+
+				// The max will tell in which direction the main char is moving and so which is the
+				// movement to stop. In this way if the main char is colliding in front by pressing W,
+				// he can go back by pressing S.
+				if(maxUpDown == directionOfMovement.w){
+					stopW = true;
 				}
-				// If S or Down are pressed
-		    if(keyboard[83] || keyboard[40]){
-		      velocity.z = 0.0 * delta;
-		    }
-		    // If A or Left are pressed
-		    if(keyboard[65] || keyboard[37]){
-		      velocity.x = 0.0 * delta;
-		    }
-		    // If D or Right are pressed
-		    if(keyboard[68] || keyboard[39]){
-		       velocity.x = 0.0 * delta;
-		    }
+				else{
+					stopS = true;
+				}
+
+				if(maxRightLeft == directionOfMovement.r){
+					stopR = true;
+				}
+				else{
+					stopL = true;
+				}
 			} // End if collision detected
 			else{
-				// If W or Up are pressed
-		    if(keyboard[87] || keyboard[38]){
-		      velocity.z -= 2.0 * delta;
-		    }
-		    // If S or Down are pressed
-		    if(keyboard[83] || keyboard[40]){
-		      velocity.z += 2.0 * delta;
-		    }
-		    // If A or Left are pressed
-		    if(keyboard[65] || keyboard[37]){
-		      velocity.x -= 2.0 * delta;
-		    }
-		    // If D or Right are pressed
-		    if(keyboard[68] || keyboard[39]){
-		       velocity.x += 2.0 * delta;
-		    }
-			} // End else
+				stopL = stopR = stopW = stopS = false;
+			}
 		} // End for loop
+
+		// If W or Up are pressed
+		if((keyboard[87] || keyboard[38]) && !stopW){
+			velocity.z -= 400.0 * delta;
+			directionOfMovement.w += 1;
+		}
+		// If S or Down are pressed
+		if((keyboard[83] || keyboard[40]) && !stopS){
+			velocity.z += 400.0 * delta;
+			directionOfMovement.s += 1;
+		}
+		// If A or Left are pressed
+		if((keyboard[65] || keyboard[37]) && !stopR){
+			velocity.x -= 400.0 * delta;
+			directionOfMovement.r += 1;
+		}
+		// If D or Right are pressed
+		if((keyboard[68] || keyboard[39]) && !stopL){
+			 velocity.x += 400.0 * delta;
+			 directionOfMovement.l += 1;
+		}
 
     velocity.y = Math.max( 0, velocity.y );
     canJump = true;

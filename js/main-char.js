@@ -104,7 +104,7 @@ var Hero = function(){
 
   // Attach the camera to the torso
   hero.add(createCamera(heroSizes));
-  var cubeGeometry = new THREE.BoxGeometry(10,10,22,10,10,10);
+  var cubeGeometry = new THREE.BoxGeometry(40,10,40,10,10,10);
 	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true, transparent:true } );
   let box = new THREE.Mesh(
 			cubeGeometry,
