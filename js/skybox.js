@@ -130,25 +130,9 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
   progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
 };
 
+//models details for background
 var models = {
-  /*1: {
-      obj: "./js/models/Kameri lunar colony/Kameri lunar colony.obj",
-      mtl: "./js/models/Kameri lunar colony/Kameri_lunar_colony.mtl",
-      x: -1000,
-      y: 140,
-      z: 500,
-      size1: 1,
-      size2: 1,
-      size3: 1,
-      rotation1: 0,
-      rotation2: Math.PI/2,
-      rotation3: 0,
-      mesh: null,
-      nameMesh: "Kameri_lunar_colony",
-      internal: false
-  },*/
-
-  2: {
+  1: {
     obj: "./js/models/Organodron City/Organodron City.obj",
     mtl: "./js/models/Organodron City/Organodron_City.mtl",
     x: 2500,
@@ -164,7 +148,7 @@ var models = {
     nameMesh: "buildingCorridorOpen",
     internal: false
   },
-  3: {
+  2: {
     obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
     mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
     x: 0,
