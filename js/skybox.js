@@ -42,12 +42,20 @@ let shootingInterval = 0;
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
 
+//list of collidable objects
+var collidableMeshList = [];
+// This object is used to understand in which direction the main char is going
+var directionOfMovement = {w: 0, s: 0, r:0, l:0};
+// These are flags to stop the movement of the main char
+var stopW, stopS, stopR, stopL;
+stopL = stopR = stopW = stopS = false;
+
 //var mtlLoader = new MTLLoader();
 //var objLoader = new OBJLoader2();
 
 // Configure the Physijs physic engine scripts
-Physijs.scripts.worker = './js/physijs/physijs_worker.js';
-Physijs.scripts.ammo = './ammo.js';
+//Physijs.scripts.worker = './js/physijs/physijs_worker.js';
+//Physijs.scripts.ammo = './ammo.js';
 
 
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
@@ -118,7 +126,7 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
 };
 
 var models = {
-  1: {
+  /*1: {
       obj: "./js/models/Kameri lunar colony/Kameri lunar colony.obj",
       mtl: "./js/models/Kameri lunar colony/Kameri_lunar_colony.mtl",
       x: -1000,
@@ -133,7 +141,7 @@ var models = {
       mesh: null,
       nameMesh: "Kameri_lunar_colony",
       internal: false
-  },
+  },*/
 
   2: {
     obj: "./js/models/Organodron City/Organodron City.obj",
@@ -173,7 +181,7 @@ const gltf_models = {
   bb8:    { url: './js/models/bb8_gltf/scene.gltf' },
 };
 
-  scene = new Physijs.Scene();
+  scene = new THREE.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
   scene.add(light);
@@ -249,6 +257,7 @@ const gltf_models = {
 
   }
 
+//load the models of the background (city, towers, ...)
 var mtlLoader;
   var objLoader;
   for (var _key in models) {
@@ -270,6 +279,8 @@ var mtlLoader;
                   root.rotation.y = models[key].rotation2;
                   root.rotation.z = models[key].rotation3;
 
+                  collidableMeshList.push(root);
+
                   scene.add(root);
 
                 });
@@ -277,23 +288,7 @@ var mtlLoader;
       })(_key);
   }
 
-  const gltfLoader = new GLTFLoader(manager);
-  for (const model of Object.values(gltf_models)) {
-    gltfLoader.load(model.url, (gltf) => {
-      model.gltf = gltf;
-    });
-  }
 
-  //var robot = new KillingRobot();
-
-  /*Object.values(gltf_models).forEach((model, ndx) => {
-    const clonedScene = SkeletonUtils.clone(model.gltf.scene);
-    const root = new THREE.Object3D();
-    root.add(clonedScene);
-    scene.add(root);
-    root.scale.set(0.1, 0.1, 0.1);
-    root.position.set(getRandomInt(50, 1000), 12, getRandomInt(0, 1000));
-  });*/
 
 var controlsEnabled = false;
 var moveForward = false;
@@ -305,15 +300,11 @@ var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 var isWalking = false;
 
-//var robot = new KillingRobot();
+//variable for robots spawn
 var robotsAlive = 0;
 var robotsArray = [];
 
 
-//spawnRobots(level);
-
-var tweenStart;
-var cubeTween;
 
 
 function init() {
@@ -333,22 +324,14 @@ function init() {
 
   document.body.appendChild( renderer.domElement );
 
-  //loadLandscapeModels();
-  //loadModels();
+  var wallGeometry = new THREE.CubeGeometry(100, 100, 20, 1, 1, 1 );
+	var wallMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
+	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
 
-  //add a single robot to test animation with tween
-  /*for (var i=0; i<15; i++) {
-    robot = new KillingRobot(manager);
-    robot.scale.set(3, 3, 3);
-    var positionX = getRandomInt(50, 1000);
-    var positionZ = getRandomInt(0, 1000);
-    robot.position.set(positionX, 0, positionZ);
-    robotsAlive += 1;
-    robotsArray.push(robot);
-    scene.add(robot);
-  }*/
-
-  //spawnRobots(level);
+	var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+	wall.position.set(100, 50, -100);
+	scene.add(wall);
+	collidableMeshList.push(wall);
 
 
   // Listener for resize
@@ -463,6 +446,7 @@ function keyUp(event){
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
+//variable for setting framerate
 var dt=1000/60;
 var timeTarget=0;
 
@@ -474,15 +458,15 @@ function animate() {
   //limitate the framerate
   if(Date.now()>=timeTarget){
 
+    //check the number of robots alive
     if(robotsArray.length == 0) newSpawn = true;
     if(nToSpawn == 7) {
       nToSpawn = 0;
       newSpawn = false;
     }
 
+    //spawn the robots models
     if(newSpawn == true && nToSpawn <= 6) {
-      //for (var i=0; i<6; i++) {
-        //const interval = window.setInterval(function () {
           var robot = new KillingRobot();
           robot.scale.set(3, 3, 3);
           var positionX = getRandomInt(50, 1000);
@@ -491,28 +475,20 @@ function animate() {
           robotsAlive += 1;
           robotsArray.push(robot);
           scene.add(robot);
-          //if (robotsArray.length == 6) clearInterval(interval);
           nToSpawn += 1;
-        //}, 10000);
-          //console.log(singleRobot);
-
-      //  }
     }
 
+    //animate the robot (wheel, weapon and walking towards the mainChar)
     robotsArray.forEach((robot, i) => {
         new TWEEN.Tween(robot.position)
           .to({x: mainChar.position.x, z: mainChar.position.z}, 500)
           .onUpdate(function (object) {
           robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
           AnimateRobot(robot);
-          //robot.position.set(points[50].x, 0, points[50].z);
 
           })
           .start()
     });
-
-
-
 
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
@@ -520,45 +496,95 @@ function animate() {
     if(controlsEnabled){
       var time = performance.now();
       var delta = ( time - prevTime ) / 1000;
-      velocity.x -= velocity.x * 10.0 * delta;
+
+  		velocity.x -= velocity.x * 10.0 * delta;
       velocity.z -= velocity.z * 10.0 * delta;
       velocity.y -= 9.8 * 100.0 * delta;
 
-      // R - for reload the gun
+  		// R - for reload the gun
       if(keyboard[82]){
         // If the reload flag is false
         if(!heroAnimation.reloadFlag){
           heroAnimation.reloadFlag = true;
+          // Play the reload sound
+          soundManager.soundEffects["reload"].sound.context.resume().then(() => {
+            soundManager.soundEffects["reload"].sound.play();
+          });
         }
       }
-      // If W or Up are pressed
-      if(keyboard[87] || keyboard[38]){
-        velocity.z -= 10000.0 * delta;
-        isWalking = true;
-      }
-      // If S or Down are pressed
-      if(keyboard[83] || keyboard[40]){
-        velocity.z += 400.0 * delta;
-        isWalking = true;
-        var elem = robotsArray.pop();
-        scene.remove(elem);
-      }
-      // If A or Left are pressed
-      if(keyboard[65] || keyboard[37]){
-        velocity.x -= 400.0 * delta;
-        isWalking = true;
-      }
-      // If D or Right are pressed
-      if(keyboard[68] || keyboard[39]){
-         velocity.x += 400.0 * delta;
-         isWalking = true;
-      }
+  		// 	collision detection:
+  		//  determines if any of the rays from the cube's origin to each vertex
+  		//	intersects any face of a mesh in the array of target meshes
+  		//  for increased collision accuracy, add more vertices to the cube;
+  		//	for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
+  		//  HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+  		mainChar.updateMatrixWorld();
+  		var cube = mainChar.getObjectByName("transparentBox");
+  		var originPoint = new THREE.Vector3();
+  		originPoint.setFromMatrixPosition(cube.matrixWorld);
 
-      if(keyboard[103]) {
-        robotsArray.pop();
-      }
+  		for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++){
+  			var localVertex = cube.geometry.vertices[vertexIndex].clone();
+  			var globalVertex = localVertex.applyMatrix4(cube.matrix);
+  			var directionVector = globalVertex.sub(cube.position);
+
+  			var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
+  			var collisionResults = ray.intersectObjects(collidableMeshList);
+  			if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+  				// We get the max of the directions both W/S direction and left/right direction
+  				var maxUpDown = Math.max(directionOfMovement.w, directionOfMovement.s);
+  				var maxRightLeft = Math.max(directionOfMovement.r, directionOfMovement.l);
+
+  				// The max will tell in which direction the main char is moving and so which is the
+  				// movement to stop. In this way if the main char is colliding in front by pressing W,
+  				// he can go back by pressing S.
+  				if(maxUpDown == directionOfMovement.w){
+  					stopW = true;
+  				}
+  				else{
+  					stopS = true;
+  				}
+
+  				if(maxRightLeft == directionOfMovement.r){
+  					stopR = true;
+  				}
+  				else{
+  					stopL = true;
+  				}
+  			} // End if collision detected
+  			else{
+  				stopL = stopR = stopW = stopS = false;
+  			}
+  		} // End for loop
+
+  		// If W or Up are pressed
+  		if((keyboard[87] || keyboard[38]) && !stopW){
+  			velocity.z -= 400.0 * delta;
+  			directionOfMovement.w += 1;
+  			isWalking = true;
+  		}
+  		// If S or Down are pressed
+  		if((keyboard[83] || keyboard[40]) && !stopS){
+  			velocity.z += 400.0 * delta;
+  			directionOfMovement.s += 1;
+  			isWalking = true;
+  		}
+  		// If A or Left are pressed
+  		if((keyboard[65] || keyboard[37]) && !stopR){
+  			velocity.x -= 400.0 * delta;
+  			directionOfMovement.r += 1;
+  			isWalking = true;
+  		}
+  		// If D or Right are pressed
+  		if((keyboard[68] || keyboard[39]) && !stopL){
+  			 velocity.x += 400.0 * delta;
+  			 directionOfMovement.l += 1;
+  			 isWalking = true;
+  		}
+
+
       velocity.y = Math.max( 0, velocity.y );
-      controls.getObject().translateX( velocity.x * delta );
+  		controls.getObject().translateX( velocity.x * delta );
       controls.getObject().translateY( velocity.y * delta );
       controls.getObject().translateZ( velocity.z * delta );
 
@@ -567,7 +593,7 @@ function animate() {
           controls.getObject().position.y = 10;
       }
       prevTime = time;
-  }
+    }
 
   if (isWalking) mainChar.position.y = 10;
 
@@ -630,39 +656,9 @@ function animate() {
       bulletsArray[index].position.add(bulletsArray[index].velocity);
   }
 
-  /*if (robotsAlive < 1) {
-    robot = new KillingRobot();
-
-
-    robot.scale.set(3, 3, 3);
-    robot.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
-    robotsAlive += 1;
-
-    scene.add(robot);
-    /*const clonedScene = SkeletonUtils.clone(robot);
-    //AnimateRobot(robot);
-    console.log("---" + clonedScene);
-
-    const root = new THREE.Object3D();
-    root.add(clonedScene);
-    robot.castShadow = true;
-    robot.receiveShadow = true;
-    scene.add(root);
-    root.scale.set(3, 3, 3);
-    root.position.set(getRandomInt(50, 1000), 0, getRandomInt(0, 1000));
-    robotsAlive += 1;
-    console.log(robotsAlive);
-  }*/
 
   renderer.render(scene, mainCharCamera);
 
-  // Calling the function to animate the robot
-  //AnimateRobot(robotTest);
-  //console.log(robotArray);
-  //console.log(robotsAlive + "--" + robot);
-
-
-  //AnimateRobot(robot);
   timeTarget+=dt;
     if(Date.now()>=timeTarget){
       timeTarget=Date.now();
