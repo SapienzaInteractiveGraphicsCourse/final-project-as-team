@@ -11,6 +11,7 @@ import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
+import {SoundManager} from './sound-manager.js'
 
 //retrieve difficulty level choosen in the menu page
 const queryString = window.location.search;
@@ -42,6 +43,10 @@ let shootingInterval = 0;
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
 
+// Instantiate the sound manager for the effects of the game
+const soundManager = new SoundManager();
+// Create the audio Listener
+const listener = new THREE.AudioListener();
 //list of collidable objects
 var collidableMeshList = [];
 // This object is used to understand in which direction the main char is going
@@ -333,6 +338,8 @@ function init() {
 	scene.add(wall);
 	collidableMeshList.push(wall);
 
+  // Load all the sounds
+  soundManager.loadSounds(listener);
 
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
@@ -447,7 +454,7 @@ window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
 //variable for setting framerate
-var dt=1000/60;
+var dt=1000/50;
 var timeTarget=0;
 
 var nToSpawn = 0;
@@ -630,6 +637,13 @@ function animate() {
     let bullet = new Bullet(controls);
     bullet.alive = true;
 
+    // If the bullet is not disappear we play the sound
+    if(bullet.alive){
+      soundManager.soundEffects["blaster"].sound.context.resume().then(() => {
+        soundManager.soundEffects["blaster"].sound.play();
+      });
+    }
+
     setTimeout(function () {
       bullet.alive = false;
       scene.remove(bullet);
@@ -638,9 +652,9 @@ function animate() {
     // Add the bullet to the scene and to the bullets array and
     // then set the shootingInterval to 10, meaning that every 10
     // frames there will be another bullet.
-  	bulletsArray.push(bullet);
-  	scene.add(bullet);
-  	shootingInterval = 10;
+    bulletsArray.push(bullet);
+    scene.add(bullet);
+    shootingInterval = 10;
   }
 
   if(shootingInterval > 0) shootingInterval -=1;
