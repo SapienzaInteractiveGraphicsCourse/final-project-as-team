@@ -466,30 +466,42 @@ window.addEventListener('keyup', keyUp);
 var dt=1000/60;
 var timeTarget=0;
 
+var nToSpawn = 0;
+var newSpawn = false;
+
 function animate() {
 
   //limitate the framerate
   if(Date.now()>=timeTarget){
 
-    if(robotsArray.length == 0) {
-      for (var i=0; i<6; i++) {
+    if(robotsArray.length == 0) newSpawn = true;
+    if(nToSpawn == 7) {
+      nToSpawn = 0;
+      newSpawn = false;
+    }
 
-        var robot = new KillingRobot();
-        robot.scale.set(3, 3, 3);
-        var positionX = getRandomInt(50, 1000);
-        var positionZ = getRandomInt(0, 1000);
-        robot.position.set(positionX, 0, positionZ);
-        robotsAlive += 1;
-        robotsArray.push(robot);
-        scene.add(robot);
+    if(newSpawn == true && nToSpawn <= 6) {
+      //for (var i=0; i<6; i++) {
+        //const interval = window.setInterval(function () {
+          var robot = new KillingRobot();
+          robot.scale.set(3, 3, 3);
+          var positionX = getRandomInt(50, 1000);
+          var positionZ = getRandomInt(0, 1000);
+          robot.position.set(positionX, 0, positionZ);
+          robotsAlive += 1;
+          robotsArray.push(robot);
+          scene.add(robot);
+          //if (robotsArray.length == 6) clearInterval(interval);
+          nToSpawn += 1;
+        //}, 10000);
           //console.log(singleRobot);
 
-        }
+      //  }
     }
 
     robotsArray.forEach((robot, i) => {
         new TWEEN.Tween(robot.position)
-          .to({x: mainChar.position.x, z: mainChar.position.z}, 2000)
+          .to({x: mainChar.position.x, z: mainChar.position.z}, 500)
           .onUpdate(function (object) {
           robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
           AnimateRobot(robot);
@@ -528,10 +540,8 @@ function animate() {
       if(keyboard[83] || keyboard[40]){
         velocity.z += 400.0 * delta;
         isWalking = true;
-        console.log("levo un elemento");
         var elem = robotsArray.pop();
         scene.remove(elem);
-        console.log(robotsArray.length);
       }
       // If A or Left are pressed
       if(keyboard[65] || keyboard[37]){
@@ -545,7 +555,6 @@ function animate() {
       }
 
       if(keyboard[103]) {
-        console.log("levo un elemento");
         robotsArray.pop();
       }
       velocity.y = Math.max( 0, velocity.y );
