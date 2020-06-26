@@ -83,9 +83,8 @@ var KillingRobot = function(){
   box.material.transparent = true;
   box.position.set(8, 5, -8);
   box.name = "robotBox";
-  robot.add(box)
-  // The robot life
-  let robotLife = 4;
+  robot.add(box);
+
   return robot;
 }
 /**

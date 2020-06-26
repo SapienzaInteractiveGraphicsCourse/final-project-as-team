@@ -55,6 +55,7 @@ var directionOfMovement = {w: 0, s: 0, r:0, l:0};
 var stopW, stopS, stopR, stopL;
 stopL = stopR = stopW = stopS = false;
 
+var robotLife = 4;
 //var mtlLoader = new MTLLoader();
 //var objLoader = new OBJLoader2();
 
@@ -165,11 +166,6 @@ var models = {
     internal: false
   },
 }
-
-const gltf_models = {
-  bb8:    { url: './js/models/bb8_gltf/scene.gltf' },
-};
-
   scene = new THREE.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
@@ -292,9 +288,6 @@ var isWalking = false;
 //variable for robots spawn
 var robotsAlive = 0;
 var robotsArray = [];
-
-
-
 
 function init() {
 
@@ -487,7 +480,6 @@ function animate() {
     var robotCube = robotsArray[0].getObjectByName("robotBox");
     var originPoint = new THREE.Vector3();
     originPoint.setFromMatrixPosition(robotCube.matrixWorld);
-
     for (var vertexIndex = 0; vertexIndex < robotCube.geometry.vertices.length; vertexIndex++){
       var localVertex = robotCube.geometry.vertices[vertexIndex].clone();
       var globalVertex = localVertex.applyMatrix4(robotCube.matrix);
@@ -637,6 +629,17 @@ function animate() {
     let bullet = new Bullet(controls);
     bullet.alive = true;
     collidableMeshList.push(bullet);
+
+    if(robotsArray[0].position.distanceTo(bullet.position) < 90){
+      robotLife -=1;
+      console.log(robotLife);
+      if(robotLife == 3){
+        robotsArray[0].getObjectByName("robotTorso").material.color.setHex("#FF0000");
+      }
+      if(robotLife == 0){
+        scene.remove(robotsArray[0]);
+      }
+    }
 
     // If the bullet is not disappear we play the sound
     if(bullet.alive){
