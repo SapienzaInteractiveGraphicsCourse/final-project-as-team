@@ -38,6 +38,7 @@ const listener = new THREE.AudioListener();
 // Physijs.scripts.ammo = './ammo.js';
 var collidableMeshList = [];
 
+
 var blocker = document.getElementById( 'blocker' );
 var instructions = document.getElementById( 'instructions' );
 
@@ -231,7 +232,6 @@ function init() {
 	wall2.position.set(-150, 50, 0);
 	wall2.rotation.y = 3.14159 / 2;
 	scene.add(wall2);
-	wall2.name = "wall2";
 
   // Create skybox effect with cube
   {
@@ -351,11 +351,12 @@ function animate() {
   if(controlsEnabled){
     var time = performance.now();
     var delta = ( time - prevTime ) / 1000;
-    velocity.x -= velocity.x * 10.0 * delta;
+
+		velocity.x -= velocity.x * 10.0 * delta;
     velocity.z -= velocity.z * 10.0 * delta;
     velocity.y -= 9.8 * 100.0 * delta;
 
-    // R - for reload the gun
+		// R - for reload the gun
     if(keyboard[82]){
       // If the reload flag is false
       if(!heroAnimation.reloadFlag){
@@ -366,22 +367,92 @@ function animate() {
         });
       }
     }
-    // If W or Up are pressed
-    if(keyboard[87] || keyboard[38]){
-      velocity.z -= 400.0 * delta;
-    }
-    // If S or Down are pressed
-    if(keyboard[83] || keyboard[40]){
-      velocity.z += 400.0 * delta;
-    }
-    // If A or Left are pressed
-    if(keyboard[65] || keyboard[37]){
-      velocity.x -= 400.0 * delta;
-    }
-    // If D or Right are pressed
-    if(keyboard[68] || keyboard[39]){
-       velocity.x += 400.0 * delta;
-    }
+
+		// 	collision detection:
+		//  determines if any of the rays from the cube's origin to each vertex
+		//	intersects any face of a mesh in the array of target meshes
+		//  for increased collision accuracy, add more vertices to the cube;
+		//	for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
+		//  HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+		mainChar.updateMatrixWorld();
+		var cube = mainChar.getObjectByName("transparentBox");
+		var originPoint = new THREE.Vector3();
+		originPoint.setFromMatrixPosition(cube.matrixWorld);
+
+		for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++){
+			var localVertex = cube.geometry.vertices[vertexIndex].clone();
+			var globalVertex = localVertex.applyMatrix4(cube.matrix);
+			var directionVector = globalVertex.sub(cube.position);
+
+			var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
+			let material = new THREE.LineBasicMaterial({
+				color: 0xff0000,
+				linewidth: 10
+			});
+			let geometry = new THREE.Geometry();
+			let startVec = new THREE.Vector3(
+				ray.ray.origin.x,
+				ray.ray.origin.y,
+				ray.ray.origin.z);
+
+			let endVec = new THREE.Vector3(
+				ray.ray.direction.x,
+				ray.ray.direction.y,
+				ray.ray.direction.z);
+
+			// could be any number
+			endVec.multiplyScalar(5000);
+
+			// get the point in the middle
+			let midVec = new THREE.Vector3();
+			midVec.lerpVectors(startVec, endVec, 0.5);
+
+			geometry.vertices.push(startVec);
+			geometry.vertices.push(midVec);
+			geometry.vertices.push(endVec);
+
+			let line = new THREE.Line(geometry, material);
+			// scene.add(line);
+			var collisionResults = ray.intersectObjects(collidableMeshList);
+			if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+				
+				// If W or Up are pressed
+				if(keyboard[87] || keyboard[38]){
+					velocity.z = 0.0 * delta;
+				}
+				// If S or Down are pressed
+		    if(keyboard[83] || keyboard[40]){
+		      velocity.z = 0.0 * delta;
+		    }
+		    // If A or Left are pressed
+		    if(keyboard[65] || keyboard[37]){
+		      velocity.x = 0.0 * delta;
+		    }
+		    // If D or Right are pressed
+		    if(keyboard[68] || keyboard[39]){
+		       velocity.x = 0.0 * delta;
+		    }
+			} // End if collision detected
+			else{
+				// If W or Up are pressed
+		    if(keyboard[87] || keyboard[38]){
+		      velocity.z -= 2.0 * delta;
+		    }
+		    // If S or Down are pressed
+		    if(keyboard[83] || keyboard[40]){
+		      velocity.z += 2.0 * delta;
+		    }
+		    // If A or Left are pressed
+		    if(keyboard[65] || keyboard[37]){
+		      velocity.x -= 2.0 * delta;
+		    }
+		    // If D or Right are pressed
+		    if(keyboard[68] || keyboard[39]){
+		       velocity.x += 2.0 * delta;
+		    }
+			} // End else
+		} // End for loop
+
     velocity.y = Math.max( 0, velocity.y );
     canJump = true;
     controls.getObject().translateX( velocity.x * delta );
@@ -395,44 +466,6 @@ function animate() {
     }
     prevTime = time;
   }
-
-	// collision detection:
-	//   determines if any of the rays from the cube's origin to each vertex
-	//		intersects any face of a mesh in the array of target meshes
-	//   for increased collision accuracy, add more vertices to the cube;
-	//		for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
-	//   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
-	var originPoint = mainChar.position.clone();
-	var cube = mainChar.getObjectByName("transparentBox");
-
-	for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++){
-		var localVertex = cube.geometry.vertices[vertexIndex].clone();
-		var globalVertex = localVertex.applyMatrix4(cube.matrix );
-		var directionVector = globalVertex.sub(cube.position);
-		// console.log(originPoint);
-		var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-		var collisionResults = ray.intersectObjects(collidableMeshList);
-
-		if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ){
-			// If W or Up are pressed
-			if(keyboard[87] || keyboard[38]){
-				velocity.z = 0.0;
-			}
-			// If S or Down are pressed
-			if(keyboard[83] || keyboard[40]){
-				velocity.z += 0.0;
-			}
-			// If A or Left are pressed
-			if(keyboard[65] || keyboard[37]){
-				velocity.x -= 0.0;
-			}
-			// If D or Right are pressed
-			if(keyboard[68] || keyboard[39]){
-				 velocity.x +=0.0;
-			}
-		}
-
-	}
 
   // If the WASD is pressed, the walking animation is triggered
   if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
