@@ -83,7 +83,7 @@ var KillingRobot = function(){
   box.material.transparent = true;
   box.position.set(8, 5, -8);
   box.name = "robotBox";
-  hero.add(box)
+  robot.add(box)
 
 
   return robot;
