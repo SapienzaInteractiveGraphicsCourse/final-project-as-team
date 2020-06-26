@@ -463,8 +463,13 @@ function keyUp(event){
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
+var dt=1000/60;
+var timeTarget=0;
 
 function animate() {
+
+  //limitate the framerate
+  if(Date.now()>=timeTarget){
 
     if(robotsArray.length == 0) {
       for (var i=0; i<6; i++) {
@@ -649,7 +654,12 @@ function animate() {
 
 
   //AnimateRobot(robot);
+  timeTarget+=dt;
+    if(Date.now()>=timeTarget){
+      timeTarget=Date.now();
+    }
   TWEEN.update();
+}
   requestAnimationFrame(animate);
 
 
