@@ -135,7 +135,7 @@ function init() {
   scene.add(mainChar);
 
   // Add the listener to the camera
-  mainCharCamera.add(listener);
+  // mainCharCamera.add(listener);
   // Load all the sounds
   soundManager.loadSounds(listener);
 
