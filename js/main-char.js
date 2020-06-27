@@ -45,7 +45,7 @@ var Hero = function(){
 
   // Creating the root element of the robot
   const hero = new THREE.Object3D();
-  hero.position.set(6, 1, -3);
+  hero.position.set(-1700, 1, 500);
 
   const heroTorso = createTorso(heroSizes);
   hero.add(heroTorso);
@@ -107,7 +107,7 @@ var Hero = function(){
 
   // This cube is used to detect the collisions with objects
   var cubeGeometry = new THREE.BoxGeometry(40,10,40,10,10,10);
-  // The material will be not so useful since the cube will be transparent 
+  // The material will be not so useful since the cube will be transparent
 	var fakeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true } );
   let box = new THREE.Mesh(
 			cubeGeometry,

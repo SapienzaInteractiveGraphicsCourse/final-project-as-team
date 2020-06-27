@@ -137,7 +137,7 @@ var models = {
     obj: "./js/models/Organodron City/Organodron City.obj",
     mtl: "./js/models/Organodron City/Organodron_City.mtl",
     x: 2500,
-    y: 250,
+    y: 200,
     z: 2500,
     size1: 9,
     size2: 9,
@@ -153,7 +153,7 @@ var models = {
     obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
     mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
     x: 0,
-    y: -115,
+    y: -100,
     z: 600,
     size1: 9,
     size2: 9,
@@ -165,7 +165,129 @@ var models = {
     nameMesh: "floating_city",
     internal: false
   },
+  3: {
+    obj: "./js/models/Center city Sci-Fi/Center city Sci-Fi.obj",
+    mtl: "./js/models/Center city Sci-Fi/Center_city_Sci-Fi.mtl",
+    x: -1700,
+    y: 20,
+    z: -250,
+    size1: 4,
+    size2: 4,
+    size3: 4,
+    rotation1: 0,
+    rotation2: 70.4,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  /*4: {
+    obj: "./js/models/debris/debris.obj",
+    mtl: "",
+    x: 300,
+    y: 0,
+    z: 300,
+    size1: 0.3,
+    size2: 0.3,
+    size3: 0.3,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },*/
+  4: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 182,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  5: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 130,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: -0.0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  6: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 235,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  7: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 287,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  8: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 340,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
 }
+
+  var models_gltf = {
+    railing:    { url: './js/models/railing/scene.gltf' },
+    railing2:    { url: './js/models/railing/scene.gltf' },
+    railing3:    { url: './js/models/railing/scene.gltf' },
+    railing4:    { url: './js/models/railing/scene.gltf' },
+    railing5:    { url: './js/models/railing/scene.gltf' },
+  };
+
+
   scene = new THREE.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
   light.position.set( 0.5, 1, 0.75 );
@@ -242,6 +364,15 @@ var models = {
 
   }
 
+  /*for (const model of Object.values(models_gltf)) {
+    const gltfLoader = new GLTFLoader(manager);
+    gltfLoader.load(model.url, (gltf) => {
+      gltf.scene.position.set(100, 5, 0);
+      gltf.scene.scale.set(10, 10, 10);
+      scene.add(gltf.scene);
+    });
+  }*/
+
 //load the models of the background (city, towers, ...)
 var mtlLoader;
   var objLoader;
@@ -274,6 +405,20 @@ var mtlLoader;
   }
 
 
+  /*var cubeGeometry = new THREE.BoxGeometry(50, 50, 500 , 1, 1, 1 );
+  // The material will be not so useful since the cube will be transparent
+	var fakeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true } );
+  let box = new THREE.Mesh(
+			cubeGeometry,
+			fakeMaterial
+		);
+  box.geometry.computeBoundingBox();
+  box.material.transparent = true;
+  box.position.set(-2300, 0, 130);
+  scene.add(box);
+  collidableMeshList.push(box);*/
+
+
 
 var controlsEnabled = false;
 var moveForward = false;
@@ -289,87 +434,7 @@ var isWalking = false;
 var robotsAlive = 0;
 var robotsArray = [];
 
-var mainObject = new THREE.Object3D();
 
-var textureLoad = new THREE.TextureLoader(manager);
-var textures = [];
-var materials = [];
-
-var textures2 = [];
-var materials2 = [];
-
-var wallGeometry = new THREE.CubeGeometry(30, 10, 20, 1, 1, 1 );
-//var wallMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
-var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
-
-for(var counter = 0; counter < 6; counter ++) {
-
-  // loads and stores a texture (you might run into some problems with loading images directly from a source because of security protocols, so copying the image data is a for sure way to get the image to load)
-  textures[counter] = textureLoad.load('./js/images/textures/RTS_Crate.png');
-
-  // creates material from previously stored texture
-  materials.push(new THREE.MeshBasicMaterial({map: textures[counter]}));
-}
-
-var wall = new THREE.Mesh(wallGeometry, materials);
-wall.position.set(-400, 6, -100);
-scene.add(wall);
-collidableMeshList.push(wall);
-mainObject.add(wall);
-
-var wallGeometry2 = new THREE.CubeGeometry(25, 25, 20, 1, 1, 1 );
-var wireMaterial2 = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
-
-for(var counter = 0; counter < 6; counter ++) {
-
-  // loads and stores a texture (you might run into some problems with loading images directly from a source because of security protocols, so copying the image data is a for sure way to get the image to load)
-  textures2[counter] = textureLoad.load('./js/images/textures/1.jpg');
-
-  // creates material from previously stored texture
-  materials2.push(new THREE.MeshBasicMaterial({map: textures2[counter]}));
-}
-
-var wall2 = new THREE.Mesh(wallGeometry2, materials2);
-wall2.position.set(-435, 10, -100);
-wall2.rotation.set(0, -20, 0);
-scene.add(wall2);
-collidableMeshList.push(wall2);
-mainObject.add(wall2);
-
-var textures3 = [];
-var materials3 = [];
-
-var bushGeometry = new THREE.CubeGeometry(75, 10, 20, 1, 1, 1 );
-var wireMaterial3 = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
-
-for(var counter = 0; counter < 6; counter ++) {
-
-  // loads and stores a texture (you might run into some problems with loading images directly from a source because of security protocols, so copying the image data is a for sure way to get the image to load)
-  textures3[counter] = textureLoad.load('./js/images/textures/bush.jpg');
-
-  textures3[counter].wrapS = THREE.RepeatWrapping;
-  textures3[counter].wrapT = THREE.RepeatWrapping;
-  textures3[counter].repeat.set( 2, 2 );
-
-  // creates material from previously stored texture
-  materials3.push(new THREE.MeshBasicMaterial({map: textures3[counter]}));
-}
-
-var bush = new THREE.Mesh(bushGeometry, materials3);
-bush.position.set(-345, 5, -105);
-bush.rotation.set(0, 0, 0);
-scene.add(bush);
-collidableMeshList.push(bush);
-mainObject.add(bush);
-
-for (var i=0; i<5; i++) {
-  const clonedScene = SkeletonUtils.clone(mainObject);
-  clonedScene.position.z -= 200;
-  scene.add(mainObject);
-}
-
-
-console.log(mainObject);
 
 function init() {
 
@@ -387,8 +452,6 @@ function init() {
   renderer.shadowMap.type = THREE.BasicShadowMap;
 
   document.body.appendChild( renderer.domElement );
-
-
 
 
 
@@ -541,20 +604,6 @@ function animate() {
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
 
-    var robotCube = robotsArray[0].getObjectByName("robotBox");
-    var originPoint = new THREE.Vector3();
-    originPoint.setFromMatrixPosition(robotCube.matrixWorld);
-    for (var vertexIndex = 0; vertexIndex < robotCube.geometry.vertices.length; vertexIndex++){
-      var localVertex = robotCube.geometry.vertices[vertexIndex].clone();
-      var globalVertex = localVertex.applyMatrix4(robotCube.matrix);
-      var directionVector = globalVertex.sub(robotCube.position);
-
-      var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
-      var collisionResults = ray.intersectObjects(collidableMeshList);
-      if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
-        console.log(collisionResults);
-      } // End if collision detected
-    } // End for loop
 
     if(controlsEnabled){
       var time = performance.now();
