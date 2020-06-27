@@ -30,6 +30,7 @@ var step = 1;
 // Main character variables and life, the camera is attached to him
 let mainChar, mainCharCamera, heroAnimation;
 let mainCharLife = 100;
+let progressBarHealth = document.getElementById("health");
 // Robot boss variable and life
 let robotBoss;
 let robotBossLife = 50;
@@ -484,8 +485,10 @@ function animate() {
       })
       .start();
 
-    // Here the bullets will go
-    if(robotShootingInterval <= 0 && robotBoss.position.distanceTo(mainChar.position) < 250){ // Left-click of the mouse
+    // Here the boss will shoot the main character
+    if(robotShootingInterval <= 0 &&
+      robotBoss.position.distanceTo(mainChar.position) < 250 &&
+      scene.getObjectByName("robotBoss") != null){
       // Create the bullet
       let robotBullet = new Bullet(robotBoss, controls);
       robotBullet.alive = true;
@@ -520,6 +523,7 @@ function animate() {
         // Case in which the robot boss is hidden
         if(mainChar.position.distanceTo(robotBulletsArray[index].position) <= 15){
           mainCharLife -= 2;
+          progressBarHealth.value -=2;
         } // End outer if
     } // End Loop
 
@@ -688,10 +692,19 @@ function animate() {
 
   if(shootingInterval > 0) shootingInterval -=1;
 
-  // If the robot are too close to the main char he will be hit
-  if(scene.getObjectByName("robot").position != null){
+  // If the robots are too close to the main char he will be hit
+  if(scene.getObjectByName("robot") != null){
     if(scene.getObjectByName("robot").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
       mainCharLife -= 2;
+      progressBarHealth.value -=2;
+    }
+  }
+
+  // If the robot boss is too close to the main char he will be hit
+  if(scene.getObjectByName("robotBoss") != null){
+    if(scene.getObjectByName("robotBoss").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
+      mainCharLife -= 2;
+      progressBarHealth.value -=2;
     }
   }
 

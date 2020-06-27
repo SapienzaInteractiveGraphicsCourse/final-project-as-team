@@ -47,37 +47,73 @@ body {
     font-size: xx-large;
     font-family: sans-serif;
   }
-  #loading>div>div {
-    padding: 2px;
+#loading>div>div {
+  padding: 2px;
+}
+.progress {
+  width: 50vw;
+  border: 1px solid black;
+}
+#progressbar {
+  width: 0;
+  transition: width ease-out .5s;
+  height: 1em;
+  background-color: #888;
+  background-image: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, .5) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, .5) 50%,
+    rgba(255, 255, 255, .5) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 50px 50px;
+  animation: progressanim 2s linear infinite;
+}
+
+@keyframes progressanim {
+  0% {
+    background-position: 50px 50px;
   }
-  .progress {
-    width: 50vw;
-    border: 1px solid black;
+  100% {
+    background-position: 0 0;
   }
-  #progressbar {
-    width: 0;
-    transition: width ease-out .5s;
-    height: 1em;
-    background-color: #888;
-    background-image: linear-gradient(
-      -45deg, 
-      rgba(255, 255, 255, .5) 25%, 
-      transparent 25%, 
-      transparent 50%, 
-      rgba(255, 255, 255, .5) 50%, 
-      rgba(255, 255, 255, .5) 75%, 
-      transparent 75%, 
-      transparent
-    );
-    background-size: 50px 50px;
-    animation: progressanim 2s linear infinite;
-  }
-   
-  @keyframes progressanim {
-    0% {
-      background-position: 50px 50px;
-    }
-    100% {
-      background-position: 0 0;
-    }
-  }
+}
+
+/**
+ * Set the syle of the player information, where we have information about the
+ * health value and the number of shot that has.
+ */
+#player-info{
+  width: 30vw;
+  height: 10vh;
+  position: absolute;
+  top: 4vh;
+  left: 4vw;
+  color: white;
+}
+
+#player-info h4{
+  margin-bottom: 0;
+  margin-top: 0
+}
+
+#health-value{
+  display: inline;
+}
+progress {
+  border-radius: 10px;
+  width: 50%;
+}
+progress::-webkit-progress-bar {
+ background-color: #0091EA;
+  border-radius: 10px;
+}
+progress::-webkit-progress-value {
+   border-radius: 10px;
+}
+progress::-moz-progress-bar {
+  /* style rules */
+}

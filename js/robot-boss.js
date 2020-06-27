@@ -32,7 +32,7 @@ var RobotBoss = function(){
 
   // Creating the root element of the robot
   const robot = new THREE.Object3D();
-  robot.name = "robot";
+  robot.name = "robotBoss";
   const robotHead = createHead(robotSizes);
   // Add the neck to the head
   robotHead.add(createNeck(robotSizes));

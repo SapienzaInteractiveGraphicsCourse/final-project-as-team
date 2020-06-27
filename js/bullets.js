@@ -9,7 +9,7 @@ var Bullet = function(root, target){
   let bulletMaterial, bulletGeometry;
   let startingPoint;
 
-  if(root.name == "robot"){
+  if(root.name == "robotBoss"){
     bulletGeometry = new THREE.BoxGeometry(3, 3, 3);
     bulletMaterial = new THREE.MeshToonMaterial({
       color: 0xff0000, // red
@@ -49,7 +49,7 @@ var Bullet = function(root, target){
 		);
 
   // Depending on the who is shooting the bullet will have a different name
-  if(root.name == "robot"){
+  if(root.name == "robotBoss"){
     bullet.name == "killingBeam";
     // We copy the position
     bullet.position.copy(position);
