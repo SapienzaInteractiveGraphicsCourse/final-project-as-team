@@ -7,6 +7,7 @@ import {OBJLoader2} from './three.js-master/examples/jsm/loaders/OBJLoader2.js';
 import {MtlObjBridge} from './three.js-master/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
 import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js';
+import {RobotBoss} from './robot-boss.js';
 import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
@@ -22,20 +23,26 @@ const level = urlParams.get('lvl')
 var camera, scene, renderer;
 var geometry, material, mesh;
 var loadingManager = null;
-let mainChar, mainCharCamera, heroAnimation;
 var controls;
 var objects = [];
 var step = 1;
 
+// Main character variables and life, the camera is attached to him
+let mainChar, mainCharCamera, heroAnimation;
+let mainCharLife = 100;
+// Robot boss variable and life
+let robotBoss;
+let robotBossLife = 50;
 // Add event listener for pressing the keys on the keyboard
 let keyboard = {};
 // Object of mouse key codes
 let mouse = {};
 // Add bullet array, one for the main char and one for the robots
 let bulletsArray = [];
-let bulletsRobotArray = [];
+let robotBulletsArray = [];
 // Shooting interval (interval between one shot and the next)
 let shootingInterval = 0;
+let robotShootingInterval = 0;
 // Instantiate the sound manager for the effects of the game
 const soundManager = new SoundManager();
 // Create the audio Listener
@@ -155,80 +162,89 @@ var models = {
     internal: false
   },
 }
-  scene = new THREE.Scene();
-  var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-  light.position.set( 0.5, 1, 0.75 );
-  scene.add(light);
+scene = new THREE.Scene();
+var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
+light.position.set( 0.5, 1, 0.75 );
+scene.add(light);
 
-  // Create a DirectionalLight and turn on shadows for the light
-  var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-  light2.position.set(-5, 10, 20); 			//default; light shining from top
-  light2.castShadow = true;            // default false
-  scene.add( light2 );
+// Create a DirectionalLight and turn on shadows for the light
+var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
+light2.position.set(-5, 10, 20); 			//default; light shining from top
+light2.castShadow = true;            // default false
+scene.add( light2 );
 
-  // Set up shadow properties for the light
-  light2.shadow.mapSize.width = 512;  // default
-  light2.shadow.mapSize.height = 512; // default
-  light2.shadow.camera.near = 0.5;    // default
-  light2.shadow.camera.far = 500;     // default
+// Set up shadow properties for the light
+light2.shadow.mapSize.width = 512;  // default
+light2.shadow.mapSize.height = 512; // default
+light2.shadow.camera.near = 0.5;    // default
+light2.shadow.camera.far = 500;     // default
 
-  // Init the main character
-  mainChar = new Hero();
-  mainChar.castShadow = true;
-  mainChar.receiveShadow = true;
-  mainCharCamera = mainChar.getObjectByName("heroCamera");
+// Init the main character
+mainChar = new Hero();
+mainChar.castShadow = true;
+mainChar.receiveShadow = true;
+mainCharCamera = mainChar.getObjectByName("heroCamera");
+mainChar.rotation.y = Math.PI;
+scene.add(mainChar);
 
-  mainChar.rotation.y = Math.PI;
-  scene.add(mainChar);
+// Init the robot boss and its position
+robotBoss = new RobotBoss();
+robotBoss.castShadow = true;
+robotBoss.receiveShadow = true;
+robotBoss.scale.multiplyScalar(5);
+var positionX = getRandomInt(50, 1000);
+var positionZ = getRandomInt(0, 1000);
+robotBoss.position.set(positionX, 0, positionZ);
+scene.add(robotBoss);
 
-  // Use the pointer to rotate the main char
-  controls = new PointerLockControls(mainChar);
-  scene.add(controls.getObject());
+// Use the pointer to rotate the main char
+controls = new PointerLockControls(mainChar);
+scene.add(controls.getObject());
 
-  // Instantiate the class for animations
-  heroAnimation = new AnimateHero(mainChar);
+// Instantiate the class for animations
+heroAnimation = new AnimateHero(mainChar);
 
-  // Create floor and add texture
-  const planeSize = 6000;
+// Create floor and add texture
+const planeSize = 6000;
 
-  const loader = new THREE.TextureLoader();
-  const texture = loader.load('js/bg_images/sabbia2.jpg');
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.magFilter = THREE.NearestFilter;
-  const repeats = planeSize / 2;
-  texture.repeat.set(repeats, repeats);
+const loader = new THREE.TextureLoader();
+const texture = loader.load('js/bg_images/sabbia2.jpg');
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.magFilter = THREE.NearestFilter;
+const repeats = planeSize / 2;
+texture.repeat.set(repeats, repeats);
 
-  const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-  const planeMat = new THREE.MeshPhongMaterial({
-  map: texture,
-  side: THREE.DoubleSide,
-  shininess: 0,
-  });
-  mesh = new THREE.Mesh(planeGeo, planeMat);
-  mesh.rotation.x = Math.PI * -.5;
-  mesh.receiveShadow = true;
-  scene.add(mesh);
+const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+const planeMat = new THREE.MeshPhongMaterial({
+map: texture,
+side: THREE.DoubleSide,
+shininess: 0,
+});
+mesh = new THREE.Mesh(planeGeo, planeMat);
+mesh.rotation.x = Math.PI * -.5;
+mesh.receiveShadow = true;
+scene.add(mesh);
 
-  // Create skybox effect with cube
-  {
+// Create skybox effect with cube
+{
 
-  const path = "js/bg_images/"
-  const ls = [
-  	"arid2_ft.jpg",
-  	"arid2_bk.jpg",
-  	"arid2_up.jpg",
-  	"arid2_dn.jpg",
-  	"arid2_rt.jpg",
-  	"arid2_lf.jpg",
+const path = "js/bg_images/"
+const ls = [
+	"arid2_ft.jpg",
+	"arid2_bk.jpg",
+	"arid2_up.jpg",
+	"arid2_dn.jpg",
+	"arid2_rt.jpg",
+	"arid2_lf.jpg",
 
-  ].map(x => path + x)
+].map(x => path + x)
 
-  const loader = new THREE.CubeTextureLoader();
-  const texture = loader.load(ls);
-  scene.background = texture;
+const loader = new THREE.CubeTextureLoader();
+const texture = loader.load(ls);
+scene.background = texture;
 
-  }
+}
 
 //load the models of the background (city, towers, ...)
 var mtlLoader;
@@ -270,6 +286,7 @@ var isWalking = false;
 // variable for robots spawn
 var robotsAlive = 0;
 var robotsArray = [];
+var robotsAreDead = false;
 
 function init() {
 
@@ -426,53 +443,89 @@ function animate() {
     }
 
     //spawn the robots models
-    if(newSpawn == true && nToSpawn <= 6) {
-          var robot = new KillingRobot();
-          robot.scale.set(3, 3, 3);
-          // Assign a random position to the current robot
-          var positionX = getRandomInt(50, 1000);
-          var positionZ = getRandomInt(0, 1000);
-          robot.position.set(positionX, 0, positionZ);
-          robotsAlive += 1;
+    if(newSpawn == true && nToSpawn <= 7) {
+      var robot = new KillingRobot();
+      robot.scale.set(3, 3, 3);
+      // Assign a random position to the current robot
+      var positionX = getRandomInt(50, 1000);
+      var positionZ = getRandomInt(0, 1000);
+      robot.position.set(positionX, 0, positionZ);
+      robotsAlive += 1;
 
-          // Push the the robot inside the array together with
-          // its life value, that will be decremented if the
-          // robot will be hit
-          robotsArray.push({robot: robot, robotLife: robotLife});
-          scene.add(robot);
-          nToSpawn += 1;
+      // Push the the robot inside the array together with
+      // its life value, that will be decremented if the
+      // robot will be hit
+      robotsArray.push({robot: robot, robotLife: robotLife});
+      // Robots can collide
+      collidableMeshList.push(robot)
+      scene.add(robot);
+      nToSpawn += 1;
     }
+
 
     // Animate the robot (wheel, weapon and walking towards the mainChar)
     // Every robot will go to the main chart
     robotsArray.forEach((elem, i) => {
-        new TWEEN.Tween(elem.robot.position)
-          .to({x: mainChar.position.x + (i * 30) , z: mainChar.position.z + (i * 5)}, 1500)
-          .onUpdate(function (object) {
-          elem.robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
-          AnimateRobot(elem.robot);
-
-          })
-          .start()
+      new TWEEN.Tween(elem.robot.position)
+        .to({x: mainChar.position.x + (i * 20) , z: mainChar.position.z + (i * 5)}, 3000)
+        .onUpdate(function (object) {
+        elem.robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
+        AnimateRobot(elem.robot);
+        })
+        .start();
     });
+
+    // Animate the big robot boss
+    let robotBossMovement = new TWEEN.Tween(robotBoss.position)
+      .to({x: mainChar.position.x , z: mainChar.position.z}, 6000)
+      .onUpdate(function (object) {
+      robotBoss.lookAt(mainChar.position.x, 0, mainChar.position.z);
+      AnimateRobot(robotBoss);
+      })
+      .start();
+
+    // Here the bullets will go
+    if(robotShootingInterval <= 0 && robotBoss.position.distanceTo(mainChar.position) < 250){ // Left-click of the mouse
+      // Create the bullet
+      let robotBullet = new Bullet(robotBoss, controls);
+      robotBullet.alive = true;
+      collidableMeshList.push(robotBullet);
+
+      setTimeout(function () {
+        robotBullet.alive = false;
+        //collidableMeshList.remove(robotBullet);
+        scene.remove(robotBullet);
+      }, 2000);
+
+      // Add the robotBullet to the scene and to the robotBullets array and
+      // then set the robotShootingInterval to 10, meaning that every 10
+      // frames there will be another robotBullet.
+      robotBulletsArray.push(robotBullet);
+      scene.add(robotBullet);
+      robotShootingInterval = 20;
+    }
+
+    if(robotShootingInterval > 0) robotShootingInterval -=1;
+
+    // go through bullets array and update position
+    // remove bullets when appropriate
+    for(var index=0; index<robotBulletsArray.length; index+=1){
+        if(robotBulletsArray[index] === undefined ) continue;
+        if(robotBulletsArray[index].alive == false ){
+            robotBulletsArray.splice(index,1);
+            continue;
+        }
+        robotBulletsArray[index].position.add(robotBulletsArray[index].velocity);
+
+        // Case in which the robot boss is hidden
+        if(mainChar.position.distanceTo(robotBulletsArray[index].position) <= 15){
+          mainCharLife -= 2;
+        } // End outer if
+    } // End Loop
+
 
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
-
-    /*var robotCube = robotsArray[0].getObjectByName("robotBox");
-    var originPoint = new THREE.Vector3();
-    originPoint.setFromMatrixPosition(robotCube.matrixWorld);
-    for (var vertexIndex = 0; vertexIndex < robotCube.geometry.vertices.length; vertexIndex++){
-      var localVertex = robotCube.geometry.vertices[vertexIndex].clone();
-      var globalVertex = localVertex.applyMatrix4(robotCube.matrix);
-      var directionVector = globalVertex.sub(robotCube.position);
-
-      var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
-      var collisionResults = ray.intersectObjects(collidableMeshList);
-      if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
-
-      } // End if collision detected
-    } // End for loop*/
 
     if(controlsEnabled){
       var time = performance.now();
@@ -572,68 +625,134 @@ function animate() {
           velocity.y = 0;
           controls.getObject().position.y = 10;
       }
+
+      // If the WASD is pressed, the walking animation is triggered
+      if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
+        heroAnimation.walking();
+      }
+      // If UpDownLeftRight is pressed, the walking animation is triggered
+      if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
+        heroAnimation.walking();
+      }
+
+      // Activate the target mode if we right-click once
+      if(keyboard[16]){
+        heroAnimation.activateTargetMode = true;
+      }
+      else{
+        heroAnimation.activateTargetMode = false;
+      }
+
+      // Animations for doing the target mode
+      heroAnimation.targetMode();
+      heroAnimation.returnFromTargetMode();
+
+      // We need a separate if condition, otherwise the shooting animation
+      // will go ten frames slower.
+      if(mouse[0]){ // Left-click of the mouse
+        heroAnimation.shooting();
+      }
+
+      // Here the bullets will go
+      if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+        // Create the bullet
+        let bullet = new Bullet(controls, null);
+        bullet.alive = true;
+        collidableMeshList.push(bullet);
+
+        // If the bullet is not disappear we play the sound
+        if(bullet.alive){
+          soundManager.soundEffects["blaster"].sound.context.resume().then(() => {
+            soundManager.soundEffects["blaster"].sound.play();
+          });
+        }
+
+        setTimeout(function () {
+          bullet.alive = false;
+          //collidableMeshList.remove(bullet);
+          scene.remove(bullet);
+        }, 1000);
+
+        // Add the bullet to the scene and to the bullets array and
+        // then set the shootingInterval to 10, meaning that every 10
+        // frames there will be another bullet.
+        bulletsArray.push(bullet);
+        scene.add(bullet);
+        shootingInterval = 10;
+      }
+
       prevTime = time;
     }
 
   if (isWalking) mainChar.position.y = 10;
 
-
-  // If the WASD is pressed, the walking animation is triggered
-  if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
-    heroAnimation.walking();
-  }
-  // If UpDownLeftRight is pressed, the walking animation is triggered
-  if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
-    heroAnimation.walking();
-  }
-
-  // Activate the target mode if we right-click once
-  if(keyboard[16]){
-    heroAnimation.activateTargetMode = true;
-  }
-  else{
-    heroAnimation.activateTargetMode = false;
-  }
-
-  // Animations for doing the target mode
-  heroAnimation.targetMode();
-  heroAnimation.returnFromTargetMode();
-
-  // We need a separate if condition, otherwise the shooting animation
-  // will go ten frames slower.
-  if(mouse[0]){ // Left-click of the mouse
-    heroAnimation.shooting();
-  }
-
-  // Here the bullets will go
-  if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
-    // Create the bullet
-    let bullet = new Bullet(controls);
-    bullet.alive = true;
-    collidableMeshList.push(bullet);
-
-    // If the bullet is not disappear we play the sound
-    if(bullet.alive){
-      soundManager.soundEffects["blaster"].sound.context.resume().then(() => {
-        soundManager.soundEffects["blaster"].sound.play();
-      });
-    }
-
-    setTimeout(function () {
-      bullet.alive = false;
-      //collidableMeshList.remove(bullet);
-      scene.remove(bullet);
-    }, 1000);
-
-    // Add the bullet to the scene and to the bullets array and
-    // then set the shootingInterval to 10, meaning that every 10
-    // frames there will be another bullet.
-    bulletsArray.push(bullet);
-    scene.add(bullet);
-    shootingInterval = 10;
-  }
-
   if(shootingInterval > 0) shootingInterval -=1;
+
+  // If the robot are too close to the main char he will be hit
+  if(scene.getObjectByName("robot").position != null){
+    if(scene.getObjectByName("robot").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
+      mainCharLife -= 2;
+    }
+  }
+
+  // Depeding on the value of the main character life the color of the
+  // arms will be different
+  if(mainCharLife == 30){
+    mainChar.getObjectByName("heroRightUpperArm")
+    .material
+    .color.set('#F1BD14');
+
+    mainChar.getObjectByName("heroLeftUpperArm")
+    .material
+    .color.set('#F1BD14');
+
+    mainChar.getObjectByName("heroLowerRightArm")
+    .material
+    .color.set('#F1BD14');
+
+    mainChar.getObjectByName("heroLowerLeftArm")
+    .material
+    .color.set('#F1BD14');
+  }
+  if(mainCharLife == 20){
+    mainChar.getObjectByName("heroRightUpperArm")
+    .material
+    .color.set('#F17414');
+
+    mainChar.getObjectByName("heroLeftUpperArm")
+    .material
+    .color.set('#F17414');
+
+    mainChar.getObjectByName("heroLowerRightArm")
+    .material
+    .color.set('#F17414');
+
+    mainChar.getObjectByName("heroLowerLeftArm")
+    .material
+    .color.set('#F17414');
+  }
+  if(mainCharLife == 10){
+    mainChar.getObjectByName("heroRightUpperArm")
+    .material
+    .color.set('#FF0000');
+
+    mainChar.getObjectByName("heroLeftUpperArm")
+    .material
+    .color.set('#FF0000');
+
+    mainChar.getObjectByName("heroLowerRightArm")
+    .material
+    .color.set('#FF0000');
+
+    mainChar.getObjectByName("heroLowerLeftArm")
+    .material
+    .color.set('#FF0000');
+  }
+  // The boss is dead !
+  if(mainCharLife == 0){
+    scene.remove(mainChar);
+    controlsEnabled = false;
+  }
 
   // go through bullets array and update position
   // remove bullets when appropriate
@@ -645,6 +764,43 @@ function animate() {
       }
       bulletsArray[index].position.add(bulletsArray[index].velocity);
 
+      // Case in which the robot boss is hidden
+      if(robotBoss.position.distanceTo(bulletsArray[index].position) <= 15){
+        robotBossLife -= 2;
+        if(robotBossLife == 30){
+          robotBoss.getObjectByName("robotTorso")
+          .material
+          .color.set('#F1BD14');
+
+          robotBoss.getObjectByName("robotHead")
+          .material
+          .color.set('#F1BD14');
+        }
+        if(robotBossLife == 20){
+          robotBoss.getObjectByName("robotTorso")
+          .material
+          .color.set("#F17414");
+
+          robotBoss.getObjectByName("robotHead")
+          .material
+          .color.set("#F17414");
+        }
+        if(robotBossLife == 10){
+          robotBoss.getObjectByName("robotTorso")
+          .material
+          .color.set("#FF0000");
+
+          robotBoss.getObjectByName("robotHead")
+          .material
+          .color.set("#FF0000");
+        }
+        // The boss is dead !
+        if(robotBossLife == 0){
+          scene.remove(robotBoss);
+        }
+      }
+
+      // Check if the other robots are hidden
       robotsArray.forEach((item, i) => {
         if(item.robot.position.distanceTo(bulletsArray[index].position) <= 15){
           // If the robot is hit, then its life is decremented and depending on
@@ -681,6 +837,10 @@ function animate() {
           if(item.robotLife == 0){
             robotsAlive -= 1;
             scene.remove(item.robot);
+            // Now the boss will came into play
+            if(robotsAlive == 0){
+              robotsAreDead = true;
+            }
           }
         }
       });

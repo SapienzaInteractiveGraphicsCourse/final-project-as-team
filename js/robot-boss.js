@@ -6,12 +6,12 @@
  *
  * @return {object} Killing robot object
  */
-var KillingRobot = function(){
+var RobotBoss = function(){
   // Sizes of the various robot parts. In this way everytime there is
   // something to change we just have to modify this object.
   let robotSizes = {
     torso       : {h: 0.8, w: 2.5},
-    head        : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 32},
+    head        : {rTop: 0.4, rBot: 0.8, h: 3, radialSeg: 5},
     neck        : {r: 0.3, t: 0.2, radialSeg: 14, tubularSeg: 81},
     eyeSupport  : {w: 1.1, h: 0.3, d: 1.65},
     eyeBar      : {w: 0.2, h: 0.1, d: 1.5},
@@ -37,7 +37,8 @@ var KillingRobot = function(){
   // Add the neck to the head
   robotHead.add(createNeck(robotSizes));
   // Add the details to the head, such as the ear with the antenna
-  robotHead.add(createEar(robotSizes));
+  robotHead.add(createEar(robotSizes, "right"));
+  robotHead.add(createEar(robotSizes, "left"));
   // Add the eye
   robotHead.add(createEye(robotSizes));
   robotHead.name = "head";
@@ -100,7 +101,7 @@ function createHead(robotSizes) {
 
   const headGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments );
   const headMat = new THREE.MeshToonMaterial( {
-    color: '#FFFFFF',
+    color: '#6A645F',
     shininess: 0,
     map:texture,
     //bumpMap: texture
@@ -135,9 +136,10 @@ function createHead(robotSizes) {
  * This function creates the ear of the robot, that is made up of the ear block
  * and of the antenna, giving a more tactical look to the robot.
  * @param  {object} robotSizes The robot sizes
+ * @param  {string} side       Tell which the side on which the ear will be created
  * @return {object}            The ear object
  */
-function createEar(robotSizes){
+function createEar(robotSizes, side){
   // Spatial coordinates to add in order to set the position
   const addX = 1.75;
   const addY = 3.7;
@@ -175,7 +177,6 @@ function createEar(robotSizes){
   const ear = new THREE.Mesh(earGeo, earMat);
   ear.castShadow = true;
   ear.receiveShadow = true;
-  ear.position.set(torsoWidth + addX, torsoHeight + addY, addZ);
   ear.name = "robotEar";
   ear.rotation.z = 90* Math.PI/180;
   earObj.add(ear);
@@ -197,13 +198,21 @@ function createEar(robotSizes){
 
   // Antenna
   const cubeGeo = new THREE.BoxBufferGeometry(antennaWidth, antennaHeigh,antennaWidth);
-  const cubeMat = new THREE.MeshToonMaterial({color: '#1E1C1A'}); // pseudo-black
+  const cubeMat = new THREE.MeshToonMaterial({color: '#FF0000'}); // red
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.position.set(torsoWidth + addX + 0.1, torsoHeight + addY + 0.8, addZ);
   mesh.name = "robotAntenna";
   earObj.add(mesh);
+
+  if(side == "right"){
+    ear.position.set(torsoWidth + 0.2, torsoHeight + addY, addZ);
+    mesh.position.set(torsoWidth + 0.3, torsoHeight + addY + 0.8, addZ);
+  }
+  else{
+    ear.position.set(torsoWidth + addX, torsoHeight + addY, addZ);
+    mesh.position.set(torsoWidth + addX + 0.1, torsoHeight + addY + 0.8, addZ);
+  }
 
   return earObj;
 }
@@ -241,7 +250,7 @@ function createEye(robotSizes){
   const eyeSuppMesh = new THREE.Mesh(eyeSuppGeo, eyeSuppMat);
   eyeSuppMesh.castShadow = true;
   eyeSuppMesh.receiveShadow = true;
-  eyeSuppMesh.position.set(torsoWidth + 1.174, torsoHeight + 3.8, 1.375);
+  eyeSuppMesh.position.set(torsoWidth + 1, torsoHeight + 3.8, 1.375);
   eyeSuppMesh.rotation.y = 90 * Math.PI/180
   eyeSuppMesh.name = "robotEyeSupport";
   eyeObj.add(eyeSuppMesh);
@@ -271,7 +280,7 @@ function createEye(robotSizes){
   const eyeBarMesh = new THREE.Mesh(barGeo, barMaterial);
   eyeBarMesh.castShadow = true;
   eyeBarMesh.receiveShadow = true;
-  eyeBarMesh.position.set(torsoWidth + 1.174, torsoHeight + 3.8, 1.875);
+  eyeBarMesh.position.set(torsoWidth + 1, torsoHeight + 3.8, 1.875);
   eyeBarMesh.rotation.y = 90 * Math.PI/180
   eyeBarMesh.name = "robotEyeBar";
   eyeObj.add(eyeBarMesh);
@@ -303,7 +312,7 @@ function createNeck(robotSizes){
   const neckObj = new THREE.Object3D();
   const neckGeo = new THREE.TorusGeometry(radius, tube, radialSeg, tubularSeg);
   const neckMat = new THREE.MeshToonMaterial({
-    color: '#534D4D',  // grey/black
+    color: '#6A645F',  // grey/black
   });
 
   // Create outline object
@@ -532,7 +541,7 @@ function createCannon(robotSizes){
   // Build the geometry
   const cylGeo = new THREE.CylinderGeometry(rTop, rBot, h, radialSeg);
   const cylMat = new THREE.MeshToonMaterial({
-    color: '#FFFFFF', // white
+    color: '#6A645F', // white
     map: texture,
     shininess: 100.0
   });
@@ -652,7 +661,7 @@ function createTorso(robotSizes){
 
   const cubeGeo = new THREE.BoxGeometry(width, height, width + 0.5);
   const cubeMat = new THREE.MeshToonMaterial({
-    color: '#FFFFFF', // white
+    color: '#6A645F', // white
     map: texture,
     //bumpMap: texture,
     shininess: 0.0
@@ -663,6 +672,51 @@ function createTorso(robotSizes){
   mesh.position.set(width + 1, height + 2, 0);
   mesh.name = "robotTorso";
   torsoObj.add(mesh);
+
+  // Add details to the torso
+  let detailGeo, detailMat, detailMesh, detailTexture;
+  detailGeo = new THREE.BoxGeometry(width - 1, 0.1, 2);
+  detailMat = new THREE.MeshToonMaterial({
+    color: "#FD0000", // red
+    shininess: 200.0,
+    emissive: 0xf25656,
+    specular: 0xf25656
+  });
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(width + 0.6, height + 2, 0.6);
+  detailMesh.name = "shiningLongTorsoDetail";
+  torsoObj.add(detailMesh);
+
+  // Adding two others little shining cube to the torso
+  detailGeo = new THREE.BoxGeometry(0.3, 0.6, 2);
+  detailMat = new THREE.MeshToonMaterial({
+    color: "#FD0000", // red
+    shininess: 200.0,
+    emissive: 0xf25656,
+    specular: 0xf25656
+  });
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(width + 1.6, height + 2, 0.6);
+  detailMesh.name = "shiningUpperTorsoDetail";
+  torsoObj.add(detailMesh);
+
+  detailGeo = new THREE.BoxGeometry(0.3, 0.6, 2);
+  detailMat = new THREE.MeshToonMaterial({
+    color: "#FFFFFF", // red
+    shininess: 200.0,
+    emissive: 0xf25656,
+    specular: 0xf25656
+  });
+  detailMesh = new THREE.Mesh(detailGeo, detailMat);
+  detailMesh.castShadow = true;
+  detailMesh.receiveShadow = true;
+  detailMesh.position.set(width + 2, height + 2, 0.6);
+  detailMesh.name = "shiningUpperTorsoDetailWhite";
+  torsoObj.add(detailMesh);
 
   // Create outline object
   const outlineW = width * 0.05;
@@ -766,7 +820,7 @@ function createMidLeg(robotSizes){
   // The middle leg part is just a little cube attached to the upper leg
   const cubeGeo = new THREE.BoxGeometry(width, height, width);
   const cubeMat = new THREE.MeshToonMaterial({
-    color: '#DAD5D5', // very light grey
+    color: '#6A645F', // very light grey
     map: texture,
   });
   const mesh = new THREE.Mesh(cubeGeo, cubeMat);
@@ -901,4 +955,4 @@ function createWheel(robotSizes){
   return mesh;
 }
 
-export {KillingRobot};
+export {RobotBoss};
