@@ -295,9 +295,12 @@ var models = {
 
   // Create a DirectionalLight and turn on shadows for the light
   var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-  light2.position.set(-5, 10, 20); 			//default; light shining from top
+  light2.position.set(-2000, 3000, 6000); 			//default; light shining from top
   light2.castShadow = true;            // default false
   scene.add( light2 );
+
+  var helper = new THREE.DirectionalLightHelper( light2, 5 );
+  scene.add( helper );
 
   // Set up shadow properties for the light
   light2.shadow.mapSize.width = 512;  // default
@@ -418,6 +421,36 @@ var mtlLoader;
   box.visible = false;
   scene.add(box);
   collidableMeshList.push(box);
+
+  var cubeGeometry2 = new THREE.BoxGeometry(2350, 50, 50 , 1, 1, 1 );
+  // The material will be not so useful since the cube will be transparent
+	var fakeMaterial2 = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true} );
+  let box2 = new THREE.Mesh(
+			cubeGeometry2,
+			fakeMaterial2
+		);
+  box2.geometry.computeBoundingBox();
+  box2.material.transparent = true;
+  box2.position.set(-2100, 0, 130);
+  box2.rotation.set(0, -0.2999, 0);
+  box2.visible = false;
+  scene.add(box2);
+  collidableMeshList.push(box2);
+
+  var cubeGeometry3 = new THREE.BoxGeometry(50, 50, 1400 , 1, 1, 1 );
+  // The material will be not so useful since the cube will be transparent
+  var fakeMaterial3 = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true} );
+  let box3 = new THREE.Mesh(
+      cubeGeometry3,
+      fakeMaterial3
+    );
+  box3.geometry.computeBoundingBox();
+  box3.material.transparent = true;
+  box3.position.set(-1700, 0, 495);
+  box3.rotation.set(0, 1.28, 0);
+  box3.visible = false;
+  scene.add(box3);
+  collidableMeshList.push(box3);
 
 
 
