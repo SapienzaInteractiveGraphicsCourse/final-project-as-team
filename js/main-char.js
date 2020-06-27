@@ -107,10 +107,11 @@ var Hero = function(){
 
   // This cube is used to detect the collisions with objects
   var cubeGeometry = new THREE.BoxGeometry(40,10,40,10,10,10);
-	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true } );
+  // The material will be not so useful since the cube will be transparent 
+	var fakeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true } );
   let box = new THREE.Mesh(
 			cubeGeometry,
-			wireMaterial
+			fakeMaterial
 		);
   box.geometry.computeBoundingBox();
   box.material.transparent = true;

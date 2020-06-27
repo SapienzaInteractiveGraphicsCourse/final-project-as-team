@@ -13,16 +13,15 @@ import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 import {SoundManager} from './sound-manager.js'
 
-//retrieve difficulty level choosen in the menu page
+// retrieve difficulty level choosen in the menu page
 const queryString = window.location.search;
-
+// Get the level value from the url
 const urlParams = new URLSearchParams(queryString);
-
 const level = urlParams.get('lvl')
-
 
 var camera, scene, renderer;
 var geometry, material, mesh;
+var loadingManager = null;
 let mainChar, mainCharCamera, heroAnimation;
 var controls;
 var objects = [];
@@ -32,17 +31,11 @@ var step = 1;
 let keyboard = {};
 // Object of mouse key codes
 let mouse = {};
-
-var loadingManager = null;
-
-// Add bullet array
+// Add bullet array, one for the main char and one for the robots
 let bulletsArray = [];
+let bulletsRobotArray = [];
 // Shooting interval (interval between one shot and the next)
 let shootingInterval = 0;
-
-var blocker = document.getElementById( 'blocker' );
-var instructions = document.getElementById( 'instructions' );
-
 // Instantiate the sound manager for the effects of the game
 const soundManager = new SoundManager();
 // Create the audio Listener
@@ -54,16 +47,12 @@ var directionOfMovement = {w: 0, s: 0, r:0, l:0};
 // These are flags to stop the movement of the main char
 var stopW, stopS, stopR, stopL;
 stopL = stopR = stopW = stopS = false;
+// The life of the robots
+var robotLife = 8;
 
-var robotLife = 4;
-//var mtlLoader = new MTLLoader();
-//var objLoader = new OBJLoader2();
-
-// Configure the Physijs physic engine scripts
-//Physijs.scripts.worker = './js/physijs/physijs_worker.js';
-//Physijs.scripts.ammo = './ammo.js';
-
-
+// Get the elements in the html page for the pointer lock
+var blocker = document.getElementById( 'blocker' );
+var instructions = document.getElementById( 'instructions' );
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 if ( havePointerLock ) {
@@ -126,7 +115,7 @@ manager.onLoad = function() {
   instructions.style.display = '';
 }
 
-
+// Progressbar
 manager.onProgress = (url, itemsLoaded, itemsTotal) => {
   progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
 };
@@ -191,7 +180,6 @@ var models = {
 
   mainChar.rotation.y = Math.PI;
   scene.add(mainChar);
-
 
   // Use the pointer to rotate the main char
   controls = new PointerLockControls(mainChar);
@@ -273,19 +261,13 @@ var mtlLoader;
       })(_key);
   }
 
-
-
 var controlsEnabled = false;
-var moveForward = false;
-var moveBackward = false;
-var moveLeft = false;
-var moveRight = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var rotation = new THREE.Vector3();
 var isWalking = false;
 
-//variable for robots spawn
+// variable for robots spawn
 var robotsAlive = 0;
 var robotsArray = [];
 
@@ -295,7 +277,6 @@ function init() {
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
 
-
   renderer = new THREE.WebGLRenderer();
   renderer.setClearColor( 0xffffff );
   renderer.setPixelRatio( window.devicePixelRatio );
@@ -304,7 +285,7 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.BasicShadowMap;
 
-  document.body.appendChild( renderer.domElement );
+  document.body.appendChild(renderer.domElement);
 
   var wallGeometry = new THREE.CubeGeometry(100, 100, 20, 1, 1, 1 );
 	var wallMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
@@ -324,28 +305,24 @@ function init() {
   animate();
 }
 
-//get random int number between min and max
+/**
+ * Function to get the random numer among the range of min e max
+ * @param  {float} min The minimum number of the range
+ * @param  {float} max The max number of the range
+ * @return {float}     The random number in the range
+ */
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-//genereta robots depending on the selected level
-function spawnRobots(lvl) {
-      robot = new KillingRobot();
-      robot.scale.set(3, 3, 3);
-      var positionX = getRandomInt(50, 1000);
-      var positionZ = getRandomInt(0, 1000);
-      robot.position.set(positionX, 0, positionZ);
-      robotsAlive += 1;
-      robotsArray.push(robot);
-      scene.add(robot);
-}
-
-
-
-// load models and set position/size
+/**
+ * Function to load the models of the background such as the skyscraper. The
+ * function simply load the obj models, scale, rotate and position them in the
+ * scene.
+ * @return {void} The function does not return anything.
+ */
 function loadModels() {
 
   var mtlLoader;
@@ -425,7 +402,6 @@ function keyUp(event){
   keyboard[event.keyCode] = false;
 }
 
-
 // Listeners
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
@@ -439,7 +415,7 @@ var newSpawn = false;
 
 function animate() {
 
-  //limitate the framerate
+  // limitate the framerate
   if(Date.now()>=timeTarget){
 
     //check the number of robots alive
@@ -450,25 +426,31 @@ function animate() {
     }
 
     //spawn the robots models
-    if(newSpawn == true && nToSpawn <= 0) {
+    if(newSpawn == true && nToSpawn <= 6) {
           var robot = new KillingRobot();
           robot.scale.set(3, 3, 3);
+          // Assign a random position to the current robot
           var positionX = getRandomInt(50, 1000);
           var positionZ = getRandomInt(0, 1000);
           robot.position.set(positionX, 0, positionZ);
           robotsAlive += 1;
-          robotsArray.push(robot);
+
+          // Push the the robot inside the array together with
+          // its life value, that will be decremented if the
+          // robot will be hit
+          robotsArray.push({robot: robot, robotLife: robotLife});
           scene.add(robot);
           nToSpawn += 1;
     }
 
-    //animate the robot (wheel, weapon and walking towards the mainChar)
-    robotsArray.forEach((robot, i) => {
-        new TWEEN.Tween(robot.position)
-          .to({x: mainChar.position.x, z: mainChar.position.z}, 1500)
+    // Animate the robot (wheel, weapon and walking towards the mainChar)
+    // Every robot will go to the main chart
+    robotsArray.forEach((elem, i) => {
+        new TWEEN.Tween(elem.robot.position)
+          .to({x: mainChar.position.x + (i * 30) , z: mainChar.position.z + (i * 5)}, 1500)
           .onUpdate(function (object) {
-          robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
-          AnimateRobot(robot);
+          elem.robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
+          AnimateRobot(elem.robot);
 
           })
           .start()
@@ -477,7 +459,7 @@ function animate() {
     // Start with the reload animation, initially this is done once.
     heroAnimation.reload();
 
-    var robotCube = robotsArray[0].getObjectByName("robotBox");
+    /*var robotCube = robotsArray[0].getObjectByName("robotBox");
     var originPoint = new THREE.Vector3();
     originPoint.setFromMatrixPosition(robotCube.matrixWorld);
     for (var vertexIndex = 0; vertexIndex < robotCube.geometry.vertices.length; vertexIndex++){
@@ -488,9 +470,9 @@ function animate() {
       var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
       var collisionResults = ray.intersectObjects(collidableMeshList);
       if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
-        console.log(collisionResults);
+
       } // End if collision detected
-    } // End for loop
+    } // End for loop*/
 
     if(controlsEnabled){
       var time = performance.now();
@@ -558,7 +540,7 @@ function animate() {
 
   		// If W or Up are pressed
   		if((keyboard[87] || keyboard[38]) && !stopW){
-  			velocity.z -= 400.0 * delta;
+  			velocity.z -= 2000.0 * delta;
   			directionOfMovement.w += 1;
   			isWalking = true;
   		}
@@ -580,7 +562,6 @@ function animate() {
   			 directionOfMovement.l += 1;
   			 isWalking = true;
   		}
-
 
       velocity.y = Math.max( 0, velocity.y );
   		controls.getObject().translateX( velocity.x * delta );
@@ -614,6 +595,7 @@ function animate() {
     heroAnimation.activateTargetMode = false;
   }
 
+  // Animations for doing the target mode
   heroAnimation.targetMode();
   heroAnimation.returnFromTargetMode();
 
@@ -629,17 +611,6 @@ function animate() {
     let bullet = new Bullet(controls);
     bullet.alive = true;
     collidableMeshList.push(bullet);
-
-    if(robotsArray[0].position.distanceTo(bullet.position) < 90){
-      robotLife -=1;
-      console.log(robotLife);
-      if(robotLife == 3){
-        robotsArray[0].getObjectByName("robotTorso").material.color.setHex("#FF0000");
-      }
-      if(robotLife == 0){
-        scene.remove(robotsArray[0]);
-      }
-    }
 
     // If the bullet is not disappear we play the sound
     if(bullet.alive){
@@ -667,14 +638,53 @@ function animate() {
   // go through bullets array and update position
   // remove bullets when appropriate
   for(var index=0; index<bulletsArray.length; index+=1){
-      if( bulletsArray[index] === undefined ) continue;
-      if( bulletsArray[index].alive == false ){
+      if(bulletsArray[index] === undefined ) continue;
+      if(bulletsArray[index].alive == false ){
           bulletsArray.splice(index,1);
           continue;
       }
       bulletsArray[index].position.add(bulletsArray[index].velocity);
-  }
 
+      robotsArray.forEach((item, i) => {
+        if(item.robot.position.distanceTo(bulletsArray[index].position) <= 15){
+          // If the robot is hit, then its life is decremented and depending on
+          // its life value the robot will have a different color
+          item.robotLife -= 1;
+          if(item.robotLife == 3){
+            item.robot.getObjectByName("robotTorso")
+            .material
+            .color.set('#F1BD14');
+
+            item.robot.getObjectByName("robotHead")
+            .material
+            .color.set('#F1BD14');
+          }
+          if(item.robotLife == 2){
+            item.robot.getObjectByName("robotTorso")
+            .material
+            .color.set("#F17414");
+
+            item.robot.getObjectByName("robotHead")
+            .material
+            .color.set("#F17414");
+          }
+          if(item.robotLife == 1){
+            item.robot.getObjectByName("robotTorso")
+            .material
+            .color.set("#FF0000");
+
+            item.robot.getObjectByName("robotHead")
+            .material
+            .color.set("#FF0000");
+          }
+          // The robot is dead !
+          if(item.robotLife == 0){
+            robotsAlive -= 1;
+            scene.remove(item.robot);
+          }
+        }
+      });
+  }
 
   renderer.render(scene, mainCharCamera);
 

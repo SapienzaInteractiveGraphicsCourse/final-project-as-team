@@ -71,20 +71,7 @@ var KillingRobot = function(){
   robotTorso.add(robotUpperLeg);
   // Finally we add torso
   robot.add(robotTorso);
-
-  // This cube is used to detect the collisions with objects
-  var cubeGeometry = new THREE.BoxGeometry(40,10,40,10,10,10);
-	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true, transparent:true } );
-  let box = new THREE.Mesh(
-			cubeGeometry,
-			wireMaterial
-		);
-  box.geometry.computeBoundingBox();
-  box.material.transparent = true;
-  box.position.set(8, 5, -8);
-  box.name = "robotBox";
-  robot.add(box);
-
+  
   return robot;
 }
 /**
@@ -184,7 +171,7 @@ function createEar(robotSizes){
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   mesh.position.set(torsoWidth + addX + 0.1, torsoHeight + addY + 0.8, addZ);
-  mesh.name = "robotTorso";
+  mesh.name = "robotAntenna";
   earObj.add(mesh);
 
   return earObj;

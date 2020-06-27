@@ -27,11 +27,10 @@ var Bullet = function(rootHero){
   // the cosine and the sine. When we rotate up or down the direction is always the same
   // what changes is just the position.
   let vel = new THREE.Vector3(-Math.sin(shiningShooterDetailGun.rotation.y), 0, Math.cos(shiningShooterDetailGun.rotation.y));
-  const bullet = new Physijs.BoxMesh(
+  const bullet = new THREE.Mesh(
 		  bulletGeometry,
 			bulletMaterial,
-			300 // mass
-		);//new THREE.Mesh(bulletGeometry, bulletMaterial);
+		);
     bullet.name = "laserBeam";
   // We copy the position
   bullet.position.copy(position);
@@ -47,9 +46,9 @@ var Bullet = function(rootHero){
 	// Assign the velocity to the bullet, this will be used to increment the
 	// position once the user will fire the shoot.
 	bullet.velocity = new THREE.Vector3(
-    rootHero.getDirection(vel).x,
-    rootHero.getDirection(vel).y,
-    rootHero.getDirection(vel).z
+    rootHero.getDirection(vel).x * 5,
+    rootHero.getDirection(vel).y * 5,
+    rootHero.getDirection(vel).z * 5
   );
 
   // Return the bullet mesh
