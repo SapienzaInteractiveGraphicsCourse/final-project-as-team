@@ -405,7 +405,7 @@ var mtlLoader;
   }
 
 
-  /*var cubeGeometry = new THREE.BoxGeometry(50, 50, 500 , 1, 1, 1 );
+  var cubeGeometry = new THREE.BoxGeometry(50, 50, 500 , 1, 1, 1 );
   // The material will be not so useful since the cube will be transparent
 	var fakeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true } );
   let box = new THREE.Mesh(
@@ -414,9 +414,10 @@ var mtlLoader;
 		);
   box.geometry.computeBoundingBox();
   box.material.transparent = true;
-  box.position.set(-2300, 0, 130);
+  box.position.set(-2310, 0, 130);
+  box.visible = false;
   scene.add(box);
-  collidableMeshList.push(box);*/
+  collidableMeshList.push(box);
 
 
 
