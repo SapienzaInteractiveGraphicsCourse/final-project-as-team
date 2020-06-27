@@ -1,232 +1,754 @@
 import * as THREE from './three.js-master/build/three.module.js';
-import {OrbitControls} from './three.js-master/examples/jsm/controls/OrbitControls.js';
+import {PointerLockControls} from './three.js-master/examples/jsm/controls/PointerLockControls.js';
 import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
+import {MTLLoader} from './three.js-master/examples/jsm/loaders/MTLLoader.js';
+import {OBJLoader} from './three.js-master/examples/jsm/loaders/OBJLoader.js';
+import {OBJLoader2} from './three.js-master/examples/jsm/loaders/OBJLoader2.js';
+import {MtlObjBridge} from './three.js-master/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
 import {AnimateRobot} from './robot-animations.js';
 import {KillingRobot} from './robot.js';
+import {SkeletonUtils} from './three.js-master/examples/jsm/utils/SkeletonUtils.js';
 import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
+import {SoundManager} from './sound-manager.js'
+
+//retrieve difficulty level choosen in the menu page
+const queryString = window.location.search;
+
+const urlParams = new URLSearchParams(queryString);
+
+const level = urlParams.get('lvl')
+
+
+var camera, scene, renderer;
+var geometry, material, mesh;
+let mainChar, mainCharCamera, heroAnimation;
+var controls;
+var objects = [];
+var step = 1;
 
 // Add event listener for pressing the keys on the keyboard
 let keyboard = {};
+// Object of mouse key codes
+let mouse = {};
+
+var loadingManager = null;
+
 // Add bullet array
 let bulletsArray = [];
 // Shooting interval (interval between one shot and the next)
 let shootingInterval = 0;
 
-function main() {
-  const canvas = document.querySelector('#c');
-  const renderer = new THREE.WebGLRenderer({canvas});
+var blocker = document.getElementById( 'blocker' );
+var instructions = document.getElementById( 'instructions' );
 
-  const fov = 45;
-  const aspect = 2;  // the canvas default
-  const near = 1;
-  const far = 10000;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(0, 10, 20);
+// Instantiate the sound manager for the effects of the game
+const soundManager = new SoundManager();
+// Create the audio Listener
+const listener = new THREE.AudioListener();
+//list of collidable objects
+var collidableMeshList = [];
+// This object is used to understand in which direction the main char is going
+var directionOfMovement = {w: 0, s: 0, r:0, l:0};
+// These are flags to stop the movement of the main char
+var stopW, stopS, stopR, stopL;
+stopL = stopR = stopW = stopS = false;
 
-  const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 5, 0);
-  controls.update();
+var robotLife = 4;
+//var mtlLoader = new MTLLoader();
+//var objLoader = new OBJLoader2();
 
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color('white');
+// Configure the Physijs physic engine scripts
+//Physijs.scripts.worker = './js/physijs/physijs_worker.js';
+//Physijs.scripts.ammo = './ammo.js';
 
-  // Init the robot and then add it to the scene
-  const robot = new KillingRobot();
-  robot.castShadow = true;
-  robot.receiveShadow = true;
-  // scene.add(robot);
 
-  // Init the main character
-  const mainChar = new Hero();
-  mainChar.castShadow = true;
-  mainChar.receiveShadow = true;
-  const mainCharCamera = mainChar.getObjectByName("heroCamera");
-  scene.add(mainChar);
-  console.log(mainChar);
-
-  {
-    const planeSize = 40;
-
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.magFilter = THREE.NearestFilter;
-    const repeats = planeSize / 2;
-    texture.repeat.set(repeats, repeats);
-
-    const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-    const planeMat = new THREE.MeshPhongMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-    });
-    const mesh = new THREE.Mesh(planeGeo, planeMat);
-    mesh.rotation.x = Math.PI * -.5;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-  }
-
-  {
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-
-    // Create a DirectionalLight and turn on shadows for the light
-    var light = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-    light.position.set(2, 10, 20); 			//default; light shining from top
-    light.castShadow = true;            // default false
-    scene.add( light );
-
-    // Set up shadow properties for the light
-    light.shadow.mapSize.width = 512;  // default
-    light.shadow.mapSize.height = 512; // default
-    light.shadow.camera.near = 0.5;    // default
-    light.shadow.camera.far = 500;     // default
-
-    //Create a helper for the shadow camera (optional)
-    var helper = new THREE.CameraHelper( light.shadow.camera );
-    scene.add( helper );
-  }
-
-  /*
-  No need to load an external model for the moment
-
-  const gltfLoader = new GLTFLoader();
-  gltfLoader.load('js/m4a1_reload_animation/scene.gltf', (gltf) => {
-    const root = gltf.scene;
-    scene.add(root);
-    root.scale.multiplyScalar(0.1);
-    root.traverse(function(child){
-      console.log(child.name);
-    })
-    // compute the box that contains all the stuff
-    // from root and below
-  });*/
-  function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
-    const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
-    const halfFovY = THREE.MathUtils.degToRad(camera.fov * .5);
-    const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
-    // compute a unit vector that points in the direction the camera is now
-    // in the xz plane from the center of the box
-    const direction = (new THREE.Vector3())
-        .subVectors(camera.position, boxCenter)
-        .multiply(new THREE.Vector3(1, 0, 1))
-        .normalize();
-
-    // move the camera to a position distance units way from the center
-    // in whatever direction the camera was from the center already
-    camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
-
-    // pick some near and far values for the frustum that
-    // will contain the box.
-    camera.near = boxSize / 100;
-    camera.far = boxSize * 100;
-
-    camera.updateProjectionMatrix();
-
-    // point the camera to look at the center of the box
-    camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
-  }
-
-  function resizeRendererToDisplaySize(renderer) {
-    const canvas = renderer.domElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const needResize = canvas.width !== width || canvas.height !== height;
-    if (needResize) {
-      renderer.setSize(width, height, false);
-    }
-    return needResize;
-  }
-
-  // instantiate the class for animations
-  let heroAnimation = new AnimateHero(mainChar);
-
-  function render() {
-    if (resizeRendererToDisplaySize(renderer)) {
-      const canvas = renderer.domElement;
-      camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      camera.updateProjectionMatrix();
-    }
-
-    // go through bullets array and update position
-  	// remove bullets when appropriate
-  	for(var index=0; index<bulletsArray.length; index+=1){
-  		if( bulletsArray[index] === undefined ) continue;
-  		if( bulletsArray[index].alive == false ){
-  			bulletsArray.splice(index,1);
-  			continue;
-  		}
-
-	    bulletsArray[index].position.add(bulletsArray[index].velocity);
-	   }
-
-    renderer.render(scene, mainCharCamera);
-    //renderer.render(scene, camera);
-    heroAnimation.reload();
-
-    // If the W is pressed, the walking animation is triggered
-    if(keyboard[87]){
-      heroAnimation.walking();
-    }
-    // If the space bar is pressed the shooting animation is triggered
-    if(keyboard[32] && shootingInterval <= 0){
-      // heroAnimation.shooting();
-      let bullet = new Bullet(mainChar);
-      bullet.alive = true;
-
-      setTimeout(function () {
-        bullet.alive = false;
-        scene.remove(bullet);
-      }, 1000);
-
-      // Add the bullet to the scene and to the bullets array and
-      // then set the shootingInterval to 10, meaning that every 10
-      // frames there will be another bullet.
-  		bulletsArray.push(bullet);
-  		scene.add(bullet);
-  		shootingInterval = 10;
-    }
-
-    if(shootingInterval > 0) shootingInterval -=1;
-
-    if(keyboard[82]){ // R - for reload
-      // If the reload flag is false
-      if(!heroAnimation.reloadFlag){
-        heroAnimation.reloadFlag = true;
-      }
-    }
-
-    if(keyboard[84]){ // T - for target mode
-      // This will trigger/not trigger the target mode
-      heroAnimation.activateTargetMode = true;
-    }
-    else{
-      heroAnimation.activateTargetMode = false;
-    }
-    heroAnimation.targetMode();
-
-    // Calling the function to animate the robot
-    AnimateRobot(robot);
-    TWEEN.update();
-    requestAnimationFrame(render);
-  }
-
-  render();
-
+// https://www.html5rocks.com/en/tutorials/pointerlock/intro/
+var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+if ( havePointerLock ) {
+    var element = document.body;
+    var pointerlockchange = function ( event ) {
+        if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
+            controlsEnabled = true;
+            controls.enabled = true;
+            blocker.style.display = 'none';
+        } else {
+            controls.enabled = false;
+            blocker.style.display = '-webkit-box';
+            blocker.style.display = '-moz-box';
+            blocker.style.display = 'box';
+            instructions.style.display = '';
+        }
+    };
+    var pointerlockerror = function ( event ) {
+        instructions.style.display = '';
+    };
+    // Hook pointer lock state change events
+    document.addEventListener( 'pointerlockchange', pointerlockchange, false );
+    document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
+    document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+    document.addEventListener( 'pointerlockerror', pointerlockerror, false );
+    document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
+    document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+    instructions.addEventListener( 'click', function ( event ) {
+        instructions.style.display = 'none';
+        // Ask the browser to lock the pointer
+        element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+        if ( /Firefox/i.test( navigator.userAgent ) ) {
+            var fullscreenchange = function ( event ) {
+                if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
+                    document.removeEventListener( 'fullscreenchange', fullscreenchange );
+                    document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
+                    element.requestPointerLock();
+                }
+            };
+            document.addEventListener( 'fullscreenchange', fullscreenchange, false );
+            document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
+            element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+            element.requestFullscreen();
+        } else {
+            element.requestPointerLock();
+        }
+    }, false );
+} else {
+    instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
+const progressbarElem = document.querySelector('#progressbar');
+const manager = new THREE.LoadingManager();
+
+manager.onStart = function() {
+  instructions.style.display = 'none';
+}
+manager.onLoad = function() {
+  init();
+  instructions.style.display = '';
+}
+
+
+manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+  progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
+};
+
+//models details for background
+var models = {
+  1: {
+    obj: "./js/models/Organodron City/Organodron City.obj",
+    mtl: "./js/models/Organodron City/Organodron_City.mtl",
+    x: 2500,
+    y: 250,
+    z: 2500,
+    size1: 9,
+    size2: 9,
+    size3: 9,
+    rotation1: 0,
+    rotation2: Math.PI,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buildingCorridorOpen",
+    internal: false
+  },
+  2: {
+    obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
+    mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
+    x: 0,
+    y: -115,
+    z: 600,
+    size1: 9,
+    size2: 9,
+    size3: 9,
+    rotation1: 0,
+    rotation2: -Math.PI/2,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "floating_city",
+    internal: false
+  },
+}
+  scene = new THREE.Scene();
+  var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
+  light.position.set( 0.5, 1, 0.75 );
+  scene.add(light);
+
+  // Create a DirectionalLight and turn on shadows for the light
+  var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
+  light2.position.set(-5, 10, 20); 			//default; light shining from top
+  light2.castShadow = true;            // default false
+  scene.add( light2 );
+
+  // Set up shadow properties for the light
+  light2.shadow.mapSize.width = 512;  // default
+  light2.shadow.mapSize.height = 512; // default
+  light2.shadow.camera.near = 0.5;    // default
+  light2.shadow.camera.far = 500;     // default
+
+  // Init the main character
+  mainChar = new Hero();
+  mainChar.castShadow = true;
+  mainChar.receiveShadow = true;
+  mainCharCamera = mainChar.getObjectByName("heroCamera");
+
+  mainChar.rotation.y = Math.PI;
+  scene.add(mainChar);
+
+
+  // Use the pointer to rotate the main char
+  controls = new PointerLockControls(mainChar);
+  scene.add(controls.getObject());
+
+  // Instantiate the class for animations
+  heroAnimation = new AnimateHero(mainChar);
+
+  // Create floor and add texture
+  const planeSize = 6000;
+
+  const loader = new THREE.TextureLoader();
+  const texture = loader.load('js/bg_images/sabbia2.jpg');
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.magFilter = THREE.NearestFilter;
+  const repeats = planeSize / 2;
+  texture.repeat.set(repeats, repeats);
+
+  const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+  const planeMat = new THREE.MeshPhongMaterial({
+  map: texture,
+  side: THREE.DoubleSide,
+  shininess: 0,
+  });
+  mesh = new THREE.Mesh(planeGeo, planeMat);
+  mesh.rotation.x = Math.PI * -.5;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+
+  // Create skybox effect with cube
+  {
+
+  const path = "js/bg_images/"
+  const ls = [
+  	"arid2_ft.jpg",
+  	"arid2_bk.jpg",
+  	"arid2_up.jpg",
+  	"arid2_dn.jpg",
+  	"arid2_rt.jpg",
+  	"arid2_lf.jpg",
+
+  ].map(x => path + x)
+
+  const loader = new THREE.CubeTextureLoader();
+  const texture = loader.load(ls);
+  scene.background = texture;
+
+  }
+
+//load the models of the background (city, towers, ...)
+var mtlLoader;
+  var objLoader;
+  for (var _key in models) {
+      (function (key) {
+          mtlLoader  = new MTLLoader(manager);
+                mtlLoader.load(models[key].mtl, (mtlParseResult) => {
+
+                var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+                for (var material of Object.values(materials)) {
+                  material.side = THREE.DoubleSide;
+                }
+
+                objLoader  = new OBJLoader2(manager);
+                objLoader.addMaterials(materials);
+                objLoader.load(models[key].obj, (root) => {
+                  root.position.set(models[key].x, models[key].y, models[key].z);
+                  root.scale.set(models[key].size1, models[key].size2, models[key].size3);
+                  root.rotation.x = models[key].rotation1;
+                  root.rotation.y = models[key].rotation2;
+                  root.rotation.z = models[key].rotation3;
+
+                  collidableMeshList.push(root);
+
+                  scene.add(root);
+
+                });
+              });
+      })(_key);
+  }
+
+
+
+var controlsEnabled = false;
+var moveForward = false;
+var moveBackward = false;
+var moveLeft = false;
+var moveRight = false;
+var prevTime = performance.now();
+var velocity = new THREE.Vector3();
+var rotation = new THREE.Vector3();
+var isWalking = false;
+
+//variable for robots spawn
+var robotsAlive = 0;
+var robotsArray = [];
+
+var mainObject = new THREE.Object3D();
+
+var textureLoad = new THREE.TextureLoader(manager);
+var textures = [];
+var materials = [];
+
+var textures2 = [];
+var materials2 = [];
+
+var wallGeometry = new THREE.CubeGeometry(30, 10, 20, 1, 1, 1 );
+//var wallMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
+var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
+
+for(var counter = 0; counter < 6; counter ++) {
+
+  // loads and stores a texture (you might run into some problems with loading images directly from a source because of security protocols, so copying the image data is a for sure way to get the image to load)
+  textures[counter] = textureLoad.load('./js/images/textures/RTS_Crate.png');
+
+  // creates material from previously stored texture
+  materials.push(new THREE.MeshBasicMaterial({map: textures[counter]}));
+}
+
+var wall = new THREE.Mesh(wallGeometry, materials);
+wall.position.set(-400, 6, -100);
+scene.add(wall);
+collidableMeshList.push(wall);
+mainObject.add(wall);
+
+var wallGeometry2 = new THREE.CubeGeometry(25, 25, 20, 1, 1, 1 );
+var wireMaterial2 = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
+
+for(var counter = 0; counter < 6; counter ++) {
+
+  // loads and stores a texture (you might run into some problems with loading images directly from a source because of security protocols, so copying the image data is a for sure way to get the image to load)
+  textures2[counter] = textureLoad.load('./js/images/textures/1.jpg');
+
+  // creates material from previously stored texture
+  materials2.push(new THREE.MeshBasicMaterial({map: textures2[counter]}));
+}
+
+var wall2 = new THREE.Mesh(wallGeometry2, materials2);
+wall2.position.set(-435, 10, -100);
+wall2.rotation.set(0, -20, 0);
+scene.add(wall2);
+collidableMeshList.push(wall2);
+mainObject.add(wall2);
+
+var textures3 = [];
+var materials3 = [];
+
+var bushGeometry = new THREE.CubeGeometry(75, 10, 20, 1, 1, 1 );
+var wireMaterial3 = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
+
+for(var counter = 0; counter < 6; counter ++) {
+
+  // loads and stores a texture (you might run into some problems with loading images directly from a source because of security protocols, so copying the image data is a for sure way to get the image to load)
+  textures3[counter] = textureLoad.load('./js/images/textures/bush.jpg');
+
+  textures3[counter].wrapS = THREE.RepeatWrapping;
+  textures3[counter].wrapT = THREE.RepeatWrapping;
+  textures3[counter].repeat.set( 2, 2 );
+
+  // creates material from previously stored texture
+  materials3.push(new THREE.MeshBasicMaterial({map: textures3[counter]}));
+}
+
+var bush = new THREE.Mesh(bushGeometry, materials3);
+bush.position.set(-345, 5, -105);
+bush.rotation.set(0, 0, 0);
+scene.add(bush);
+collidableMeshList.push(bush);
+mainObject.add(bush);
+
+for (var i=0; i<5; i++) {
+  const clonedScene = SkeletonUtils.clone(mainObject);
+  clonedScene.position.z -= 200;
+  scene.add(mainObject);
+}
+
+
+console.log(mainObject);
+
+function init() {
+
+  // hide the loading bar
+  const loadingElem = document.querySelector('#loading');
+  loadingElem.style.display = 'none';
+
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setClearColor( 0xffffff );
+  renderer.setPixelRatio( window.devicePixelRatio );
+  renderer.setSize( window.innerWidth, window.innerHeight );
+
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.BasicShadowMap;
+
+  document.body.appendChild( renderer.domElement );
+
+
+
+
+
+  // Load all the sounds
+  soundManager.loadSounds(listener);
+
+  // Listener for resize
+  window.addEventListener( 'resize', onWindowResize, false );
+
+  animate();
+}
+
+//get random int number between min and max
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+// load models and set position/size
+function loadModels() {
+
+  var mtlLoader;
+  var objLoader;
+  for (var _key in models) {
+      (function (key) {
+          mtlLoader  = new MTLLoader();
+                mtlLoader.load(models[key].mtl, (mtlParseResult) => {
+
+                var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
+                for (var material of Object.values(materials)) {
+                  material.side = THREE.DoubleSide;
+                }
+
+                objLoader  = new OBJLoader2();
+                objLoader.addMaterials(materials);
+                objLoader.load(models[key].obj, (root) => {
+                  root.position.set(models[key].x, models[key].y, models[key].z);
+                  root.scale.set(models[key].size1, models[key].size2, models[key].size3);
+                  root.rotation.x = models[key].rotation1;
+                  root.rotation.y = models[key].rotation2;
+                  root.rotation.z = models[key].rotation3;
+
+                  scene.add(root);
+
+                });
+              });
+      })(_key);
+  }
+}
+
+
+function onWindowResize() {
+    mainCharCamera.aspect = window.innerWidth / window.innerHeight;
+    mainCharCamera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+// Functions for click listener
+/**
+ * Function to handle the click of the mouse
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the mouse obj
+ */
+function mouseDown(event){
+  mouse[event.button] = true;
+}
+
+/**
+ * Function to handle the un-click of the mouse
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the mouse obj
+ */
+function mouseUp(event){
+  mouse[event.button] = false;
+}
+
+// Listeners
+window.addEventListener('mousedown', mouseDown);
+window.addEventListener('mouseup', mouseUp);
+
 // Thanks to https://www.youtube.com/watch?v=UUilwGxIj_Q
+/**
+ * Function to handle the click on a key
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the keyboad obj
+ */
 function keyDown(event){
   keyboard[event.keyCode] = true;
 }
-
+/**
+ * Function to handle the un-click on a key
+ * @param  {object} event The event triggered by the click
+ * @return {void}         The function simply assign that value to the keyboad obj
+ */
 function keyUp(event){
   keyboard[event.keyCode] = false;
 }
+
+
+// Listeners
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
+//variable for setting framerate
+var dt=1000/50;
+var timeTarget=0;
 
-main();
+var nToSpawn = 0;
+var newSpawn = false;
+
+function animate() {
+
+  //limitate the framerate
+  if(Date.now()>=timeTarget){
+
+    //check the number of robots alive
+    if(robotsArray.length == 0) newSpawn = true;
+    if(nToSpawn == 7) {
+      nToSpawn = 0;
+      newSpawn = false;
+    }
+
+    //spawn the robots models
+    if(newSpawn == true && nToSpawn <= 0) {
+          var robot = new KillingRobot();
+          robot.scale.set(3, 3, 3);
+          var positionX = getRandomInt(50, 1000);
+          var positionZ = getRandomInt(0, 1000);
+          robot.position.set(positionX, 0, positionZ);
+          robotsAlive += 1;
+          robotsArray.push(robot);
+          scene.add(robot);
+          nToSpawn += 1;
+    }
+
+    //animate the robot (wheel, weapon and walking towards the mainChar)
+    robotsArray.forEach((robot, i) => {
+        new TWEEN.Tween(robot.position)
+          .to({x: mainChar.position.x, z: mainChar.position.z}, 1500)
+          .onUpdate(function (object) {
+          robot.lookAt(mainChar.position.x, 0, mainChar.position.z);
+          AnimateRobot(robot);
+
+          })
+          //.start()
+    });
+
+    // Start with the reload animation, initially this is done once.
+    heroAnimation.reload();
+
+    var robotCube = robotsArray[0].getObjectByName("robotBox");
+    var originPoint = new THREE.Vector3();
+    originPoint.setFromMatrixPosition(robotCube.matrixWorld);
+    for (var vertexIndex = 0; vertexIndex < robotCube.geometry.vertices.length; vertexIndex++){
+      var localVertex = robotCube.geometry.vertices[vertexIndex].clone();
+      var globalVertex = localVertex.applyMatrix4(robotCube.matrix);
+      var directionVector = globalVertex.sub(robotCube.position);
+
+      var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize(), 0, 10);
+      var collisionResults = ray.intersectObjects(collidableMeshList);
+      if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+        console.log(collisionResults);
+      } // End if collision detected
+    } // End for loop
+
+    if(controlsEnabled){
+      var time = performance.now();
+      var delta = ( time - prevTime ) / 1000;
+
+  		velocity.x -= velocity.x * 10.0 * delta;
+      velocity.z -= velocity.z * 10.0 * delta;
+      velocity.y -= 9.8 * 100.0 * delta;
+
+  		// R - for reload the gun
+      if(keyboard[82]){
+        // If the reload flag is false
+        if(!heroAnimation.reloadFlag){
+          heroAnimation.reloadFlag = true;
+          // Play the reload sound
+          soundManager.soundEffects["reload"].sound.context.resume().then(() => {
+            soundManager.soundEffects["reload"].sound.play();
+          });
+        }
+      }
+  		// 	collision detection:
+  		//  determines if any of the rays from the cube's origin to each vertex
+  		//	intersects any face of a mesh in the array of target meshes
+  		//  for increased collision accuracy, add more vertices to the cube;
+  		//	for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
+  		//  HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+  		mainChar.updateMatrixWorld();
+  		var cube = mainChar.getObjectByName("transparentBox");
+  		var originPoint = new THREE.Vector3();
+  		originPoint.setFromMatrixPosition(cube.matrixWorld);
+
+  		for (var vertexIndex = 0; vertexIndex < cube.geometry.vertices.length; vertexIndex++){
+  			var localVertex = cube.geometry.vertices[vertexIndex].clone();
+  			var globalVertex = localVertex.applyMatrix4(cube.matrix);
+  			var directionVector = globalVertex.sub(cube.position);
+
+  			var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+  			var collisionResults = ray.intersectObjects(collidableMeshList);
+  			if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+  				// We get the max of the directions both W/S direction and left/right direction
+  				var maxUpDown = Math.max(directionOfMovement.w, directionOfMovement.s);
+  				var maxRightLeft = Math.max(directionOfMovement.r, directionOfMovement.l);
+
+  				// The max will tell in which direction the main char is moving and so which is the
+  				// movement to stop. In this way if the main char is colliding in front by pressing W,
+  				// he can go back by pressing S.
+  				if(maxUpDown == directionOfMovement.w){
+  					stopW = true;
+  				}
+  				else{
+  					stopS = true;
+  				}
+
+  				if(maxRightLeft == directionOfMovement.r){
+  					stopR = true;
+  				}
+  				else{
+  					stopL = true;
+  				}
+  			} // End if collision detected
+  			else{
+  				stopL = stopR = stopW = stopS = false;
+  			}
+  		} // End for loop
+
+  		// If W or Up are pressed
+  		if((keyboard[87] || keyboard[38]) && !stopW){
+  			velocity.z -= 2000.0 * delta;
+  			directionOfMovement.w += 1;
+  			isWalking = true;
+  		}
+  		// If S or Down are pressed
+  		if((keyboard[83] || keyboard[40]) && !stopS){
+  			velocity.z += 400.0 * delta;
+  			directionOfMovement.s += 1;
+  			isWalking = true;
+  		}
+  		// If A or Left are pressed
+  		if((keyboard[65] || keyboard[37]) && !stopR){
+  			velocity.x -= 400.0 * delta;
+  			directionOfMovement.r += 1;
+  			isWalking = true;
+  		}
+  		// If D or Right are pressed
+  		if((keyboard[68] || keyboard[39]) && !stopL){
+  			 velocity.x += 400.0 * delta;
+  			 directionOfMovement.l += 1;
+  			 isWalking = true;
+  		}
+
+
+      velocity.y = Math.max( 0, velocity.y );
+  		controls.getObject().translateX( velocity.x * delta );
+      controls.getObject().translateY( velocity.y * delta );
+      controls.getObject().translateZ( velocity.z * delta );
+
+      if (controls.getObject().position.y < 10 ) {
+          velocity.y = 0;
+          controls.getObject().position.y = 10;
+      }
+      prevTime = time;
+    }
+
+  if (isWalking) mainChar.position.y = 10;
+
+
+  // If the WASD is pressed, the walking animation is triggered
+  if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
+    heroAnimation.walking();
+  }
+  // If UpDownLeftRight is pressed, the walking animation is triggered
+  if(keyboard[38] || keyboard[40] || keyboard[37] || keyboard[39]){
+    heroAnimation.walking();
+  }
+
+  // Activate the target mode if we right-click once
+  if(keyboard[16]){
+    heroAnimation.activateTargetMode = true;
+  }
+  else{
+    heroAnimation.activateTargetMode = false;
+  }
+
+  heroAnimation.targetMode();
+  heroAnimation.returnFromTargetMode();
+
+  // We need a separate if condition, otherwise the shooting animation
+  // will go ten frames slower.
+  if(mouse[0]){ // Left-click of the mouse
+    heroAnimation.shooting();
+  }
+
+  // Here the bullets will go
+  if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+    // Create the bullet
+    let bullet = new Bullet(controls);
+    bullet.alive = true;
+    collidableMeshList.push(bullet);
+
+    if(robotsArray[0].position.distanceTo(bullet.position) < 1){
+      robotLife -=1;
+      console.log(robotLife);
+      if(robotLife == 3){
+        robotsArray[0].getObjectByName("robotTorso").material.color.setHex("#FF0000");
+      }
+      if(robotLife == 0){
+        scene.remove(robotsArray[0]);
+      }
+    }
+
+    // If the bullet is not disappear we play the sound
+    if(bullet.alive){
+      soundManager.soundEffects["blaster"].sound.context.resume().then(() => {
+        soundManager.soundEffects["blaster"].sound.play();
+      });
+    }
+
+    setTimeout(function () {
+      bullet.alive = false;
+      //collidableMeshList.remove(bullet);
+      scene.remove(bullet);
+    }, 1000);
+
+    // Add the bullet to the scene and to the bullets array and
+    // then set the shootingInterval to 10, meaning that every 10
+    // frames there will be another bullet.
+    bulletsArray.push(bullet);
+    scene.add(bullet);
+    shootingInterval = 10;
+  }
+
+  if(shootingInterval > 0) shootingInterval -=1;
+
+  // go through bullets array and update position
+  // remove bullets when appropriate
+  for(var index=0; index<bulletsArray.length; index+=1){
+      if( bulletsArray[index] === undefined ) continue;
+      if( bulletsArray[index].alive == false ){
+          bulletsArray.splice(index,1);
+          continue;
+      }
+      bulletsArray[index].position.add(bulletsArray[index].velocity);
+  }
+
+
+  renderer.render(scene, mainCharCamera);
+
+  timeTarget+=dt;
+    if(Date.now()>=timeTarget){
+      timeTarget=Date.now();
+    }
+  TWEEN.update();
+}
+  requestAnimationFrame(animate);
+
+
+}
