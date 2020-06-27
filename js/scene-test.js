@@ -279,14 +279,6 @@ var models = {
   },
 }
 
-  var models_gltf = {
-    railing:    { url: './js/models/railing/scene.gltf' },
-    railing2:    { url: './js/models/railing/scene.gltf' },
-    railing3:    { url: './js/models/railing/scene.gltf' },
-    railing4:    { url: './js/models/railing/scene.gltf' },
-    railing5:    { url: './js/models/railing/scene.gltf' },
-  };
-
 
   scene = new THREE.Scene();
   var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
@@ -367,15 +359,6 @@ var models = {
 
   }
 
-  /*for (const model of Object.values(models_gltf)) {
-    const gltfLoader = new GLTFLoader(manager);
-    gltfLoader.load(model.url, (gltf) => {
-      gltf.scene.position.set(100, 5, 0);
-      gltf.scene.scale.set(10, 10, 10);
-      scene.add(gltf.scene);
-    });
-  }*/
-
 //load the models of the background (city, towers, ...)
 var mtlLoader;
   var objLoader;
@@ -451,6 +434,36 @@ var mtlLoader;
   box3.visible = false;
   scene.add(box3);
   collidableMeshList.push(box3);
+
+  var cubeGeometry4 = new THREE.BoxGeometry(190, 50, 50 , 1, 1, 1 );
+  // The material will be not so useful since the cube will be transparent
+  var fakeMaterial4 = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true} );
+  let box4 = new THREE.Mesh(
+      cubeGeometry4,
+      fakeMaterial4
+    );
+  box4.geometry.computeBoundingBox();
+  box4.material.transparent = true;
+  box4.position.set(-1100, 0, 820);
+  box4.rotation.set(0, 1.28, 0);
+  box4.visible = false;
+  scene.add(box4);
+  collidableMeshList.push(box4);
+
+  var cubeGeometry5 = new THREE.BoxGeometry(500, 50, 50 , 1, 1, 1 );
+  // The material will be not so useful since the cube will be transparent
+  var fakeMaterial5 = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent:true} );
+  let box5 = new THREE.Mesh(
+      cubeGeometry5,
+      fakeMaterial5
+    );
+  box5.geometry.computeBoundingBox();
+  box5.material.transparent = true;
+  box5.position.set(-930, 0, 230);
+  box5.rotation.set(0, 1.28, 0);
+  box5.visible = false;
+  scene.add(box5);
+  collidableMeshList.push(box5);
 
 
 
@@ -773,7 +786,7 @@ function animate() {
   // Here the bullets will go
   if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
     // Create the bullet
-    let bullet = new Bullet(controls);
+    let bullet = new Bullet(controls, null);
     bullet.alive = true;
     collidableMeshList.push(bullet);
 

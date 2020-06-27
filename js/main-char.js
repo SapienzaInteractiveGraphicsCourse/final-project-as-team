@@ -45,7 +45,7 @@ var Hero = function(){
 
   // Creating the root element of the robot
   const hero = new THREE.Object3D();
-  hero.position.set(-1700, 1, 500);
+  hero.position.set(-1000, 1, 800);
 
   const heroTorso = createTorso(heroSizes);
   hero.add(heroTorso);
