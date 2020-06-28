@@ -18,6 +18,9 @@ body {
   height: 100%;
   background-color: rgba(0,0,0,0.5);
 }
+/**
+ * Style of the instructions to display on the screen
+ */
 #instructions {
   visibility: hidden;
   width: 100%;
@@ -37,6 +40,10 @@ body {
   color: #ffffff;
   text-align: center;
   cursor: pointer;
+}
+
+#display-instructions{
+   font-size:40px;
 }
 
 #loading {
@@ -89,6 +96,23 @@ body {
   }
 }
 
+/**
+ * Style of the transparent background, the same used also in the
+ * menu. In this way there will be an opaque background.
+ * @type {[type]}
+ */
+#transparent-background {
+  position: absolute;
+  top: 8vh;
+  width: 30vw;
+  height: 24vh;
+  top: 4vh;
+  left: 3vw;
+  background-color: #9D8C9A;
+  opacity: 0.5;
+  margin: 0;
+  visibility: hidden;
+}
 /**
  * Set the syle of the player information, where we have information about the
  * health value and the number of shot that has.

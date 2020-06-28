@@ -22,10 +22,12 @@ const level = urlParams.get('lvl');
 
 // Get the instructions and hide it
 const divInstructions = document.getElementById("instructions");
+const instructionsText = document.getElementById("display-instructions");
 
 // Get and hide the player informations
 const playerInfo = document.getElementById("player-info");
-playerInfo.style.visibility = "hidden";
+const backgroundInfo = document.getElementById("transparent-background");
+
 // Reload message: tells to the user to reload the weapon
 const reloadMessage = document.getElementById("reload-message");
 reloadMessage.style.visibility = "hidden";
@@ -100,52 +102,53 @@ var instructions = document.getElementById( 'instructions' );
 // https://www.html5rocks.com/en/tutorials/pointerlock/intro/
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 if ( havePointerLock ) {
-    var element = document.body;
-    var pointerlockchange = function ( event ) {
-        if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
-            controlsEnabled = true;
-            controls.enabled = true;
-            blocker.style.display = 'none';
-        } else {
-            controls.enabled = false;
-            blocker.style.display = '-webkit-box';
-            blocker.style.display = '-moz-box';
-            blocker.style.display = 'box';
-            instructions.style.display = '';
-        }
-    };
-    var pointerlockerror = function ( event ) {
-        instructions.style.display = '';
-    };
-    // Hook pointer lock state change events
-    document.addEventListener( 'pointerlockchange', pointerlockchange, false );
-    document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
-    document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
-    document.addEventListener( 'pointerlockerror', pointerlockerror, false );
-    document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
-    document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
-    instructions.addEventListener( 'click', function ( event ) {
-        instructions.style.display = 'none';
-        // Ask the browser to lock the pointer
-        element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-        if ( /Firefox/i.test( navigator.userAgent ) ) {
-            var fullscreenchange = function ( event ) {
-                if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
-                    document.removeEventListener( 'fullscreenchange', fullscreenchange );
-                    document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
-                    element.requestPointerLock();
-                }
-            };
-            document.addEventListener( 'fullscreenchange', fullscreenchange, false );
-            document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
-            element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-            element.requestFullscreen();
-        } else {
-            element.requestPointerLock();
-        }
-    }, false );
-} else {
-    instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
+  var element = document.body;
+  var pointerlockchange = function ( event ) {
+      if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
+          controlsEnabled = true;
+          controls.enabled = true;
+          blocker.style.display = 'none';
+      } else {
+          controls.enabled = false;
+          blocker.style.display = '-webkit-box';
+          blocker.style.display = '-moz-box';
+          blocker.style.display = 'box';
+          instructions.style.display = '';
+      }
+  };
+  var pointerlockerror = function ( event ) {
+      instructions.style.display = '';
+  };
+  // Hook pointer lock state change events
+  document.addEventListener( 'pointerlockchange', pointerlockchange, false );
+  document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
+  document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+  document.addEventListener( 'pointerlockerror', pointerlockerror, false );
+  document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
+  document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+  instructions.addEventListener( 'click', function ( event ) {
+      instructions.style.display = 'none';
+      // Ask the browser to lock the pointer
+      element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+      if ( /Firefox/i.test( navigator.userAgent ) ) {
+          var fullscreenchange = function ( event ) {
+              if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
+                  document.removeEventListener( 'fullscreenchange', fullscreenchange );
+                  document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
+                  element.requestPointerLock();
+              }
+          };
+          document.addEventListener( 'fullscreenchange', fullscreenchange, false );
+          document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
+          element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+          element.requestFullscreen();
+      } else {
+          element.requestPointerLock();
+      }
+  }, false );
+}
+else {
+  instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 }
 
 const progressbarElem = document.querySelector('#progressbar');
@@ -335,6 +338,7 @@ function init() {
 
   // Once everything is loaded display the player information
   playerInfo.style.visibility = "visible";
+  backgroundInfo.style.visibility = "visible";
 
   renderer = new THREE.WebGLRenderer();
   renderer.setClearColor( 0xffffff );
@@ -576,6 +580,7 @@ function animate() {
     if(shoots == 0){
       reloadMessage.style.visibility = "visible";
       reloadMessage.className = "pulsate";
+      backgroundInfo.style.height = "32vh";
     }
 
     // Reload animation.
@@ -596,8 +601,11 @@ function animate() {
           heroAnimation.reloadFlag = true;
           // Munitions are fully loaded
           shoots = 24;
+          // Change the style of the elements in the player info
           reloadMessage.style.visibility = "hidden";
           reloadMessage.className = "";
+          backgroundInfo.style.height = "22vh";
+
           var divs = document.getElementsByClassName('shot');
           for (var i = 0; i < divs.length; i++) {
             divs[i].classList.toggle("appear");
@@ -838,6 +846,9 @@ function animate() {
     scene.remove(mainChar);
     controlsEnabled = false;
     dead = true;
+    // Set the game over text
+    divInstructions.innerHTML = "GAME OVER. <br />The robots won."
+    document.exitPointerLock();
   }
 
   // go through bullets array and update position
