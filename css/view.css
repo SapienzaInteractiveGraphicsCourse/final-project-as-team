@@ -117,3 +117,39 @@ progress::-webkit-progress-value {
 progress::-moz-progress-bar {
   /* style rules */
 }
+
+/**
+ * Style the munitions div, they are rectangles that will disappear once the
+ * character will use them. These styles will let the divs line up next to each
+ * other while accepting dimensions.
+ */
+#munitions h4{
+  margin-top: 1vh;
+}
+#munitions div {
+    display: block;
+    float: left;
+    width: 0.3vw;
+    height: 2vh;
+    /* a small margin to separate the blocks */
+    margin-right: 5px;
+}
+/**
+ * Defining some style for the shot divs, when they appear
+ * and disappear
+ */
+.shot {
+  background: #D12799;
+  border: 2px solid #E53BE4;
+  border-radius: 10px;
+  opacity: 1;
+  transition: opacity 0.45s;
+}
+
+.shot.fade {
+  opacity: 0;
+}
+
+.shot.appear {
+  opacity: 1;
+}

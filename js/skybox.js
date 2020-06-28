@@ -20,6 +20,10 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const level = urlParams.get('lvl')
 
+// Get and hide the player informations
+const playerInfo = document.getElementById("player-info");
+playerInfo.style.visibility = "hidden";
+
 var camera, scene, renderer;
 var geometry, material, mesh;
 var loadingManager = null;
@@ -30,7 +34,12 @@ var step = 1;
 // Main character variables and life, the camera is attached to him
 let mainChar, mainCharCamera, heroAnimation;
 let mainCharLife = 100;
+// Progressbar
 let progressBarHealth = document.getElementById("health");
+let progressBarValue = document.getElementById("health-value");
+let dead = false;
+let shoots = 24;
+
 // Robot boss variable and life
 let robotBoss;
 let robotBossLife = 50;
@@ -295,6 +304,9 @@ function init() {
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
 
+  // Once everything is loaded display the player information
+  playerInfo.style.visibility = "visible";
+
   renderer = new THREE.WebGLRenderer();
   renderer.setClearColor( 0xffffff );
   renderer.setPixelRatio( window.devicePixelRatio );
@@ -522,8 +534,12 @@ function animate() {
 
         // Case in which the robot boss is hidden
         if(mainChar.position.distanceTo(robotBulletsArray[index].position) <= 15){
-          mainCharLife -= 2;
-          progressBarHealth.value -=2;
+          // If the character is not dead
+          if(!dead){
+            mainCharLife -= 2;
+            progressBarHealth.value -=2;
+            progressBarValue.innerHTML = mainCharLife + "%";
+          }
         } // End outer if
     } // End Loop
 
@@ -544,6 +560,15 @@ function animate() {
         // If the reload flag is false
         if(!heroAnimation.reloadFlag){
           heroAnimation.reloadFlag = true;
+          // Munitions are fully loaded
+          shoots = 24;
+          var divs = document.getElementsByClassName('shot');
+          for (var i = 0; i < divs.length; i++) {
+            divs[i].classList.toggle("appear");
+            divs[i].className = "shot";
+            console.log(divs[i]);
+          }
+
           // Play the reload sound
           soundManager.soundEffects["reload"].sound.context.resume().then(() => {
             soundManager.soundEffects["reload"].sound.play();
@@ -653,16 +678,19 @@ function animate() {
 
       // We need a separate if condition, otherwise the shooting animation
       // will go ten frames slower.
-      if(mouse[0]){ // Left-click of the mouse
+      if(mouse[0] && shoots > 0){ // Left-click of the mouse
         heroAnimation.shooting();
       }
 
-      // Here the bullets will go
-      if(mouse[0] && shootingInterval <= 0){ // Left-click of the mouse
+      // Here the bullets will go (if there are ...)
+      if(mouse[0] && shootingInterval <= 0 && shoots > 0){ // Left-click of the mouse
         // Create the bullet
         let bullet = new Bullet(controls, null);
         bullet.alive = true;
         collidableMeshList.push(bullet);
+        // Decrement the shoot number
+        document.getElementById(shoots.toString()).classList.toggle("fade");
+        shoots--;
 
         // If the bullet is not disappear we play the sound
         if(bullet.alive){
@@ -695,16 +723,24 @@ function animate() {
   // If the robots are too close to the main char he will be hit
   if(scene.getObjectByName("robot") != null){
     if(scene.getObjectByName("robot").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
-      mainCharLife -= 2;
-      progressBarHealth.value -=2;
+      // If the character is not dead
+      if(!dead){
+        mainCharLife -= 2;
+        progressBarHealth.value -=2;
+        progressBarValue.innerHTML = mainCharLife + "%";
+      }
     }
   }
 
   // If the robot boss is too close to the main char he will be hit
   if(scene.getObjectByName("robotBoss") != null){
     if(scene.getObjectByName("robotBoss").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
-      mainCharLife -= 2;
-      progressBarHealth.value -=2;
+      // If the character is not dead
+      if(!dead){
+        mainCharLife -= 2;
+        progressBarHealth.value -=2;
+        progressBarValue.innerHTML = mainCharLife + "%";
+      }
     }
   }
 
@@ -765,6 +801,7 @@ function animate() {
   if(mainCharLife == 0){
     scene.remove(mainChar);
     controlsEnabled = false;
+    dead = true;
   }
 
   // go through bullets array and update position
