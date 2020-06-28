@@ -13,7 +13,7 @@ class AnimateHero {
 
     // Flags for triggering animations
     // Reload
-    this.reloadFlag = true;
+    this.reloadFlag = false;
     // Look through the target boolean flag
     this.activateTargetMode = false;
 

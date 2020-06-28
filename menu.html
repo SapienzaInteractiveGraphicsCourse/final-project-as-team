@@ -4,60 +4,68 @@
 		<title>Menu</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <link rel="stylesheet" href="css/menu.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
-				<!-- Importing three.js -->
-		    <script src="js/three.js"></script>
+		<!-- Old style font -->
+		<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="css/menu.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
+		<!-- Importing three.js -->
+    <script src="js/three.js"></script>
 	</head>
 	<body id="mainBox">
-    <!-- Importing first test script -->
-    <!--<script type="module" src="js/menu.js"></script>-->
-    <div id=box></div>
-    <div id=logo></div>
-    <div>
-        <h1 class="lvl" id=level_easy  onclick="selectLevel('easy')" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';">EASY</h1>
-        <h1 class="lvl" id=level_medium onclick="selectLevel('medium')" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';">MEDIUM</h1>
-        <h1 class="lvl" id=level_hard onclick="selectLevel('hard')" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';">HARD</h1>
-        <h1 id=startGame onclick="startGame()" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';"></h1>
-
+		<audio id="mammmagamma">
+			<source src="js/sounds/menuMaggamma.mp3" type="audio/ogg">
+		</audio>
+		<!-- This div is just for adding a transparent background -->
+		<div id="transparent-background"></div>
+		<div id="main-title">
+			<h1>LOW POLY ROBOTS</h1>
+			<h4>Created by Andrea Napoletani & Sergio Picca</h4>
+			<h6>Final project of the Interactive Graphics Course - Sapienza</h6>
+		</div>
+    <div id="levels">
+			<h1>Select the game level: </h1>
+	    <h2 class="lvl" id="level_easy"  onclick="selectLevel('easy')" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';">EASY</h2>
+	    <h2 class="lvl" id="level_medium" onclick="selectLevel('medium')" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';">MEDIUM</h2>
+	    <h2 class="lvl" id="level_hard" onclick="selectLevel('hard')" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';">HARD</h2>
+			<h5 id="error"> You have to choose one level!.</h5>
+			<h2 id="startGame" onclick="startGame()" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default';">PLAY.</h2>
     </div>
     <script>
+			var audio = document.getElementById("mammmagamma");
+			audio.play();
+			audio.loop = true;
+      window.selected = "";
 
-        window.selected = "";
+			/**
+			 * Function to change the style and get the right selected level.
+			 * @param  {string} lvl 	Name of the level selected.
+			 * @return {void}     		The function does not return anything.
+			 */
+      function selectLevel(lvl) {
+        var elem = document.getElementsByClassName("lvl");
+        for (var i = 0; i < elem.length; i++){
+            elem[i].style.textDecoration = "none";
+				}
+        window.selected = lvl;
+        document.getElementById("level_" + lvl).style.textDecoration = "underline";
+      }
 
-        function selectLevel(lvl) {
-
-            var elem = document.getElementsByClassName("lvl");
-            for (var i = 0; i < elem.length; i++)
-                elem[i].style.textDecoration = "none";
-            window.selected = lvl;
-            console.log(selected);
-            document.getElementById("level_" + lvl).style.textDecoration = "underline";
-            
+			/**
+			 * Function that will trigger the start of the game given the
+			 * selected level.
+			 * @return {void} The function simply change page.
+			 */
+      function startGame() {
+        console.log(window.selected);
+        if (selected == "") {
+	        document.getElementById("error").style.visibility = "visible";
+					document.getElementById("startGame").style.borderColor = "red";
         }
-
-        function startGame() {
-            console.log(window.selected);
-            if (selected == "") {
-                //alert("Choose a level for the game!");
-                document.getElementById("level_easy").style.color = "red";
-                document.getElementById("level_medium").style.color = "red";
-                document.getElementById("level_hard").style.color = "red";
-                window.setTimeout(function changeColor () {
-                    document.getElementById("level_easy").style.color = "rgb(24, 94, 245)";
-                    document.getElementById("level_medium").style.color = "rgb(24, 94, 245)";
-                    document.getElementById("level_hard").style.color = "rgb(24, 94, 245)";
-                } , 200);               
-                
-
-            }
-            else {
-                console.log("settata");    
-                window.location.href = 'skybox.html?lvl=' + window.selected; 
-            }
+        else {
+					audio.pause();
+          window.location.href = 'skybox.html?lvl=' + window.selected;
         }
-        
+      }
     </script>
-
 	</body>
 </html>

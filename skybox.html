@@ -3,13 +3,16 @@
 	<head>
 		<title>three.js - pointerlock controls</title>
 		<meta charset="utf-8">
+
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <link rel="stylesheet" href="css/view.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
-				<!-- Importing three.js -->
-		    <script src="js/three.js"></script>
-				<!-- Importing the physic engine -->
-				<script src="js/physijs/physi.js"></script>
+		<!-- Old style font -->
+		<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="css/view.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
+		<!-- Importing three.js -->
+    <script src="js/three.js"></script>
+		<!-- Importing the physic engine -->
+		<script src="js/physijs/physi.js"></script>
 	</head>
 	<body>
     <!-- Importing first test script -->
@@ -24,7 +27,7 @@
 
 		</div>
 		<div id="player-info">
-			<h2>Player</h2>
+			<h2>Player Info</h2>
 			<!-- Information about the health of the player -->
 			<h4>Health: </h4> <div id="health-value">100%</div>
 			<progress id="health" value="100" max="100"></progress>
@@ -57,10 +60,16 @@
 				<div class="shot" id="23"></div>
 				<div class="shot" id="24"></div>
 			</div>
+
+			<!-- Once the munitions are over the message shows up -->
+			<div id="reload-message">
+				<h1>RELOAD</h1>
+				<h4>Press R - To Reload</h4>
+			</div>
 		</div>
 		<div id="loading">
 			<div>
-			  <div>Entering the world...</div>
+			  <div>LOADING...</div>
 			  <div class="progress"><div id="progressbar"></div></div>
 			</div>
 		</div>

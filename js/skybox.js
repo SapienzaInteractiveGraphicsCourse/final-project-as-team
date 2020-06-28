@@ -18,11 +18,17 @@ import {SoundManager} from './sound-manager.js'
 const queryString = window.location.search;
 // Get the level value from the url
 const urlParams = new URLSearchParams(queryString);
-const level = urlParams.get('lvl')
+const level = urlParams.get('lvl');
+
+// Get the instructions and hide it
+const divInstructions = document.getElementById("instructions");
 
 // Get and hide the player informations
 const playerInfo = document.getElementById("player-info");
 playerInfo.style.visibility = "hidden";
+// Reload message: tells to the user to reload the weapon
+const reloadMessage = document.getElementById("reload-message");
+reloadMessage.style.visibility = "hidden";
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -40,9 +46,32 @@ let progressBarValue = document.getElementById("health-value");
 let dead = false;
 let shoots = 24;
 
-// Robot boss variable and life
-let robotBoss;
-let robotBossLife = 50;
+// Robot boss and robots variables
+let robotBoss,robotBossLife, robotBossSpeed;
+let robotsSpeed, robotLife;
+
+// Depeding on the choosen level the boss and the robots will have
+// different settings, they can be faster or live for longer
+if(level == "easy"){
+  robotBossLife = 40;
+  robotBossSpeed = 8000;
+  robotLife = 4;
+  robotsSpeed = 5000;
+}
+else if(level == "medium"){
+  robotBossLife = 60;
+  robotBossSpeed = 6000;
+  robotLife = 8;
+  robotsSpeed = 3000;
+}
+else{
+  robotBossLife = 100;
+  robotBossSpeed = 1000;
+  robotLife = 50;
+  robotsSpeed = 500;
+}
+
+
 // Add event listener for pressing the keys on the keyboard
 let keyboard = {};
 // Object of mouse key codes
@@ -64,8 +93,6 @@ var directionOfMovement = {w: 0, s: 0, r:0, l:0};
 // These are flags to stop the movement of the main char
 var stopW, stopS, stopR, stopL;
 stopL = stopR = stopW = stopS = false;
-// The life of the robots
-var robotLife = 8;
 
 // Get the elements in the html page for the pointer lock
 var blocker = document.getElementById( 'blocker' );
@@ -299,6 +326,8 @@ var robotsArray = [];
 var robotsAreDead = false;
 
 function init() {
+  // Now we can show the instructions
+  divInstructions.style.visibility = "visible";
 
   // hide the loading bar
   const loadingElem = document.querySelector('#loading');
@@ -543,8 +572,13 @@ function animate() {
         } // End outer if
     } // End Loop
 
+    // If there are no more shoots we have to notify the user
+    if(shoots == 0){
+      reloadMessage.style.visibility = "visible";
+      reloadMessage.className = "pulsate";
+    }
 
-    // Start with the reload animation, initially this is done once.
+    // Reload animation.
     heroAnimation.reload();
 
     if(controlsEnabled){
@@ -562,6 +596,8 @@ function animate() {
           heroAnimation.reloadFlag = true;
           // Munitions are fully loaded
           shoots = 24;
+          reloadMessage.style.visibility = "hidden";
+          reloadMessage.className = "";
           var divs = document.getElementsByClassName('shot');
           for (var i = 0; i < divs.length; i++) {
             divs[i].classList.toggle("appear");
