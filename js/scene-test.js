@@ -181,22 +181,6 @@ var models = {
     nameMesh: "buil2",
     internal: false
   },
-  /*4: {
-    obj: "./js/models/debris/debris.obj",
-    mtl: "",
-    x: 300,
-    y: 0,
-    z: 300,
-    size1: 0.3,
-    size2: 0.3,
-    size3: 0.3,
-    rotation1: 0,
-    rotation2: 0,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buil2",
-    internal: false
-  },*/
   4: {
     obj: "./js/models/barrier/road barrier.obj",
     mtl: "./js/models/barrier/road barrier.mtl",
