@@ -13,6 +13,11 @@ import {Hero} from './main-char.js';
 import {AnimateHero} from './main-char-animations.js';
 import {Bullet} from './bullets.js';
 import {SoundManager} from './sound-manager.js'
+import {EffectComposer} from './three.js-master/examples/jsm/postprocessing/EffectComposer.js';
+import {RenderPass} from './three.js-master/examples/jsm/postprocessing/RenderPass.js';
+import {ShaderPass} from './three.js-master/examples/jsm/postprocessing/ShaderPass.js';
+import {PixelShader} from './three.js-master/examples/jsm/shaders/PixelShader.js';
+import {AddBoxes} from './building-einv.js';
 
 // retrieve difficulty level choosen in the menu page
 const queryString = window.location.search;
@@ -173,7 +178,7 @@ var models = {
     obj: "./js/models/Organodron City/Organodron City.obj",
     mtl: "./js/models/Organodron City/Organodron_City.mtl",
     x: 2500,
-    y: 250,
+    y: 200,
     z: 2500,
     size1: 9,
     size2: 9,
@@ -189,7 +194,7 @@ var models = {
     obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
     mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
     x: 0,
-    y: -80,
+    y: -100,
     z: 600,
     size1: 9,
     size2: 9,
@@ -201,7 +206,106 @@ var models = {
     nameMesh: "floating_city",
     internal: false
   },
+  3: {
+    obj: "./js/models/Center city Sci-Fi/Center city Sci-Fi.obj",
+    mtl: "./js/models/Center city Sci-Fi/Center_city_Sci-Fi.mtl",
+    x: -1700,
+    y: 20,
+    z: -250,
+    size1: 4,
+    size2: 4,
+    size3: 4,
+    rotation1: 0,
+    rotation2: 70.4,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  4: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 182,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  5: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 130,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: -0.0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  6: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 235,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  7: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 287,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
+  8: {
+    obj: "./js/models/barrier/road barrier.obj",
+    mtl: "./js/models/barrier/road barrier.mtl",
+    x: -2300,
+    y: -1,
+    z: 340,
+    size1: 2,
+    size2: 2,
+    size3: 2,
+    rotation1: 0,
+    rotation2: 0,
+    rotation3: 0,
+    mesh: null,
+    nameMesh: "buil2",
+    internal: false
+  },
 }
+
+
+
 scene = new THREE.Scene();
 var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
 light.position.set( 0.5, 1, 0.75 );
@@ -209,9 +313,9 @@ scene.add(light);
 
 // Create a DirectionalLight and turn on shadows for the light
 var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
-light2.position.set(-5, 10, 20); 			//default; light shining from top
+light2.position.set(-2000, 3000, 6000); 			//default; light shining from top
 light2.castShadow = true;            // default false
-scene.add( light2 );
+scene.add(light2);
 
 // Set up shadow properties for the light
 light2.shadow.mapSize.width = 512;  // default
@@ -307,6 +411,8 @@ var mtlLoader;
                   root.rotation.x = models[key].rotation1;
                   root.rotation.y = models[key].rotation2;
                   root.rotation.z = models[key].rotation3;
+                  root.castShadow = true;
+                  root.receiveShadow = true;
 
                   collidableMeshList.push(root);
 
@@ -317,6 +423,7 @@ var mtlLoader;
       })(_key);
   }
 
+var addBoxes = new AddBoxes(scene, collidableMeshList, manager);
 var controlsEnabled = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
@@ -379,44 +486,6 @@ function getRandomInt(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-/**
- * Function to load the models of the background such as the skyscraper. The
- * function simply load the obj models, scale, rotate and position them in the
- * scene.
- * @return {void} The function does not return anything.
- */
-function loadModels() {
-
-  var mtlLoader;
-  var objLoader;
-  for (var _key in models) {
-      (function (key) {
-          mtlLoader  = new MTLLoader();
-                mtlLoader.load(models[key].mtl, (mtlParseResult) => {
-
-                var materials =  MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult);
-                for (var material of Object.values(materials)) {
-                  material.side = THREE.DoubleSide;
-                }
-
-                objLoader  = new OBJLoader2();
-                objLoader.addMaterials(materials);
-                objLoader.load(models[key].obj, (root) => {
-                  root.position.set(models[key].x, models[key].y, models[key].z);
-                  root.scale.set(models[key].size1, models[key].size2, models[key].size3);
-                  root.rotation.x = models[key].rotation1;
-                  root.rotation.y = models[key].rotation2;
-                  root.rotation.z = models[key].rotation3;
-
-                  scene.add(root);
-
-                });
-              });
-      })(_key);
-  }
-}
-
 
 function onWindowResize() {
     mainCharCamera.aspect = window.innerWidth / window.innerHeight;

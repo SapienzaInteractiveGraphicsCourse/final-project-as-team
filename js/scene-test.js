@@ -275,7 +275,7 @@ var models = {
   var light2 = new THREE.DirectionalLight( 0xffffff, 1, 100 );
   light2.position.set(-2000, 3000, 6000); 			//default; light shining from top
   light2.castShadow = true;            // default false
-  scene.add( light2 );
+  scene.add(light2);
 
   var helper = new THREE.DirectionalLightHelper( light2, 5 );
   scene.add( helper );
