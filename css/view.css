@@ -105,7 +105,7 @@ body {
   position: absolute;
   top: 8vh;
   width: 30vw;
-  height: 24vh;
+  height: 28vh;
   top: 4vh;
   left: 3vw;
   background-color: #9D8C9A;
@@ -149,6 +149,14 @@ progress::-webkit-progress-value {
 progress::-moz-progress-bar {
   /* style rules */
 }
+/**
+ * Set the style of the score, just the font size
+ */
+#score{
+  font-size: 24px;
+  margin-top: 0;
+  margin-bottom: 3vh;
+}
 
 /**
  * Style the munitions div, they are rectangles that will disappear once the
@@ -191,11 +199,13 @@ progress::-moz-progress-bar {
  */
 #reload-message {
   position: relative;
-  top: 2vh;
-  color: #E92249
+  top: 1vh;
+  color: #E92249;
+  margin-top: 0;
 }
 
 #reload-message h1 {
+  margin-top: 0;
   margin-bottom: 0;
   font-size: 5vh;
 }

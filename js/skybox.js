@@ -36,6 +36,9 @@ const backgroundInfo = document.getElementById("transparent-background");
 // Reload message: tells to the user to reload the weapon
 const reloadMessage = document.getElementById("reload-message");
 reloadMessage.style.visibility = "hidden";
+// Get the score element of the player
+const scoreElement = document.getElementById("score");
+let score = 0;
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -561,6 +564,7 @@ var nToSpawn = 0;
 var newSpawn = false;
 
 function animate() {
+  scoreElement.style.color = "#FFFFFF";
 
   // limitate the framerate
   if(Date.now()>=timeTarget){
@@ -590,6 +594,11 @@ function animate() {
       collidableMeshList.push(robot)
       scene.add(robot);
       nToSpawn += 1;
+
+      // The boss came into play
+      if(scene.getObjectByName("robotBoss") == null && newSpawn == true && nToSpawn == 7){
+        scene.add(robotBoss);
+      }
     }
 
 
@@ -653,7 +662,11 @@ function animate() {
         if(mainChar.position.distanceTo(robotBulletsArray[index].position) <= 15){
           // If the character is not dead
           if(!dead){
-            mainCharLife -= 2;
+            score -= 25;
+            scoreElement.innerHTML = "SCORE: " + score;
+            scoreElement.style.color = "#FF0303";
+
+            mainCharLife -= 1;
             progressBarHealth.value -=2;
             progressBarValue.innerHTML = mainCharLife + "%";
           }
@@ -664,7 +677,7 @@ function animate() {
     if(shoots == 0){
       reloadMessage.style.visibility = "visible";
       reloadMessage.className = "pulsate";
-      backgroundInfo.style.height = "32vh";
+      backgroundInfo.style.height = "36vh";
     }
 
     // Reload animation.
@@ -688,7 +701,7 @@ function animate() {
           // Change the style of the elements in the player info
           reloadMessage.style.visibility = "hidden";
           reloadMessage.className = "";
-          backgroundInfo.style.height = "22vh";
+          backgroundInfo.style.height = "28vh";
 
           var divs = document.getElementsByClassName('shot');
           for (var i = 0; i < divs.length; i++) {
@@ -873,7 +886,11 @@ function animate() {
     if(scene.getObjectByName("robot").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
       // If the character is not dead
       if(!dead){
-        mainCharLife -= 2;
+        score -= 2;
+        scoreElement.innerHTML = "SCORE: " + score;
+        scoreElement.style.color = "#FF0303";
+
+        mainCharLife -= 1;
         progressBarHealth.value -=2;
         progressBarValue.innerHTML = mainCharLife + "%";
       }
@@ -885,7 +902,11 @@ function animate() {
     if(scene.getObjectByName("robotBoss").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
       // If the character is not dead
       if(!dead){
-        mainCharLife -= 2;
+        score -= 15;
+        scoreElement.innerHTML = "SCORE: " + score;
+        scoreElement.style.color = "#FF0303";
+
+        mainCharLife -= 1;
         progressBarHealth.value -=2;
         progressBarValue.innerHTML = mainCharLife + "%";
       }
@@ -968,6 +989,10 @@ function animate() {
       // Case in which the robot boss is hidden
       if(robotBoss.position.distanceTo(bulletsArray[index].position) <= 15){
         robotBossLife -= 4;
+        score += 10;
+        scoreElement.innerHTML = "SCORE: " + score;
+        scoreElement.style.color = "#66F800";
+
         if(robotBossLife == 30){
           robotBoss.getObjectByName("robotTorso")
           .material
@@ -1007,6 +1032,10 @@ function animate() {
           // If the robot is hit, then its life is decremented and depending on
           // its life value the robot will have a different color
           item.robotLife -= 1;
+          score += 2;
+          scoreElement.innerHTML = "SCORE: " + score;
+          scoreElement.style.color = "#66F800";
+
           if(item.robotLife == 3){
             item.robot.getObjectByName("robotTorso")
             .material
