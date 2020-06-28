@@ -13,7 +13,7 @@ class SoundManager {
       blaster : { path: "js/sounds/blaster.wav", duration: 0.3, loop: false, volume: 0.6 },
       reload  : { path: "js/sounds/reload.wav", duration: -1, loop: false, volume: 0.4 },
       walking : { path: "js/sounds/walking.wav", duration: -1, loop: false, volume: 0.1 },
-      breath : { path: "js/sounds/breath.wav", duration: -1, loop: true, volume: 0.6 }
+      breath  : { path: "js/sounds/breath.wav", duration: -1, loop: true, volume: 0.6 }
     }
   }
 

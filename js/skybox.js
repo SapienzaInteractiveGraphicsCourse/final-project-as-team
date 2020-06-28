@@ -450,7 +450,7 @@ function init() {
   renderer = new THREE.WebGLRenderer();
   renderer.setClearColor( 0xffffff );
   renderer.setPixelRatio( window.devicePixelRatio );
-  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setSize(window.innerWidth, window.innerHeight );
 
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.BasicShadowMap;
@@ -468,7 +468,10 @@ function init() {
 
   // Load all the sounds
   soundManager.loadSounds(listener);
-
+  // Breathing all the time
+  soundManager.soundEffects["breath"].sound.context.resume().then(() => {
+    soundManager.soundEffects["breath"].sound.play();
+  });
   // Listener for resize
   window.addEventListener( 'resize', onWindowResize, false );
 
@@ -524,6 +527,12 @@ window.addEventListener('mouseup', mouseUp);
  */
 function keyDown(event){
   keyboard[event.keyCode] = true;
+  // If the WASD is pressed, the walking sound is triggered
+  if(keyboard[87] || keyboard[65] || keyboard[83] || keyboard[68]){
+    soundManager.soundEffects["walking"].sound.context.resume().then(() => {
+      soundManager.soundEffects["walking"].sound.play();
+    });
+  }
 }
 /**
  * Function to handle the un-click on a key
@@ -532,6 +541,12 @@ function keyDown(event){
  */
 function keyUp(event){
   keyboard[event.keyCode] = false;
+  // If the WASD is not pressed, the walking sound is turned off
+  if(!keyboard[87] || !keyboard[65] || !keyboard[83] || !keyboard[68]){
+    soundManager.soundEffects["walking"].sound.context.resume().then(() => {
+      soundManager.soundEffects["walking"].sound.stop();
+    });
+  }
 }
 
 // Listeners
@@ -551,7 +566,7 @@ function animate() {
   if(Date.now()>=timeTarget){
 
     //check the number of robots alive
-    if(robotsArray.length == 0) newSpawn = true;
+    if(robotsAlive == 0) newSpawn = true;
     if(nToSpawn == 7) {
       nToSpawn = 0;
       newSpawn = false;
@@ -1026,6 +1041,7 @@ function animate() {
             // Now the boss will came into play
             if(robotsAlive == 0){
               robotsAreDead = true;
+              robotsArray = [];
             }
           }
         }
