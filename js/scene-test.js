@@ -19,7 +19,9 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
 const level = urlParams.get('lvl')
-
+// Get the instructions and hide it
+const divInstructions = document.getElementById("instructions");
+const instructionsText = document.getElementById("display-instructions");
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -734,10 +736,12 @@ var robotsArray = [];
 
 function init() {
 
+  // Now we can show the instructions
+  divInstructions.style.visibility = "visible";
+
   // hide the loading bar
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
-
 
   renderer = new THREE.WebGLRenderer();
   renderer.setClearColor( 0xffffff );
