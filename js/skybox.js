@@ -735,25 +735,45 @@ function animate() {
 
   		// If W or Up are pressed
   		if((keyboard[87] || keyboard[38]) && !stopW){
-  			velocity.z -= 2000.0 * delta;
+  			if(keyboard[32]){
+          velocity.z -= 2000.0 * delta;
+        }
+        else{
+          velocity.z -= 400.0 * delta;
+        }
   			directionOfMovement.w += 1;
   			isWalking = true;
   		}
   		// If S or Down are pressed
   		if((keyboard[83] || keyboard[40]) && !stopS){
-  			velocity.z += 400.0 * delta;
+        if(keyboard[32]){
+          velocity.z += 2000.0 * delta;
+        }
+        else{
+          velocity.z += 400.0 * delta;
+        }
   			directionOfMovement.s += 1;
   			isWalking = true;
   		}
   		// If A or Left are pressed
   		if((keyboard[65] || keyboard[37]) && !stopR){
-  			velocity.x -= 400.0 * delta;
+        if(keyboard[32]){
+          velocity.x -= 2000.0 * delta;
+        }
+        else{
+          velocity.x -= 400.0 * delta;
+        }
   			directionOfMovement.r += 1;
   			isWalking = true;
   		}
   		// If D or Right are pressed
   		if((keyboard[68] || keyboard[39]) && !stopL){
-  			 velocity.x += 400.0 * delta;
+        if(keyboard[32]){
+          velocity.x += 2000.0 * delta;
+        }
+        else{
+          velocity.x += 400.0 * delta;
+        }
   			 directionOfMovement.l += 1;
   			 isWalking = true;
   		}
@@ -932,7 +952,7 @@ function animate() {
 
       // Case in which the robot boss is hidden
       if(robotBoss.position.distanceTo(bulletsArray[index].position) <= 15){
-        robotBossLife -= 2;
+        robotBossLife -= 4;
         if(robotBossLife == 30){
           robotBoss.getObjectByName("robotTorso")
           .material
