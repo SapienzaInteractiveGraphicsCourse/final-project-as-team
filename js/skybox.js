@@ -39,6 +39,9 @@ reloadMessage.style.visibility = "hidden";
 // Get the score element of the player
 const scoreElement = document.getElementById("score");
 let score = 0;
+// Retry and back button 
+const retryButton = document.getElementById("retry");
+const backButton = document.getElementById("back");
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -178,8 +181,8 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
 //models details for background
 var models = {
   1: {
-    obj: "./js/models/Organodron City/Organodron City.obj",
-    mtl: "./js/models/Organodron City/Organodron_City.mtl",
+    obj: "/js/models/Organodron City/Organodron City.obj",
+    mtl: "/js/models/Organodron City/Organodron_City.mtl",
     x: 2500,
     y: 200,
     z: 2500,
@@ -194,8 +197,8 @@ var models = {
     internal: false
   },
   2: {
-    obj: "./js/models/Scifi Floating City/Scifi Floating City.obj",
-    mtl: "./js/models/Scifi Floating City/Scifi_Floating_City.mtl",
+    obj: "/js/models/Scifi Floating City/Scifi Floating City.obj",
+    mtl: "/js/models/Scifi Floating City/Scifi_Floating_City.mtl",
     x: 0,
     y: -100,
     z: 600,
@@ -210,8 +213,8 @@ var models = {
     internal: false
   },
   3: {
-    obj: "./js/models/Center city Sci-Fi/Center city Sci-Fi.obj",
-    mtl: "./js/models/Center city Sci-Fi/Center_city_Sci-Fi.mtl",
+    obj: "/js/models/Center city Sci-Fi/Center city Sci-Fi.obj",
+    mtl: "/js/models/Center city Sci-Fi/Center_city_Sci-Fi.mtl",
     x: -1700,
     y: 20,
     z: -250,
@@ -226,8 +229,8 @@ var models = {
     internal: false
   },
   4: {
-    obj: "./js/models/barrier/road barrier.obj",
-    mtl: "./js/models/barrier/road barrier.mtl",
+    obj: "/js/models/barrier/road barrier.obj",
+    mtl: "/js/models/barrier/road barrier.mtl",
     x: -2300,
     y: -1,
     z: 182,
@@ -242,8 +245,8 @@ var models = {
     internal: false
   },
   5: {
-    obj: "./js/models/barrier/road barrier.obj",
-    mtl: "./js/models/barrier/road barrier.mtl",
+    obj: "/js/models/barrier/road barrier.obj",
+    mtl: "/js/models/barrier/road barrier.mtl",
     x: -2300,
     y: -1,
     z: 130,
@@ -258,8 +261,8 @@ var models = {
     internal: false
   },
   6: {
-    obj: "./js/models/barrier/road barrier.obj",
-    mtl: "./js/models/barrier/road barrier.mtl",
+    obj: "/js/models/barrier/road barrier.obj",
+    mtl: "/js/models/barrier/road barrier.mtl",
     x: -2300,
     y: -1,
     z: 235,
@@ -274,8 +277,8 @@ var models = {
     internal: false
   },
   7: {
-    obj: "./js/models/barrier/road barrier.obj",
-    mtl: "./js/models/barrier/road barrier.mtl",
+    obj: "/js/models/barrier/road barrier.obj",
+    mtl: "/js/models/barrier/road barrier.mtl",
     x: -2300,
     y: -1,
     z: 287,
@@ -290,8 +293,8 @@ var models = {
     internal: false
   },
   8: {
-    obj: "./js/models/barrier/road barrier.obj",
-    mtl: "./js/models/barrier/road barrier.mtl",
+    obj: "/js/models/barrier/road barrier.obj",
+    mtl: "/js/models/barrier/road barrier.mtl",
     x: -2300,
     y: -1,
     z: 340,
@@ -306,7 +309,6 @@ var models = {
     internal: false
   },
 }
-
 
 
 scene = new THREE.Scene();
@@ -974,6 +976,8 @@ function animate() {
     // Set the game over text
     divInstructions.innerHTML = "GAME OVER. <br />The robots won."
     document.exitPointerLock();
+    retryButton.style.visibility = "visible";
+    backButton.style.visibility = "visible";
   }
 
   // go through bullets array and update position

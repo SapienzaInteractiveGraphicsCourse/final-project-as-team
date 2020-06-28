@@ -11,7 +11,18 @@ body {
   margin: 0;
   overflow: hidden;
 }
-
+button{
+  background-color: #F41BDE;
+  color: #FFFFFF;
+  padding: 2vh;
+  border: 3px solid #A8359C;
+  visibility: hidden;
+  position: relative;
+  top: 2vh;
+}
+/**
+ * Style of the blocker element for the point lock
+ */
 #blocker {
   position: absolute;
   width: 100%;
