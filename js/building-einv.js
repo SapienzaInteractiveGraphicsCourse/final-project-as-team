@@ -381,8 +381,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     3: {
-      obj: "final-project-as-team/js/models/Center_city_Sci-Fi/Center_city_Sci-Fi.obj",
-      mtl: "final-project-as-team/js/models/Center_city_Sci-Fi/Center_city_Sci-Fi.mtl",
+      obj: "final-project-as-team/js/models/Center_city_Sci-Fi/Center_City_Sci-Fi.obj",
+      mtl: "final-project-as-team/js/models/Center_city_Sci-Fi/Center_City_Sci-Fi.mtl",
       x: -1700,
       y: 20,
       z: -250,
