@@ -518,6 +518,20 @@ function animate() {
     // Animate the robot (wheel, weapon and walking towards the mainChar)
     // Every robot will go to the main chart
     robotsArray.forEach((elem, i) => {
+      // Check if the current robot hurts the main char
+      if(elem.robot.position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
+        // If the character is not dead
+        if(!dead){
+          score -= 2;
+          scoreElement.innerHTML = "SCORE: " + score;
+          scoreElement.style.color = "#FF0303";
+
+          mainCharLife -= 1;
+          progressBarHealth.value -=1;
+          progressBarValue.innerHTML = mainCharLife + "%";
+        }
+      }
+      // Set the animation for the robot
       new TWEEN.Tween(elem.robot.position)
         .to({x: mainChar.position.x + (i * 20) , z: mainChar.position.z + (i * 5)}, 3000)
         .onUpdate(function (object) {
@@ -580,7 +594,7 @@ function animate() {
             scoreElement.style.color = "#FF0303";
 
             mainCharLife -= 1;
-            progressBarHealth.value -=2;
+            progressBarHealth.value -= 1;
             progressBarValue.innerHTML = mainCharLife + "%";
           }
         } // End outer if
@@ -793,22 +807,6 @@ function animate() {
 
   if(shootingInterval > 0) shootingInterval -=1;
 
-  // If the robots are too close to the main char he will be hit
-  if(scene.getObjectByName("robot") != null){
-    if(scene.getObjectByName("robot").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
-      // If the character is not dead
-      if(!dead){
-        score -= 2;
-        scoreElement.innerHTML = "SCORE: " + score;
-        scoreElement.style.color = "#FF0303";
-
-        mainCharLife -= 1;
-        progressBarHealth.value -=2;
-        progressBarValue.innerHTML = mainCharLife + "%";
-      }
-    }
-  }
-
   // If the robot boss is too close to the main char he will be hit
   if(scene.getObjectByName("robotBoss") != null){
     if(scene.getObjectByName("robotBoss").position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
@@ -819,7 +817,7 @@ function animate() {
         scoreElement.style.color = "#FF0303";
 
         mainCharLife -= 1;
-        progressBarHealth.value -=2;
+        progressBarHealth.value -=1;
         progressBarValue.innerHTML = mainCharLife + "%";
       }
     }

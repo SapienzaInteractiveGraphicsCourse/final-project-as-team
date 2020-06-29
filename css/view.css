@@ -135,7 +135,7 @@ body {
 #transparent-background {
   position: absolute;
   top: 8vh;
-  width: 24vw;
+  width: 34vw;
   height: 28vh;
   top: 4vh;
   left: 3vw;
@@ -170,24 +170,20 @@ body {
 
 #health-value{
   display: inline;
+  position: relative;
+  left: 10vw;
+  bottom: 2.5vh;
 }
 
-progress {
+#health {
+  position: absolute;
+  margin-top: 0.5vh;
+  margin-bottom: 1vh;
+  left: 0vw;
   border-radius: 10px;
-  width: 50%;
+  width: 100%;
 }
 
-progress::-webkit-progress-bar {
- background-color: #0091EA;
-  border-radius: 10px;
-}
-
-progress::-webkit-progress-value {
-   border-radius: 10px;
-}
-progress::-moz-progress-bar {
-  /* style rules */
-}
 /**
  * Set the style of the score, just the font size
  */
@@ -202,6 +198,9 @@ progress::-moz-progress-bar {
  * character will use them. These styles will let the divs line up next to each
  * other while accepting dimensions.
  */
+#munitions{
+  margin-top: 2vh;
+}
 #munitions h4{
   margin-top: 1vh;
 }
