@@ -362,7 +362,7 @@ function init() {
 	composer.addPass(pixelPass);
 
 	params = {
-		pixelSize: 3,
+		pixelSize: 2.5,
 		postprocessing: true
 	};
   pixelPass.uniforms[ "pixelSize" ].value = params.pixelSize;
