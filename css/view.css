@@ -19,7 +19,7 @@ body {
   visibility: hidden;
   position: absolute;
   top: 52vh;
-  left: 38vw;
+  left: 34vw;
 }
 /**
  * Styles of the button in the menu
@@ -31,7 +31,7 @@ body {
   border: 3px solid #A8359C;
   position: relative;
   top: 2vh;
-  width: 12vw;
+  width: 14vw;
 }
 /**
  * Change the background color on hover
