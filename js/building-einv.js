@@ -345,4 +345,140 @@ var AddBoxes = function(scene, collidableMeshList, manager){
   collidableMeshList.push(box20);
 }
 
-export {AddBoxes};
+var OBJSketchFabModels = function(){
+  //models details for background
+  var models = {
+    1: {
+      obj: "/js/models/Organodron City/Organodron City.obj",
+      mtl: "/js/models/Organodron City/Organodron_City.mtl",
+      x: 2500,
+      y: 200,
+      z: 2500,
+      size1: 9,
+      size2: 9,
+      size3: 9,
+      rotation1: 0,
+      rotation2: Math.PI,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "buildingCorridorOpen",
+      internal: false
+    },
+    2: {
+      obj: "/js/models/Scifi Floating City/Scifi Floating City.obj",
+      mtl: "/js/models/Scifi Floating City/Scifi_Floating_City.mtl",
+      x: 0,
+      y: -100,
+      z: 600,
+      size1: 9,
+      size2: 9,
+      size3: 9,
+      rotation1: 0,
+      rotation2: -Math.PI/2,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "floating_city",
+      internal: false
+    },
+    3: {
+      obj: "/js/models/Center city Sci-Fi/Center city Sci-Fi.obj",
+      mtl: "/js/models/Center city Sci-Fi/Center_city_Sci-Fi.mtl",
+      x: -1700,
+      y: 20,
+      z: -250,
+      size1: 4,
+      size2: 4,
+      size3: 4,
+      rotation1: 0,
+      rotation2: 70.4,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "buil2",
+      internal: false
+    },
+    4: {
+      obj: "/js/models/barrier/road barrier.obj",
+      mtl: "/js/models/barrier/road barrier.mtl",
+      x: -2300,
+      y: -1,
+      z: 182,
+      size1: 2,
+      size2: 2,
+      size3: 2,
+      rotation1: 0,
+      rotation2: 0,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "buil2",
+      internal: false
+    },
+    5: {
+      obj: "/js/models/barrier/road barrier.obj",
+      mtl: "/js/models/barrier/road barrier.mtl",
+      x: -2300,
+      y: -1,
+      z: 130,
+      size1: 2,
+      size2: 2,
+      size3: 2,
+      rotation1: 0,
+      rotation2: -0.0,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "buil2",
+      internal: false
+    },
+    6: {
+      obj: "/js/models/barrier/road barrier.obj",
+      mtl: "/js/models/barrier/road barrier.mtl",
+      x: -2300,
+      y: -1,
+      z: 235,
+      size1: 2,
+      size2: 2,
+      size3: 2,
+      rotation1: 0,
+      rotation2: 0,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "buil2",
+      internal: false
+    },
+    7: {
+      obj: "/js/models/barrier/road barrier.obj",
+      mtl: "/js/models/barrier/road barrier.mtl",
+      x: -2300,
+      y: -1,
+      z: 287,
+      size1: 2,
+      size2: 2,
+      size3: 2,
+      rotation1: 0,
+      rotation2: 0,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "buil2",
+      internal: false
+    },
+    8: {
+      obj: "/js/models/barrier/road barrier.obj",
+      mtl: "/js/models/barrier/road barrier.mtl",
+      x: -2300,
+      y: -1,
+      z: 340,
+      size1: 2,
+      size2: 2,
+      size3: 2,
+      rotation1: 0,
+      rotation2: 0,
+      rotation3: 0,
+      mesh: null,
+      nameMesh: "buil2",
+      internal: false
+    },
+  }
+
+  return models;
+}
+
+export {AddBoxes, OBJSketchFabModels};

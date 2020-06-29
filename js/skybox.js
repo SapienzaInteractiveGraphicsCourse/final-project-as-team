@@ -17,13 +17,20 @@ import {EffectComposer} from './three.js-master/examples/jsm/postprocessing/Effe
 import {RenderPass} from './three.js-master/examples/jsm/postprocessing/RenderPass.js';
 import {ShaderPass} from './three.js-master/examples/jsm/postprocessing/ShaderPass.js';
 import {PixelShader} from './three.js-master/examples/jsm/shaders/PixelShader.js';
-import {AddBoxes} from './building-einv.js';
+import {AddBoxes, OBJSketchFabModels} from './building-einv.js';
 
 // retrieve difficulty level choosen in the menu page
 const queryString = window.location.search;
 // Get the level value from the url
 const urlParams = new URLSearchParams(queryString);
 const level = urlParams.get('lvl');
+// Pixel effect parameters for post processing
+var composer, pixelPass, params;
+
+// Audio variales
+var analyser, dataArray;
+var audioData = [];
+var stream = "js/sounds/loveIsAnywhere.mp3";
 
 // Get the instructions and hide it
 const divInstructions = document.getElementById("instructions");
@@ -39,9 +46,11 @@ reloadMessage.style.visibility = "hidden";
 // Get the score element of the player
 const scoreElement = document.getElementById("score");
 let score = 0;
-// Retry and back button 
+
+// Retry and back button
 const retryButton = document.getElementById("retry");
 const backButton = document.getElementById("back");
+const menu = document.getElementById("menu");
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -60,30 +69,30 @@ let dead = false;
 let shoots = 24;
 
 // Robot boss and robots variables
-let robotBoss,robotBossLife, robotBossSpeed;
+let robotBoss,robotBossLife, bossLife, robotBossSpeed;
 let robotsSpeed, robotLife;
 
 // Depeding on the choosen level the boss and the robots will have
 // different settings, they can be faster or live for longer
 if(level == "easy"){
-  robotBossLife = 40;
+  bossLife = 40;
   robotBossSpeed = 8000;
   robotLife = 4;
   robotsSpeed = 5000;
 }
 else if(level == "medium"){
-  robotBossLife = 60;
+  bossLife = 60;
   robotBossSpeed = 6000;
   robotLife = 8;
   robotsSpeed = 3000;
 }
 else{
-  robotBossLife = 100;
+  bossLife = 100;
   robotBossSpeed = 1000;
   robotLife = 50;
   robotsSpeed = 500;
 }
-
+robotBossLife = bossLife;
 
 // Add event listener for pressing the keys on the keyboard
 let keyboard = {};
@@ -179,137 +188,7 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
 };
 
 //models details for background
-var models = {
-  1: {
-    obj: "/js/models/Organodron City/Organodron City.obj",
-    mtl: "/js/models/Organodron City/Organodron_City.mtl",
-    x: 2500,
-    y: 200,
-    z: 2500,
-    size1: 9,
-    size2: 9,
-    size3: 9,
-    rotation1: 0,
-    rotation2: Math.PI,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buildingCorridorOpen",
-    internal: false
-  },
-  2: {
-    obj: "/js/models/Scifi Floating City/Scifi Floating City.obj",
-    mtl: "/js/models/Scifi Floating City/Scifi_Floating_City.mtl",
-    x: 0,
-    y: -100,
-    z: 600,
-    size1: 9,
-    size2: 9,
-    size3: 9,
-    rotation1: 0,
-    rotation2: -Math.PI/2,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "floating_city",
-    internal: false
-  },
-  3: {
-    obj: "/js/models/Center city Sci-Fi/Center city Sci-Fi.obj",
-    mtl: "/js/models/Center city Sci-Fi/Center_city_Sci-Fi.mtl",
-    x: -1700,
-    y: 20,
-    z: -250,
-    size1: 4,
-    size2: 4,
-    size3: 4,
-    rotation1: 0,
-    rotation2: 70.4,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buil2",
-    internal: false
-  },
-  4: {
-    obj: "/js/models/barrier/road barrier.obj",
-    mtl: "/js/models/barrier/road barrier.mtl",
-    x: -2300,
-    y: -1,
-    z: 182,
-    size1: 2,
-    size2: 2,
-    size3: 2,
-    rotation1: 0,
-    rotation2: 0,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buil2",
-    internal: false
-  },
-  5: {
-    obj: "/js/models/barrier/road barrier.obj",
-    mtl: "/js/models/barrier/road barrier.mtl",
-    x: -2300,
-    y: -1,
-    z: 130,
-    size1: 2,
-    size2: 2,
-    size3: 2,
-    rotation1: 0,
-    rotation2: -0.0,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buil2",
-    internal: false
-  },
-  6: {
-    obj: "/js/models/barrier/road barrier.obj",
-    mtl: "/js/models/barrier/road barrier.mtl",
-    x: -2300,
-    y: -1,
-    z: 235,
-    size1: 2,
-    size2: 2,
-    size3: 2,
-    rotation1: 0,
-    rotation2: 0,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buil2",
-    internal: false
-  },
-  7: {
-    obj: "/js/models/barrier/road barrier.obj",
-    mtl: "/js/models/barrier/road barrier.mtl",
-    x: -2300,
-    y: -1,
-    z: 287,
-    size1: 2,
-    size2: 2,
-    size3: 2,
-    rotation1: 0,
-    rotation2: 0,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buil2",
-    internal: false
-  },
-  8: {
-    obj: "/js/models/barrier/road barrier.obj",
-    mtl: "/js/models/barrier/road barrier.mtl",
-    x: -2300,
-    y: -1,
-    z: 340,
-    size1: 2,
-    size2: 2,
-    size3: 2,
-    rotation1: 0,
-    rotation2: 0,
-    rotation3: 0,
-    mesh: null,
-    nameMesh: "buil2",
-    internal: false
-  },
-}
-
+var models = {}; //new OBJSketchFabModels();
 
 scene = new THREE.Scene();
 var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
@@ -444,6 +323,20 @@ function init() {
   // Now we can show the instructions
   divInstructions.style.visibility = "visible";
 
+  // AUDIO
+	var fftSize = 2048;
+	var audioLoader = new THREE.AudioLoader();
+	var listener = new THREE.AudioListener();
+	var audio = new THREE.Audio(listener);
+	audio.crossOrigin = "anonymous";
+	audioLoader.load(stream, function(buffer) {
+		audio.setBuffer(buffer);
+		audio.setLoop(true);
+		audio.play();
+	});
+
+	analyser = new THREE.AudioAnalyser(audio, fftSize);
+
   // hide the loading bar
   const loadingElem = document.querySelector('#loading');
   loadingElem.style.display = 'none';
@@ -460,6 +353,20 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.BasicShadowMap;
 
+  composer = new EffectComposer(renderer);
+	composer.addPass(new RenderPass(scene, mainCharCamera));
+
+	pixelPass = new ShaderPass(PixelShader);
+	pixelPass.uniforms["resolution"].value = new THREE.Vector2(window.innerWidth, window.innerHeight);
+	pixelPass.uniforms["resolution"].value.multiplyScalar(window.devicePixelRatio);
+	composer.addPass(pixelPass);
+
+	params = {
+		pixelSize: 3,
+		postprocessing: true
+	};
+  pixelPass.uniforms[ "pixelSize" ].value = params.pixelSize;
+
   document.body.appendChild(renderer.domElement);
 
   var wallGeometry = new THREE.CubeGeometry(100, 100, 20, 1, 1, 1 );
@@ -473,12 +380,9 @@ function init() {
 
   // Load all the sounds
   soundManager.loadSounds(listener);
-  // Breathing all the time
-  soundManager.soundEffects["breath"].sound.context.resume().then(() => {
-    soundManager.soundEffects["breath"].sound.play();
-  });
+
   // Listener for resize
-  window.addEventListener( 'resize', onWindowResize, false );
+  window.addEventListener('resize', onWindowResize, false);
 
   animate();
 }
@@ -495,10 +399,16 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Function that is called once the windonw is resized and adapt the aspect
+ * @return {void} Just change the aspect
+ */
 function onWindowResize() {
     mainCharCamera.aspect = window.innerWidth / window.innerHeight;
     mainCharCamera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
+
+    pixelPass.uniforms["resolution"].value.set(window.innerWidth, window.innerHeight).multiplyScalar(window.devicePixelRatio);
 }
 
 // Functions for click listener
@@ -566,6 +476,8 @@ var nToSpawn = 0;
 var newSpawn = false;
 
 function animate() {
+  // The score change color only when it is updated, otherwise it should be
+  // white all the time
   scoreElement.style.color = "#FFFFFF";
 
   // limitate the framerate
@@ -600,6 +512,14 @@ function animate() {
       // The boss came into play
       if(scene.getObjectByName("robotBoss") == null && newSpawn == true && nToSpawn == 7){
         scene.add(robotBoss);
+        robotBossLife = bossLife;
+        robotBoss.getObjectByName("robotTorso")
+        .material
+        .color.set('#6A645F');
+
+        robotBoss.getObjectByName("robotHead")
+        .material
+        .color.set('#6A645F');
       }
     }
 
@@ -709,7 +629,6 @@ function animate() {
           for (var i = 0; i < divs.length; i++) {
             divs[i].classList.toggle("appear");
             divs[i].className = "shot";
-            console.log(divs[i]);
           }
 
           // Play the reload sound
@@ -976,8 +895,8 @@ function animate() {
     // Set the game over text
     divInstructions.innerHTML = "GAME OVER. <br />The robots won."
     document.exitPointerLock();
-    retryButton.style.visibility = "visible";
-    backButton.style.visibility = "visible";
+    menu.style.visibility = "visible";
+
   }
 
   // go through bullets array and update position
@@ -1081,7 +1000,17 @@ function animate() {
       });
   }
 
-  renderer.render(scene, mainCharCamera);
+  if ( params.postprocessing ) {
+
+		composer.render();
+
+	} else {
+
+		renderer.render( scene, mainCharCamera );
+
+	}
+
+  //renderer.render(scene, mainCharCamera);
 
   timeTarget+=dt;
     if(Date.now()>=timeTarget){

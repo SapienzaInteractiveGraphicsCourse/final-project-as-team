@@ -18,7 +18,6 @@
     <!-- Importing first test script -->
     <script type="module" src="js/skybox.js"></script>
 		<div id="blocker">
-
 			<div id="instructions">
 				<span id="display-instructions">Click to play</span>
 				<br />
@@ -26,9 +25,13 @@
 				<br />
 				SPACE = Run,  SHIFT = Target mode)
 			</div>
-			<button id="back" type="button" name="button">BACK TO MENU.</button>
-			<button id="retry" type="button" name="button">RETRY !</button>
 		</div>
+
+		<div id="menu">
+			<button id="back" type="button" name="button" onclick="location.href = 'index.html';">BACK TO MENU.</button>
+			<button id="retry" type="button" name="button" onclick="window.location.reload()">RESTART !</button>
+		</div>
+
 		<!-- This div is just for adding a transparent background -->
 		<div id="transparent-background"></div>
 		<div id="player-info">
