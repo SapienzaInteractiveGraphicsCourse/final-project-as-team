@@ -369,15 +369,6 @@ function init() {
 
   document.body.appendChild(renderer.domElement);
 
-  var wallGeometry = new THREE.CubeGeometry(100, 100, 20, 1, 1, 1 );
-	var wallMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
-	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
-
-	var wall = new THREE.Mesh(wallGeometry, wallMaterial);
-	wall.position.set(100, 50, -100);
-	scene.add(wall);
-	collidableMeshList.push(wall);
-
   // Load all the sounds
   soundManager.loadSounds(listener);
 
