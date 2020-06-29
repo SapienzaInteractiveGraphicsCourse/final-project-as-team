@@ -349,8 +349,8 @@ var OBJSketchFabModels = function(){
   //models details for background
   var models = {
     1: {
-      obj: "./final-project-as-team/js/models/Organodron_City/Organodron_City.obj",
-      mtl: "./final-project-as-team/js/models/Organodron_City/Organodron_City.mtl",
+      obj: "js/models/Organodron_City/Organodron_City.obj",
+      mtl: "js/models/Organodron_City/Organodron_City.mtl",
       x: 2500,
       y: 200,
       z: 2500,
@@ -365,8 +365,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     2: {
-      obj: "./final-project-as-team/js/models/Scifi_Floating_City/Scifi_Floating_City.obj",
-      mtl: "./final-project-as-team/js/models/Scifi_Floating_City/Scifi_Floating_City.mtl",
+      obj: "js/models/Scifi_Floating_City/Scifi_Floating_City.obj",
+      mtl: "js/models/Scifi_Floating_City/Scifi_Floating_City.mtl",
       x: 0,
       y: -100,
       z: 600,
@@ -381,8 +381,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     3: {
-      obj: "./final-project-as-team/js/models/Center_city_Sci-Fi/Center_City_Sci-Fi.obj",
-      mtl: "./final-project-as-team/js/models/Center_city_Sci-Fi/Center_City_Sci-Fi.mtl",
+      obj: "js/models/Center_city_Sci-Fi/Center_City_Sci-Fi.obj",
+      mtl: "js/models/Center_city_Sci-Fi/Center_City_Sci-Fi.mtl",
       x: -1700,
       y: 20,
       z: -250,
@@ -397,8 +397,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     4: {
-      obj: "./final-project-as-team/js/models/barrier/road_barrier.obj",
-      mtl: "./final-project-as-team/js/models/barrier/road_barrier.mtl",
+      obj: "js/models/barrier/road_barrier.obj",
+      mtl: "js/models/barrier/road_barrier.mtl",
       x: -2300,
       y: -1,
       z: 182,
@@ -413,8 +413,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     5: {
-      obj: "./final-project-as-team/js/models/barrier/road_barrier.obj",
-      mtl: "./final-project-as-team/js/models/barrier/road_barrier.mtl",
+      obj: "js/models/barrier/road_barrier.obj",
+      mtl: "js/models/barrier/road_barrier.mtl",
       x: -2300,
       y: -1,
       z: 130,
@@ -429,8 +429,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     6: {
-      obj: "./final-project-as-team/js/models/barrier/road_barrier.obj",
-      mtl: "./final-project-as-team/js/models/barrier/road_barrier.mtl",
+      obj: "js/models/barrier/road_barrier.obj",
+      mtl: "js/models/barrier/road_barrier.mtl",
       x: -2300,
       y: -1,
       z: 235,
@@ -445,8 +445,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     7: {
-      obj: "./final-project-as-team/js/models/barrier/road_barrier.obj",
-      mtl: "./final-project-as-team/js/models/barrier/road_barrier.mtl",
+      obj: "js/models/barrier/road_barrier.obj",
+      mtl: "js/models/barrier/road_barrier.mtl",
       x: -2300,
       y: -1,
       z: 287,
@@ -461,8 +461,8 @@ var OBJSketchFabModels = function(){
       internal: false
     },
     8: {
-      obj: "./final-project-as-team/js/models/barrier/road_barrier.obj",
-      mtl: "./final-project-as-team/js/models/barrier/road_barrier.mtl",
+      obj: "js/models/barrier/road_barrier.obj",
+      mtl: "js/models/barrier/road_barrier.mtl",
       x: -2300,
       y: -1,
       z: 340,
