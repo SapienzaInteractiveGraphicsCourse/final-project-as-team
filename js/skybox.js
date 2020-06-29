@@ -188,7 +188,7 @@ manager.onProgress = (url, itemsLoaded, itemsTotal) => {
 };
 
 //models details for background
-var models = {}; //new OBJSketchFabModels();
+var models = new OBJSketchFabModels();
 
 scene = new THREE.Scene();
 var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
