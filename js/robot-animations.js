@@ -39,6 +39,7 @@ tweenTwo.chain(tween);
  * @return {void}         Not return anything, just build the animations
  */
 let AnimateRobot = function(root){
+  // Methods providing animations
   movingCannon(true, root);
   rotatingWheel(true, root);
   movingHead(true, root);
