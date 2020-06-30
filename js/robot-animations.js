@@ -39,56 +39,44 @@ tweenTwo.chain(tween);
  * @return {void}         Not return anything, just build the animations
  */
 let AnimateRobot = function(root){
-
-
-  root.traverse(function(child){
-    movingCannon(true, child);
-    rotatingWheel(true, child);
-    movingHead(true, child);
-  })
+  movingCannon(true, root);
+  rotatingWheel(true, root);
+  movingHead(true, root);
 }
 /**
  * Function to rotate the cannon parts
  * @param  {bool}   flagVar Set to true to switch on the animation
- * @param  {object} child   Child to move
+ * @param  {object} root    This is the root element of the object
  * @return {void}           The function does not return anything
  */
-function movingCannon(flagVar, child){
+function movingCannon(flagVar, root){
   if(flagVar){
-    if(child.name == "robotShooter"){
-      child.rotation.y = position.cannonRot;
-    }
-    if(child.name == "robotShooterViewFinder"){
-      child.rotation.z = position.cannonRot;
-    }
+    root.getObjectByName("robotShooter").rotation.y = position.cannonRot;
+    root.getObjectByName("robotShooterViewFinder").rotation.z = position.cannonRot;
   }
 }
 
 /**
  * Function to rotate the wheel of the robot
  * @param  {bool}   flagVar Set to true to switch on the animation
- * @param  {object} child   Child to move
+ * @param  {object} root    This is the root element of the object
  * @return {void}           The function does not return anything
  */
-function rotatingWheel(flagVar, child){
+function rotatingWheel(flagVar, root){
   if(flagVar){
-    if(child.name == "robotWheel"){
-      child.rotation.x += 0.05;
-    }
+    root.getObjectByName("robotWheel").rotation.x += 0.05;
   }
 }
 /**
  * This function is used to move up and down the robot head, while is
  * moving
  * @param  {bool}   flagVar Set to true to switch on the animation
- * @param  {object} child   Child to move
+ * @param  {object} root    This is the root element of the object
  * @return {void}           The function does not return anything
  */
-function movingHead(flagVar, child){
+function movingHead(flagVar, root){
   if(flagVar){
-    if(child.name == "robotHead"){
-      child.rotation.x = (110 * Math.PI/180) - position.headRot;
-    }
+    root.getObjectByName("robotHead").rotation.x = (110 * Math.PI/180) - position.headRot;
   }
 }
 

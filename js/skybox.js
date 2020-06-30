@@ -519,7 +519,7 @@ function animate() {
     // Every robot will go to the main chart
     robotsArray.forEach((elem, i) => {
       // Check if the current robot hurts the main char
-      if(elem.robot.position.distanceTo(mainChar.position) <= 25 && robotsAlive > 0){
+      if(elem.robot.position.distanceTo(mainChar.position) <= 15 && robotsAlive > 0){
         // If the character is not dead
         if(!dead){
           score -= 2;
