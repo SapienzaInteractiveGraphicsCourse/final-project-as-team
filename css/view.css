@@ -164,24 +164,22 @@ body {
 }
 
 #player-info h4{
-  margin-bottom: 0;
+  margin-bottom: 1vh;
   margin-top: 0
 }
 
 #health-value{
   display: inline;
-  position: relative;
-  left: 10vw;
-  bottom: 2.5vh;
 }
-
+/**
+ * Style of the health progress bar
+ */
 #health {
   position: absolute;
-  margin-top: 0.5vh;
   margin-bottom: 1vh;
-  left: 0vw;
   border-radius: 10px;
-  width: 100%;
+  margin-left: 1vw;
+  width: 80%;
 }
 
 /**
@@ -266,4 +264,13 @@ body {
     100% {
         opacity: 0.5;
     }
+}
+
+#information {
+  visibility: hidden;
+  position: absolute;
+  color: #FFFFFF;
+  top: 5vh;
+  right: 1vw;
+  width: 15vw;
 }

@@ -28,12 +28,17 @@ const level = urlParams.get('lvl');
 var composer, pixelPass, params;
 
 // Audio variales
-var analyser, dataArray;
-var audioData = [];
+// Variable to stop the audio
+var stopAudio = false;
+// Variable telling if the audio has already been played
+var theTrackIsOn = false;
+var audio, analyser;
 var stream = "js/sounds/loveIsAnywhere.mp3";
 
+// Variable for pausing the game
+var pauseGame = false;
+
 // Get the instructions and hide it
-const divInstructions = document.getElementById("instructions");
 const instructionsText = document.getElementById("display-instructions");
 
 // Get and hide the player informations
@@ -51,6 +56,10 @@ let score = 0;
 const retryButton = document.getElementById("retry");
 const backButton = document.getElementById("back");
 const menu = document.getElementById("menu");
+
+// Element for stop the music
+const stopMusicElement = document.getElementById("stopMusic");
+const pauseElement = document.getElementById("pause");
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -124,20 +133,26 @@ var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement
 if ( havePointerLock ) {
   var element = document.body;
   var pointerlockchange = function ( event ) {
-      if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
-          controlsEnabled = true;
-          controls.enabled = true;
-          blocker.style.display = 'none';
+      if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
+        controlsEnabled = true;
+        controls.enabled = true;
+        blocker.style.display = 'none';
+        // The player has the control
+        pauseGame = false;
+        pauseElement.style.visibility = "visible";
       } else {
-          controls.enabled = false;
-          blocker.style.display = '-webkit-box';
-          blocker.style.display = '-moz-box';
-          blocker.style.display = 'box';
-          instructions.style.display = '';
+        controls.enabled = false;
+        blocker.style.display = '-webkit-box';
+        blocker.style.display = '-moz-box';
+        blocker.style.display = 'box';
+        instructions.style.display = '';
+        // The game is paused if the player exits from the pointer lock
+        pauseGame = true;
+        pauseElement.style.visibility = "hidden";
       }
   };
   var pointerlockerror = function ( event ) {
-      instructions.style.display = '';
+    instructions.style.display = '';
   };
   // Hook pointer lock state change events
   document.addEventListener( 'pointerlockchange', pointerlockchange, false );
@@ -151,17 +166,17 @@ if ( havePointerLock ) {
       // Ask the browser to lock the pointer
       element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
       if ( /Firefox/i.test( navigator.userAgent ) ) {
-          var fullscreenchange = function ( event ) {
-              if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
-                  document.removeEventListener( 'fullscreenchange', fullscreenchange );
-                  document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
-                  element.requestPointerLock();
-              }
-          };
-          document.addEventListener( 'fullscreenchange', fullscreenchange, false );
-          document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
-          element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-          element.requestFullscreen();
+        var fullscreenchange = function ( event ) {
+            if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
+                document.removeEventListener( 'fullscreenchange', fullscreenchange );
+                document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
+                element.requestPointerLock();
+            }
+        };
+        document.addEventListener( 'fullscreenchange', fullscreenchange, false );
+        document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
+        element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+        element.requestFullscreen();
       } else {
           element.requestPointerLock();
       }
@@ -319,21 +334,30 @@ var robotsAlive = 0;
 var robotsArray = [];
 var robotsAreDead = false;
 
+/**
+ * Function that set all the variables and starts the game, calling the animate
+ * function
+ * @return {void} The function does not return anything
+ */
 function init() {
   // Now we can show the instructions
-  divInstructions.style.visibility = "visible";
+  instructions.style.visibility = "visible";
+  // Now the stop music instruction is visible
+  stopMusicElement.style.visibility = "visible";
+  pauseElement.style.visibility = "visible";
 
   // AUDIO
 	var fftSize = 2048;
 	var audioLoader = new THREE.AudioLoader();
 	var listener = new THREE.AudioListener();
-	var audio = new THREE.Audio(listener);
+	audio = new THREE.Audio(listener);
 	audio.crossOrigin = "anonymous";
 	audioLoader.load(stream, function(buffer) {
 		audio.setBuffer(buffer);
 		audio.setLoop(true);
 		audio.play();
 	});
+  theTrackIsOn = true;
 
 	analyser = new THREE.AudioAnalyser(audio, fftSize);
 
@@ -439,6 +463,12 @@ function keyDown(event){
       soundManager.soundEffects["walking"].sound.play();
     });
   }
+  // Stop the sountrack music
+  if(keyboard[78]){
+    stopAudio = !stopAudio;
+    theTrackIsOn = false;
+  }
+
 }
 /**
  * Function to handle the un-click on a key
@@ -470,6 +500,28 @@ function animate() {
   // The score change color only when it is updated, otherwise it should be
   // white all the time
   scoreElement.style.color = "#FFFFFF";
+
+  // Stop the audio
+  if(stopAudio){
+    audio.pause();
+  }
+
+  // If the track is not on, we play it
+  if(!theTrackIsOn){
+    if(!stopAudio){
+      audio.play();
+      theTrackIsOn = true;
+    }
+  }
+
+  if(pauseGame){
+    menu.style.visibility = "visible";
+  }
+  if(!pauseGame){
+    if(!dead){
+      menu.style.visibility = "hidden";
+    }
+  }
 
   // limitate the framerate
   if(Date.now()>=timeTarget){
@@ -882,10 +934,9 @@ function animate() {
     controlsEnabled = false;
     dead = true;
     // Set the game over text
-    divInstructions.innerHTML = "GAME OVER. <br />The robots won."
+    instructions.innerHTML = "GAME OVER. <br />The robots won."
     document.exitPointerLock();
     menu.style.visibility = "visible";
-
   }
 
   // go through bullets array and update position
@@ -1002,10 +1053,14 @@ function animate() {
   //renderer.render(scene, mainCharCamera);
 
   timeTarget+=dt;
-    if(Date.now()>=timeTarget){
-      timeTarget=Date.now();
-    }
-  TWEEN.update();
+  if(Date.now()>=timeTarget){
+    timeTarget=Date.now();
+  }
+
+  // If the game is not paused the robots allow to move
+  if(!pauseGame){
+    TWEEN.update();
+  }
 }
   requestAnimationFrame(animate);
 
