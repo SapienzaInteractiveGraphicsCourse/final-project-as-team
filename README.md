@@ -1,6 +1,6 @@
 # LOW POLY ROBOTS ATTACKS !
 
-![Menu](images/menu.jpg)
+![Menu](./images/menu.jpg)
 
 ***The Idea***
 
