@@ -1,6 +1,6 @@
 # LOW POLY ROBOTS ATTACKS !
 
-**The idea**
+## The idea
 
 *LOW POLY ROBOTS ATTACKS!* is the name of the final project of the Interactive Graphics course and  is  the  first  release  of  a  3D  cartoon-style-game  set  in  a  sci-fi/futuristic  world  surrounded by big buildings in the desert.  It is a first person shooter game where the user impersonates a character that must eliminate all the robots that want to kill him.
 
@@ -12,9 +12,7 @@ If you want to play, just click [here](https://sapienzainteractivegraphicscourse
 
 Feel free to contact us and give some advice about the project!
 
--------------------------------------------------------------------------
-
-**How to play**
+## How to play
 
 - **W**, **A**, **S**, **D** to move the character around the map.
 - **SPACE** + **W**, **A**, **S**, **D** to enter the *run* mode.
@@ -23,9 +21,8 @@ Feel free to contact us and give some advice about the project!
 - **ESC** to pause the game.
 - **LEFT-CLICK** to shoot,
 
-------------------------------------------------------------------------
 
-**Game screenshots**
+## Game screenshots
 
 The starting menu where the player can select the game difficulty.
 ![](js/images/menu.png)
